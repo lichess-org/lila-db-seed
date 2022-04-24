@@ -4,14 +4,14 @@ import os
 import random
 import json
 import bson
+from datetime import timedelta
 from datetime import datetime
 from random import randrange as rrange
 from modules.datasrc import gen
 
 
-def bulk_write(
-    coll, objs, append=False
-):  # append is used during bson/json export
+def bulk_write(coll, objs, append=False):
+    # append parameter is used during bson/json export
     if gen.dump_dir != None:
         if not os.path.isdir(gen.dump_dir):
             os.makedirs(gen.dump_dir, exist_ok=True)
@@ -74,19 +74,23 @@ def days_since_genesis(then: datetime = datetime.now()) -> int:
 
 # time_shortly_after provides a date between then and (then + 4 hrs)
 def time_shortly_after(then: datetime) -> datetime:
-    mintime = int(then.timestamp())
+    mintime = int(
+        then.timestamp()
+    )  # not using timedelta because i can't be bothered to look up how to min/max it
     maxtime = int(min(datetime.now().timestamp(), mintime + 14400))
-    return datetime.fromtimestamp(rrange(mintime, maxtime))
+    return datetime.fromtimestamp(rrange(mintime - 1, maxtime))
 
 
 # time_since returns a date between then and now
 def time_since(then: datetime) -> datetime:
-    mintime = int(then.timestamp())
-    maxtime = int(datetime.now().timestamp())
-    return datetime.fromtimestamp(rrange(mintime, maxtime))
+    restime = datetime.now()
+    if then < restime:
+        restime = datetime.fromtimestamp(
+            rrange(int(then.timestamp()) - 1, int(restime.timestamp()))
+        )
+    return restime
 
 
 # time_since_days_ago returns a date between (now - days_ago) and now
 def time_since_days_ago(days_ago: int) -> datetime:
-    thentime = int(datetime.now().timestamp() - rrange(0, days_ago * 86400))
-    return datetime.fromtimestamp(thentime)
+    return datetime.now() - timedelta(days=rrange(0, days_ago))
