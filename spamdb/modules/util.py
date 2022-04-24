@@ -93,4 +93,6 @@ def time_since(then: datetime) -> datetime:
 
 # time_since_days_ago returns a date between (now - days_ago) and now
 def time_since_days_ago(days_ago: int) -> datetime:
+    if days_ago < 1:
+        return datetime.now()
     return datetime.now() - timedelta(days=rrange(0, days_ago))
