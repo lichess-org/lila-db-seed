@@ -24,37 +24,46 @@ types: list[list[int, str, float]] = [
 
 
 class Perf:
-    def __init__(self, uid: str, index: int, numGames: int, drawRatio: float, rating: int):
+    def __init__(
+        self,
+        uid: str,
+        index: int,
+        num_games: int,
+        draw_ratio: float,
+        rating: int,
+    ):
         self._id = uid + "/" + str(index)
         self.userId = uid
         self.perfType = index
         self.bestWins = self._results()
         self.worstLosses = self._results()
 
-        variantVariance = random.uniform(-0.03, 0.03)  # best variable name ever
-        winRatio = 0.5 + variantVariance
-        r = rating + int(8000 * variantVariance)  # ass math at its best
-        draw = int(numGames * random.uniform(drawRatio / 5, drawRatio))
-        win = int(numGames * winRatio - draw / 2)
+        variant_variance = random.uniform(
+            -0.03, 0.03
+        )  # best variable name ever
+        win_ratio = 0.5 + variant_variance
+        r = rating + int(8000 * variant_variance)  # ass math at its best
+        draw = int(num_games * random.uniform(draw_ratio / 5, draw_ratio))
+        win = int(num_games * win_ratio - draw / 2)
 
         self.r = r
         self.resultStreak = {"win": self._streak(), "loss": self._streak()}
         self.playStreak = {"nb": self._streak(), "time": self._streak()}
 
         self.count = {
-            "all": numGames,
-            "rated": int(numGames * random.uniform(0.7, 0.99)),
+            "all": num_games,
+            "rated": int(num_games * random.uniform(0.7, 0.99)),
             "draw": draw,
             "win": win,
-            "loss": numGames - win - draw,
+            "loss": num_games - win - draw,
             "tour": rrange(20, 150),
             "berserk": rrange(0, 50),
-            "opAvg": {"avg": 1 - winRatio, "pop": rrange(10, 100)},
-            "seconds": numGames * 300,
+            "opAvg": {"avg": 1 - win_ratio, "pop": rrange(10, 100)},
+            "seconds": num_games * 300,
             "disconnects": rrange(2, 40),
         }
 
-    def getRanking(self):
+    def get_ranking(self):
         return Ranking(self)
 
     @staticmethod

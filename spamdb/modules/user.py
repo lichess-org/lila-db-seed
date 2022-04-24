@@ -7,37 +7,35 @@ from random import randrange as rrange
 from modules.datasrc import gen
 from modules.event import evt
 import modules.perf as perf
-import modules.pref as pref
 import modules.util as util
 
 
-def createUserColls(db: pymongo.MongoClient, followFactor: float) -> None:
+def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
 
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
     relations: list[Relation] = []
     history: list[History] = []
-    fideMap = {}
 
     for uid in gen.uids:
         users.append(User(uid))
-        for stat in users[-1].detachPerfs():
+        for stat in users[-1].detach_perfs():
             perfs.append(stat)
-            rankings.append(stat.getRanking())
-        gen.fideMap[uid] = users[-1].profile["fideRating"]
+            rankings.append(stat.get_ranking())
+        gen.fide_map[uid] = users[-1].profile["fideRating"]
         history.append(History(users[-1]))
 
-    users.extend(User.createSpecialUsers())
+    users.extend(User.create_special_users())
     for u in users:
-        for f in random.sample(gen.uids, int(followFactor * len(gen.uids))):
-            evt.follow(u._id, util.timeSince(u.createdAt), f)
+        for f in random.sample(gen.uids, int(follow_factor * len(gen.uids))):
+            evt.follow(u._id, util.time_since(u.createdAt), f)
 
-    util.bulkwrite(db.pref, [pref.Pref(u._id) for u in users])
-    util.bulkwrite(db.user4, users)
-    util.bulkwrite(db.ranking, rankings)
-    util.bulkwrite(db.perf_stat, perfs)
-    util.bulkwrite(db.history4, history)
+    util.bulk_write(db.pref, [Pref(u._id) for u in users])
+    util.bulk_write(db.user4, users)
+    util.bulk_write(db.ranking, rankings)
+    util.bulk_write(db.perf_stat, perfs)
+    util.bulk_write(db.history4, history)
 
 
 def drop(db: pymongo.MongoClient) -> None:
@@ -49,14 +47,24 @@ def drop(db: pymongo.MongoClient) -> None:
 
 
 class User:
-    def __init__(self, name: str, marks: list[str] = [], roles: list[str] = [], withPerfs: bool = True):
-        self._id = util.normalizeId(name)
+    def __init__(
+        self,
+        name: str,
+        marks: list[str] = [],
+        roles: list[str] = [],
+        with_perfs: bool = True,
+    ):
+        self._id = util.normalize_id(name)
         self.username = name.capitalize()
         self.email = f"lichess.waste.basket+{name}@gmail.com"
-        self.bpass = bson.binary.Binary(base64.b64decode("E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"))
+        self.bpass = bson.binary.Binary(
+            base64.b64decode(
+                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
+            )
+        )
         self.enabled = True
-        self.createdAt = util.timeSinceDaysAgo(365)
-        self.seenAt = util.timeSince(self.createdAt)
+        self.createdAt = util.time_since_days_ago(365)
+        self.seenAt = util.time_since(self.createdAt)
         self.lang = "en-US"
         self.time = {"total": rrange(10000, 20000), "tv": 0}
         self.roles = ["ROLE_VERIFIED"]
@@ -68,13 +76,13 @@ class User:
         self.plan = {
             "months": 1,
             "active": util.chance(0.2),
-            "since": util.timeSinceDaysAgo(30),
+            "since": util.time_since_days_ago(30),
         }
         rating = min(3000, max(int(random.normalvariate(1700, 300)), 400))
         self.profile = {
-            "country": gen.randomCountry(),
+            "country": gen.random_country(),
             "location": self.username + " City",
-            "bio": gen.randomParagraph(),
+            "bio": gen.random_paragraph(),
             "firstName": self.username,
             "lastName": self.username + "bertson",
             "fideRating": rating,
@@ -83,27 +91,31 @@ class User:
             "rcfRating": rrange(rating - 200, rating + 200),
             "cfcRating": rrange(rating - 200, rating + 200),
             "dsbRating": rrange(rating - 200, rating + 200),
-            "links": "\n".join(gen.randomSocialMediaLinks()),
+            "links": "\n".join(gen.random_social_media_links()),
         }
-        totalGames = rrange(2000, 10000)
-        totalWins = totalLosses = totalDraws = 0
-        if withPerfs:
+        total_games = rrange(2000, 10000)
+        total_wins = total_losses = total_draws = 0
+        if with_perfs:
             self.perfStats = {}  # we'll detach this later
             self.perfs = {}
-            perfGames: list[int] = util.randomPartition(totalGames, len(perf.types), 0)
+            perf_games: list[int] = util.random_partition(
+                total_games, len(perf.types), 0
+            )
 
-            for [index, perfName, drawRatio], numGames in zip(perf.types, perfGames):
-                if numGames == 0:
+            for [index, perf_name, draw_ratio], num_games in zip(
+                perf.types, perf_games
+            ):
+                if num_games == 0:
                     continue
-                p = perf.Perf(self._id, index, numGames, drawRatio, rating)
+                p = perf.Perf(self._id, index, num_games, draw_ratio, rating)
 
-                totalWins = totalWins + p.count["win"]
-                totalLosses = totalLosses + p.count["loss"]
-                totalDraws = totalDraws + p.count["draw"]
-                self.perfStats[perfName] = p
-                self.perfs[perfName] = {
+                total_wins = total_wins + p.count["win"]
+                total_losses = total_losses + p.count["loss"]
+                total_draws = total_draws + p.count["draw"]
+                self.perfStats[perf_name] = p
+                self.perfs[perf_name] = {
                     "nb": p.count["all"],
-                    "la": util.timeSinceDaysAgo(30),
+                    "la": util.time_since_days_ago(30),
                     "re": [rrange(-32, 32) for _ in range(12)],
                     "gl": {
                         "r": p.r,
@@ -112,27 +124,29 @@ class User:
                     },
                 }
         else:
-            totalGames = 0
+            total_games = 0
 
         self.count = {
-            "game": totalGames,
+            "game": total_games,
             "ai": 0,
-            "rated": int(totalGames * 0.8),
-            "win": totalWins,
-            "winH": totalWins,
-            "loss": totalLosses,
-            "lossH": totalLosses,
-            "draw": totalDraws,
-            "drawH": totalDraws,
+            "rated": int(total_games * 0.8),
+            "win": total_wins,
+            "winH": total_wins,
+            "loss": total_losses,
+            "lossH": total_losses,
+            "draw": total_draws,
+            "drawH": total_draws,
         }
 
-    def detachPerfs(self) -> list[perf.Perf]:  # build perfs here, but they aren't stored in user4
-        detachedList: list[perf.Perf] = list(self.perfStats.values())
+    def detach_perfs(
+        self,
+    ) -> list[perf.Perf]:  # build perfs here, but they aren't stored in user4
+        detached_list: list[perf.Perf] = list(self.perfStats.values())
         delattr(self, "perfStats")
-        return detachedList
+        return detached_list
 
     @staticmethod
-    def createSpecialUsers():
+    def create_special_users():
         users: list[User] = []
         users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
         users[-1].title = "LM"
@@ -141,7 +155,9 @@ class User:
         users.append(User("cheat-hunter", [], ["ROLE_CHEAT_HUNTER"], False))
         users.append(User("boost-hunter", [], ["ROLE_BOOST_HUNTER"], False))
         users.append(User("timeout-mod", [], ["ROLE_TIMEOUT_MOD"], False))
-        users.append(User("puzzle-curator", [], ["ROLE_PUZZLE_CURATOR"], False))
+        users.append(
+            User("puzzle-curator", [], ["ROLE_PUZZLE_CURATOR"], False)
+        )
         users.append(User("api-hog", [], ["ROLE_API_HOG"], False))
         users.append(User("troll", ["troll"], [], False))
         users.append(User("rank-ban", ["rankban"], [], False))
@@ -155,12 +171,26 @@ class User:
         users[-1].roles = []
         users.append(User("bot", [], ["ROLE_VERIFIED"], False))
         users[-1].title = "BOT"
-        users.append(User("wide", [], ["ROLE_VERIFIED"], False))  # for ui testing
+        users.append(
+            User("wide", [], ["ROLE_VERIFIED"], False)
+        )  # for ui testing
         users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
         users[-1].title = "WGM"
         users[-1].plan["active"] = True  # patron
         users[-1].plan["months"] = 12
         return users
+
+
+class Pref:
+    def __init__(self, uid: str):
+        self._id = uid
+        self.is3d = False
+        self.bg = 400  # random.choice([100, 200, 400]) # you did the work, now make em look at it!
+        if self.bg == 400:
+            self.bgImg = gen.random_image_link()
+
+        # can't imagine there's anything here that would be useful for testing since it's quick to
+        # modify prefs directly
 
 
 class History:
@@ -171,13 +201,17 @@ class History:
         for (name, perf) in u.perfs.items():
 
             newR = u.perfs[name]["gl"]["r"]
-            origR = min(3000, max(400, rrange(newR - 500, newR + 500)))  # used to be sooo much better/worse!
+            origR = min(
+                3000, max(400, rrange(newR - 500, newR + 500))
+            )  # used to be sooo much better/worse!
 
             self.__dict__[name] = {}
             days: int = (datetime.datetime.now() - u.createdAt).days
             for x in range(0, days, rrange(2, 10)):
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
-                self.__dict__[name][str(x)] = rrange(intermediateR - 100, intermediateR + 100)
+                self.__dict__[name][str(x)] = rrange(
+                    intermediateR - 100, intermediateR + 100
+                )
 
 
 _titles: list[str] = [

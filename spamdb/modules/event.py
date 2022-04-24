@@ -7,18 +7,18 @@ import modules.util as util
 from modules.datasrc import gen
 
 
-def createEventColls(db: pymongo.MongoClient) -> None:
+def create_event_colls(db: pymongo.MongoClient) -> None:
     activities: list[dict] = []
     relations: list[Relation] = []
 
-    for (days, udicts) in sorted(evt.activityMap.items()):
+    for (days, udicts) in sorted(evt.activity_map.items()):
         activities.extend(udicts.values())
-    for uid in evt.relationMap.keys():
-        relations.extend([Relation(uid, f) for f in evt.relationMap[uid]])
+    for uid in evt.relation_map.keys():
+        relations.extend([Relation(uid, f) for f in evt.relation_map[uid]])
 
-    util.bulkwrite(db.relation, relations)
-    util.bulkwrite(db.activity2, activities)
-    util.bulkwrite(db.timeline_entry, evt.timeline)
+    util.bulk_write(db.relation, relations)
+    util.bulk_write(db.activity2, activities)
+    util.bulk_write(db.timeline_entry, evt.timeline)
 
 
 def drop(db: pymongo.MongoClient) -> None:
@@ -30,9 +30,9 @@ def drop(db: pymongo.MongoClient) -> None:
 # handles activity and timeline collections
 class EventApi:
     def __init__(self):
-        self.relationMap: dict[str, list[str]] = {}
-        self.activityMap: dict[int, dict[str, dict]] = {}
-        self.historyMap: dict[str, History] = {}
+        self.relation_map: dict[str, list[str]] = {}
+        self.activity_map: dict[int, dict[str, dict]] = {}
+        self.history_map: dict[str, History] = {}
         self.timeline: list = []
 
     class Outcome(enum.Enum):
@@ -41,36 +41,73 @@ class EventApi:
         LOSS = enum.auto()
 
         def invert(self):
-            return {self.WIN: self.LOSS, self.LOSS: self.WIN, self.DRAW: self.DRAW}
+            return {
+                self.WIN: self.LOSS,
+                self.LOSS: self.WIN,
+                self.DRAW: self.DRAW,
+            }
 
     def follow(self, uid: str, time: datetime, following: str) -> None:
         if uid == following:
             return
-        self.relationMap.setdefault(uid, []).append(following)
-        self.timeline.append(TimelineEntry(time, self.relationMap[uid]).follow(uid, following))
-        f = self._lazyMakeActivity(uid, time, "f", [])
+        self.relation_map.setdefault(uid, []).append(following)
+        self.timeline.append(
+            TimelineEntry(time, self.relation_map[uid]).follow(uid, following)
+        )
+        f = self._lazy_make_activity(uid, time, "f", [])
         # wtf here
 
-    def addPost(self, uid: str, time: datetime, pid: str, tid: str, tname: str) -> None:
-        self.timeline.append(TimelineEntry(time, self.relationMap[uid]).forumPost(uid, pid, tid, tname))
-        self._lazyMakeActivity(uid, time, "p", []).append(pid)
+    def add_post(
+        self, uid: str, time: datetime, pid: str, tid: str, tname: str
+    ) -> None:
+        self.timeline.append(
+            TimelineEntry(time, self.relation_map[uid]).forum_post(
+                uid, pid, tid, tname
+            )
+        )
+        self._lazy_make_activity(uid, time, "p", []).append(pid)
 
-    def addTeam(self, uid: str, time: datetime, tid: str, tname: str) -> None:
-        self.timeline.append(TimelineEntry(time, self.relationMap[uid]).teamCreate(uid, tid))
-        self._lazyMakeActivity(uid, time, "e", []).append(tname)
+    def add_team(self, uid: str, time: datetime, tid: str, tname: str) -> None:
+        self.timeline.append(
+            TimelineEntry(time, self.relation_map[uid]).team_create(uid, tid)
+        )
+        self._lazy_make_activity(uid, time, "e", []).append(tname)
 
-    def joinTeam(self, uid: str, time: datetime, tid: str, tname: str) -> None:
-        self.timeline.append(TimelineEntry(time, self.relationMap[uid]).teamJoin(uid, tid))
-        self._lazyMakeActivity(uid, time, "e", []).append(tname)
+    def join_team(
+        self, uid: str, time: datetime, tid: str, tname: str
+    ) -> None:
+        self.timeline.append(
+            TimelineEntry(time, self.relation_map[uid]).team_join(uid, tid)
+        )
+        self._lazy_make_activity(uid, time, "e", []).append(tname)
 
-    def addGame(self, uid: str, time: datetime, opponent: str, outcome: Outcome, pid: str) -> None:
-        self.timeline.append(TimelineEntry(time, [uid]).gameEnd(opponent, outcome == self.Outcome.WIN, pid))
-        self._gameActivity(uid, time, outcome)
-        self._gameActivity(opponent, time, outcome.invert())
+    def add_game(
+        self,
+        uid: str,
+        time: datetime,
+        opponent: str,
+        outcome: Outcome,
+        pid: str,
+    ) -> None:
+        self.timeline.append(
+            TimelineEntry(time, [uid]).game_end(
+                opponent, outcome == self.Outcome.WIN, pid
+            )
+        )
+        self._game_activity(uid, time, outcome)
+        self._game_activity(opponent, time, outcome.invert())
 
-    def _gameActivity(self, uid: str, time: datetime, outcome: Outcome) -> None:
-        v = self._lazyMakeActivity(uid, time, "g", {}).setdefault(
-            "standard", {"w": 0, "l": 0, "d": 0, "r": [gen.fideMap[uid], gen.fideMap[uid]]}
+    def _game_activity(
+        self, uid: str, time: datetime, outcome: Outcome
+    ) -> None:
+        v = self._lazy_make_activity(uid, time, "g", {}).setdefault(
+            "standard",
+            {
+                "w": 0,
+                "l": 0,
+                "d": 0,
+                "r": [gen.fide_map[uid], gen.fide_map[uid]],
+            },
         )
         if outcome == self.Outcome.DRAW:
             v["d"] = v["d"] + 1
@@ -82,9 +119,11 @@ class EventApi:
             v["l"] = v["l"] + 1
             v["r"][1] = v["r"][1] - 10
 
-    def _lazyMakeActivity(self, uid: str, time: datetime, key: str, default):
-        days = util.daysSinceGenesis(time)
-        activity = self.activityMap.setdefault(days, {}).setdefault(uid, Activity(uid, days))
+    def _lazy_make_activity(self, uid: str, time: datetime, key: str, default):
+        days = util.days_since_genesis(time)
+        activity = self.activity_map.setdefault(days, {}).setdefault(
+            uid, Activity(uid, days)
+        )
         if not hasattr(activity, key):
             setattr(activity, key, default)
         return getattr(activity, key)
@@ -113,15 +152,25 @@ class TimelineEntry:
         self.date = time
         self.users = listeners
 
-    def gameEnd(self, opponent: str, win: bool, pid: str):
+    def game_end(self, opponent: str, win: bool, pid: str):
         self.typ = "game-end"
-        self.data = {"playerId": pid, "perf": "standard", "opponent": opponent, "win": win}
+        self.data = {
+            "playerId": pid,
+            "perf": "standard",
+            "opponent": opponent,
+            "win": win,
+        }
         self.chan = "gameEnd"
         return self
 
-    def forumPost(self, uid: str, pid: str, tid: str, tname: str):
+    def forum_post(self, uid: str, pid: str, tid: str, tname: str):
         self.typ = "forum-post"
-        self.data = {"userId": uid, "topicName": tname, "postId": pid, "topicId": tid}
+        self.data = {
+            "userId": uid,
+            "topicName": tname,
+            "postId": pid,
+            "topicId": tid,
+        }
         self.chan = f"forum:{tid}"
         return self
 
@@ -131,19 +180,19 @@ class TimelineEntry:
         self.chan = "follow"
         return self
 
-    def teamCreate(self, uid: str, tid: str):
+    def team_create(self, uid: str, tid: str):
         self.typ = "team-create"
         self.data = {"userId": uid, "teamId": tid}
         self.chan = "teamCreate"
         return self
 
-    def teamJoin(self, uid: str, tid: str):
+    def team_join(self, uid: str, tid: str):
         self.typ = "team-join"
         self.data = {"userId": uid, "teamId": tid}
         self.chan = "teamJoin"
         return self
 
-    def blogLike(self, uid: str, bid: str, title: str):
+    def blog_like(self, uid: str, bid: str, title: str):
         self.typ = "ublog-post-like"
         self.data = {"userId": uid, "id": bid, "title": title}
         self.chan = "ublogPostLike"
