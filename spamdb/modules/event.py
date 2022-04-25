@@ -147,7 +147,6 @@ class Activity:
 
 class TimelineEntry:
     def __init__(self, time: datetime, listeners: list[str]):
-        # only forum post for now
         self._id = bson.ObjectId()
         self.date = time
         self.users = listeners
