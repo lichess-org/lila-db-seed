@@ -8,19 +8,21 @@ from modules.datasrc import gen
 import modules.util as util
 
 
-def createBlogColls(db: pymongo.MongoClient, numBlogs: int) -> None:
+def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     ublogs: list = []
     uposts: list = []
 
-    for (numPosts, uid) in zip(util.randomPartition(numBlogs, len(gen.uids), 0), gen.uids):
-        if numPosts == 0:
+    for (num_posts, uid) in zip(
+        util.random_partition(num_blogs, len(gen.uids), 0), gen.uids
+    ):
+        if num_posts == 0:
             continue
         ublogs.append(UBlog(uid))
-        for _ in range(numPosts):
+        for _ in range(num_posts):
             uposts.append(UBlogPost(uid))
 
-    util.bulkwrite(db.ublog_blog, ublogs)
-    util.bulkwrite(db.ublog_post, uposts)
+    util.bulk_write(db.ublog_blog, ublogs)
+    util.bulk_write(db.ublog_post, uposts)
 
 
 def drop(db: pymongo.MongoClient) -> None:
@@ -34,7 +36,30 @@ class UBlog:
         self.tier = 2
 
 
-_blogTopics: list[str] = [
+class UBlogPost:
+    def __init__(self, uid: str):
+        self._id = gen.next_id(UBlogPost)
+        self.blog = f"user:{uid}"
+        self.title = gen.random_topic()
+        self.intro = gen.random_topic()
+        self.markdown = (
+            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}\n"
+            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}\n"
+            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}"
+        )
+        self.language = "en-US"
+        self.live = True
+        self.topics = random.sample(_blog_topics, 3)
+        self.created = {"by": uid, "at": util.time_since_days_ago(365)}
+        self.lived = self.created
+        self.updated = self.created
+        self.rank = self.created["at"] - timedelta(days=30)  # wtf is this?
+        self.views = rrange(10, 100)
+        self.likes = rrange(3, 10)
+        self.likers = random.sample(gen.uids, self.likes)
+
+
+_blog_topics: list[str] = [
     "Chess",
     "Analysis",
     "Puzzle",
@@ -52,26 +77,3 @@ _blogTopics: list[str] = [
     "Lichess",
     "Off topic",
 ]
-
-
-class UBlogPost:
-    def __init__(self, uid: str):
-        self._id = gen.nextId(UBlogPost)
-        self.blog = f"user:{uid}"
-        self.title = gen.randomTopic()
-        self.intro = gen.randomTopic()
-        self.markdown = (
-            f"![image]({gen.randomImageLink()})\n{gen.randomParagraph()}\n"
-            f"![image]({gen.randomImageLink()})\n{gen.randomParagraph()}\n"
-            f"![image]({gen.randomImageLink()})\n{gen.randomParagraph()}"
-        )
-        self.language = "en-US"
-        self.live = True
-        self.topics = random.sample(_blogTopics, 3)
-        self.created = {"by": uid, "at": util.timeSinceDaysAgo(365)}
-        self.lived = self.created
-        self.updated = self.created
-        self.rank = self.created["at"] - timedelta(days=30)  # wtf is this?
-        self.views = rrange(10, 100)
-        self.likes = rrange(3, 10)
-        self.likers = random.sample(gen.uids, self.likes)

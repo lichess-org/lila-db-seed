@@ -12,14 +12,16 @@ mongorestore dump
 - 2036 puzzle paths, required by lila to find the puzzles
 - 3000 games from which the puzzles were made, required by lila to use the puzzles
 - lots of other stuff including users & mods. see below
+
 ```
+
 ```
+
 ---
 
 # Create your own database:
-  
 
-If you want to customize database size, text, forum categories, teams, images, blogs, etc. then use the provided spamdb.py utility (feel free to improve the code). spamdb.py will insert into mongodb directly and can export jsons and bsons. Most of the bsons in dump were generated with spamdb.py. Usage help:
+If you want to customize database size, users, text, forum categories, teams, images, blogs, etc. then use the provided spamdb.py utility (feel free to improve the code). spamdb.py will insert into mongodb directly and can export jsons and bsons. Most of the bsons in dump were generated with spamdb.py. Usage help:
 
 ```
 python3 ./spamdb.py --help
@@ -30,7 +32,7 @@ python3.9+ and pymongo module are both required. get pymongo with:
 ```
 pip3 install pymongo
 ```
-  
+
 ## Special users:
 
 - lichess/password - ROLE_SUPER_ADMIN # lichess mod such power!
@@ -44,8 +46,8 @@ pip3 install pymongo
 
 ## Normal users:
 
-userids found in users.txt, chosen from international baby names.  All accounts created by spamdb.py utilize "password" as their password.  The normal users have all the data: the follows, the notifications, the ratings, the game histories, the timelines. You're missing out if you don't take svetlana or marcel for a spin
+userids found in users.txt, chosen from international baby names. All accounts created by spamdb.py utilize "password" as their password. The normal users have all the data: the follows, the notifications, the ratings, the game histories, the timelines. You're missing out if you don't take svetlana or marcel for a spin
 
 ## Caveats:
 
-Right now game search doesn't work at all. And it turns out "password" wasn't such a good choice for everyone's password because chrome just loves to nag you about how it shows up in compromised account lists. Every time you type it. Ideally, dev instances could disable passwords entirely (as a config option).
+Right now game search doesn't work at all.
