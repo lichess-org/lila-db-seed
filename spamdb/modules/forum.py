@@ -14,10 +14,15 @@ def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
     categs: dict[str, Categ] = {}
     topics: list[Topic] = []
     posts: list[Post] = []
+    emptyCategs: list[Categ] = []
 
     for cat_name in gen.categs:
         categ = Categ(cat_name)
-        categs[categ._id] = categ
+        if cat_name.endswith("-"):
+            emptyCategs.append(categ)
+        else:
+            categs[categ._id] = categ
+
     for topic_name in gen.topics:
         topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
     for _ in range(num_posts):
@@ -30,7 +35,8 @@ def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
     for t in topics:
         if hasattr(t, "lastPostId"):
             categs[t.categId].add_topic(t)
-
+    for c in emptyCategs:
+        categs[c._id] = c
     util.bulk_write(db.f_categ, categs.values())
     util.bulk_write(db.f_topic, topics)
     util.bulk_write(db.f_post, posts)

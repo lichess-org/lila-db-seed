@@ -27,7 +27,7 @@ def drop(db: pymongo.MongoClient) -> None:
     db.relation.drop()
 
 
-# handles activity and timeline collections
+# singleton evt, collects activity and timeline collections
 class EventApi:
     def __init__(self):
         self.relation_map: dict[str, list[str]] = {}
@@ -40,7 +40,7 @@ class EventApi:
         WIN = enum.auto()
         LOSS = enum.auto()
 
-        def invert(self):
+        def opponentPov(self):
             return {
                 self.WIN: self.LOSS,
                 self.LOSS: self.WIN,
@@ -95,7 +95,7 @@ class EventApi:
             )
         )
         self._game_activity(uid, time, outcome)
-        self._game_activity(opponent, time, outcome.invert())
+        self._game_activity(opponent, time, outcome.opponentPov())
 
     def _game_activity(
         self, uid: str, time: datetime, outcome: Outcome
@@ -129,7 +129,7 @@ class EventApi:
         return getattr(activity, key)
 
 
-evt = EventApi()
+evt = EventApi()  # used by other modules
 
 
 class Relation:

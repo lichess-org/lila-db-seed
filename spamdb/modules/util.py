@@ -10,6 +10,11 @@ from random import randrange as rrange
 from modules.datasrc import gen
 
 
+class ObjWrapper:  # so we only need one bulk_write
+    def __init__(self, obj: dict):
+        self.__dict__ = obj
+
+
 def bulk_write(coll, objs, append=False):
     # append parameter is used during bson/json export
     if gen.dump_dir != None:
@@ -20,7 +25,7 @@ def bulk_write(coll, objs, append=False):
         ext: str = "bson" if gen.bson_mode else "json"
         outpath: str = os.path.join(gen.dump_dir, f"{coll.name}.{ext}")
         openmode = ("a" if append else "w") + ("b" if gen.bson_mode else "")
-        with open(outpath, openmode if gen.bson_mode else "w") as f:
+        with open(outpath, openmode) as f:
             for o in objs:
                 if gen.bson_mode:
                     f.write(bson.encode(o.__dict__))
@@ -96,3 +101,23 @@ def time_since_days_ago(days_ago: int) -> datetime:
     if days_ago < 1:
         return datetime.now()
     return datetime.now() - timedelta(days=rrange(0, days_ago))
+
+
+def insert_json(db: pymongo.MongoClient, jsonStr: str) -> None:
+    _insert_json(db, json.loads(jsonStr))
+
+
+def insert_json_file(db: pymongo.MongoClient, filename: str) -> None:
+    with open(filename, "r") as f:
+        _insert_json(db, json.load(f))
+
+
+def _insert_json(db: pymongo.MongoClient, collDict: dict) -> None:
+    for (collName, objList) in collDict.items():
+        if hasattr(db, collName):
+            bulk_write(getattr(db, collName), [ObjWrapper(o) for o in objList])
+        else:
+            print(
+                f"db does not contain collection: {collName}\nplease create "
+                "it first."
+            )
