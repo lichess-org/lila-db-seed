@@ -17,46 +17,28 @@ def main():
         gen.set_num_uids(args.users)
     if args.teams:
         gen.set_num_teams(args.teams)
-    uri = "127.0.0.1" if args.uri == None else args.uri
-    client = pymongo.MongoClient(uri)
-    client.admin.command(
-        "ping"
-    )  # should raise an exception if we cant connect
-    db = _get_db(client, uri)
 
-    _do_drops(db, args.drop)
+    with MongoContextMgr(
+        "mongodb://127.0.0.1/lichess" if args.uri == None else args.uri
+    ) as db:
 
-    if args.dump_json:
-        gen.set_json_dump_mode(args.dump_json)
-    elif args.dump_bson:
-        gen.set_bson_dump_mode(args.dump_bson)
-    elif args.insert:
-        util.insert_json(db, args.insert)
-    elif args.insert_file:
-        util.insert_file(db, args.insert_file)
-    elif not args.no_create:
-        user.create_user_colls(db, args.follow)
-        game.create_game_colls(db)
-        forum.create_forum_colls(db, int(int(args.posts) / 2))
-        team.create_team_colls(db, int(int(args.posts) / 2))
-        blog.create_blog_colls(db, int(args.ublogs))
-        event.create_event_colls(db)
+        _do_drops(db, args.drop)
 
-    client.close()
-
-
-def _get_db(client: pymongo.MongoClient, uri: str):
-    dbname = "lichess"
-    begin_delim = uri.find("authSource=")
-    end_delim = uri.find("&")
-    if begin_delim != -1:
-        if end_delim == -1:
-            dbname = uri[begin_delim + 11 :]
-        else:
-            dbname = uri[begin_delim + 11 : end_delim]
-    # there's 10 better ways to extract this string but i'm too lzy right now
-
-    return getattr(client, dbname)
+        if args.dump_json:
+            gen.set_json_dump_mode(args.dump_json)
+        elif args.dump_bson:
+            gen.set_bson_dump_mode(args.dump_bson)
+        if not args.no_create:
+            user.create_user_colls(db, args.follow)
+            game.create_game_colls(db)
+            forum.create_forum_colls(db, int(int(args.posts) / 2))
+            team.create_team_colls(db, int(int(args.posts) / 2))
+            blog.create_blog_colls(db, int(args.ublogs))
+            event.create_event_colls(db)
+        if args.insert:
+            util.insert_json(db, args.insert)
+        elif args.insert_file:
+            util.insert_file(db, args.insert_file)
 
 
 def _do_drops(db: pymongo.MongoClient, drop) -> None:
@@ -81,6 +63,21 @@ def _do_drops(db: pymongo.MongoClient, drop) -> None:
         blog.drop(db)
 
 
+class MongoContextMgr:
+    def __init__(self, uri):
+        self.client = pymongo.MongoClient(uri)
+        self.client.admin.command(
+            "ping"
+        )  # should raise an exception if we cant connect
+        self.db = self.client.get_default_database()
+
+    def __enter__(self):
+        return self.db
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.client.close()
+
+
 def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Seed lila database with all kinds of spam."
@@ -89,9 +86,9 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument(
         "--uri",
         help=(
-            'form: --uri="mongodb://user:password@host:port/?'
+            'form: --uri="mongodb://user:password@host:port/database?'
             'authSource=default_db&authMechanism=SCRAM-SHA-256"  (default: '
-            "mongodb://127.0.0.1:27071)"
+            "mongodb://127.0.0.1/lichess)"
         ),
         action="store",
     )
@@ -163,7 +160,8 @@ def _get_args() -> argparse.Namespace:
             "of the form {collname:[listOfObjs]}.  for example:  "
             '--insert=\'{"f_categ": [{"_id": "blah", "name": "blah", "desc": "blah", '
             '"nbTopics": 0, "nbPosts": 0, "nbTopicsTroll": 0, "nbPostsTroll": 0, '
-            '"quiet": false}]}\' will create the new forum category "blah"'
+            '"quiet": false}]}\' will create the new forum category "blah".  You '
+            "will usually want to specify -nc/--no-create with this"
         ),
     )
     group.add_argument(
@@ -176,7 +174,10 @@ def _get_args() -> argparse.Namespace:
         "-nc",
         "--no-create",
         action="store_true",
-        help="leave db alone (usually in conjunction with drop)",
+        help=(
+            "skip procedural object generation (usually in conjunction with "
+            "--drop or --insert)"
+        ),
     )
     parser.add_argument(
         "--drop",
