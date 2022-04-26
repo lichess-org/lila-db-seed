@@ -28,12 +28,8 @@ def create_game_colls(db: pymongo.MongoClient) -> None:
         crosstable.setdefault(id, Result(id)).add_game(g)
 
     util.bulk_write(db.game5, games)
-    util.bulk_write(
-        db.puzzle2_path, [util.ObjWrapper(pp) for pp in gen.puzzle_paths]
-    )
-    util.bulk_write(
-        db.puzzle2_puzzle, [util.ObjWrapper(p) for p in gen.puzzles]
-    )
+    util.bulk_write(db.puzzle2_path, gen.puzzle_paths)
+    util.bulk_write(db.puzzle2_puzzle, gen.puzzles)
     # TODO find out why crosstable and matchup are separate slices of what
     # could be same collection
     util.bulk_write(db.crosstable2, crosstable.values())
