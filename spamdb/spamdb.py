@@ -18,9 +18,7 @@ def main():
     if args.teams > -1:
         gen.set_num_teams(args.teams)
 
-    with _MongoContextMgr(
-        "mongodb://127.0.0.1/lichess" if args.uri == None else args.uri
-    ) as db:
+    with _MongoContextMgr(args.uri) as db:
 
         _do_drops(db, args.drop)
 
@@ -28,6 +26,7 @@ def main():
             gen.set_json_dump_mode(args.dump_json)
         elif args.dump_bson:
             gen.set_bson_dump_mode(args.dump_bson)
+
         if not args.no_create:
             user.create_user_colls(db, args.follow)
             game.create_game_colls(db)
@@ -35,6 +34,7 @@ def main():
             team.create_team_colls(db, int(int(args.posts) / 2))
             blog.create_blog_colls(db, int(args.ublogs))
             event.create_event_colls(db)
+
         if args.insert:
             util.insert_json(db, args.insert)
         elif args.insert_file:
@@ -90,6 +90,7 @@ def _get_args() -> argparse.Namespace:
             'authSource=default_db&authMechanism=SCRAM-SHA-256"  (default: '
             "mongodb://127.0.0.1/lichess)"
         ),
+        default="mongodb://127.0.0.1/lichess",
         action="store",
     )
     parser.add_argument(

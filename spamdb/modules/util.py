@@ -9,11 +9,6 @@ from datetime import datetime
 from modules.datasrc import gen
 
 
-class ObjWrapper:  # so we only need one bulk_write
-    def __init__(self, obj: dict):
-        self.__dict__ = obj
-
-
 def bulk_write(coll, objs, append=False):
     # append parameter is used during bson/json export
     if len(objs) < 1:
@@ -29,15 +24,15 @@ def bulk_write(coll, objs, append=False):
         with open(outpath, openmode) as f:
             for o in objs:
                 if gen.bson_mode:
-                    f.write(bson.encode(o.__dict__))
+                    f.write(bson.encode(_dict(o)))
                 else:
-                    f.write(json.dumps(o.__dict__, default=str, indent=4))
+                    f.write(json.dumps(_dict(o), default=str, indent=4))
         print(f"Colleciton {coll.name}: dumped to {outpath}")
     else:
         ledger = []
         for x in objs:
-            ledger.append(pymongo.DeleteOne({"_id": x._id}))
-            ledger.append(pymongo.InsertOne(x.__dict__))
+            ledger.append(pymongo.DeleteOne({"_id": _dict(x)["_id"]}))
+            ledger.append(pymongo.InsertOne(_dict(x)))
         res = coll.bulk_write(ledger)
         print(f"Collection {coll.name}: {res.bulk_api_result}")
 
@@ -120,6 +115,10 @@ def insert_json_file(db: pymongo.MongoClient, filename: str) -> None:
         _insert_json(db, json.load(f))
 
 
+def _dict(o: object) -> dict:
+    return o.__dict__ if hasattr(o, "__dict__") else o
+
+
 def _insert_json(db: pymongo.MongoClient, collDict: dict) -> None:
     for (collName, objList) in collDict.items():
-        bulk_write(db[collName], [ObjWrapper(o) for o in objList])
+        bulk_write(db[collName], objList)  # [ObjWrapper(o) for o in objList])
