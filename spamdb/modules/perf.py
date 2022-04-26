@@ -1,6 +1,6 @@
 import random
 import datetime
-from random import randrange as rrange
+import modules.util as util
 
 # should probably be in game.py but it's here because reasons
 types: list[list[int, str, float]] = [
@@ -56,11 +56,11 @@ class Perf:
             "draw": draw,
             "win": win,
             "loss": num_games - win - draw,
-            "tour": rrange(20, 150),
-            "berserk": rrange(0, 50),
-            "opAvg": {"avg": 1 - win_ratio, "pop": rrange(10, 100)},
+            "tour": util.rrange(20, 150),
+            "berserk": util.rrange(0, 50),
+            "opAvg": {"avg": 1 - win_ratio, "pop": util.rrange(10, 100)},
             "seconds": num_games * 300,
-            "disconnects": rrange(2, 40),
+            "disconnects": util.rrange(2, 40),
         }
 
     def get_ranking(self):
@@ -68,8 +68,8 @@ class Perf:
 
     @staticmethod
     def _streak() -> dict[str, dict]:
-        max = rrange(1, 6)
-        return {"max": {"v": max}, "cur": {"v": rrange(0, max)}}
+        max = util.rrange(1, 6)
+        return {"max": {"v": max}, "cur": {"v": util.rrange(0, max)}}
 
     @staticmethod
     def _results() -> dict[str, list]:
@@ -82,6 +82,6 @@ class Ranking:
         self._id = stat.userId + ":" + str(stat.perfType)
         self.perf = stat.perfType
         self.rating = stat.r
-        self.progress = stat.r + rrange(-40, 40)
+        self.progress = stat.r + util.rrange(-40, 40)
         self.stable = True
         self.expiresAt = datetime.datetime.now() + datetime.timedelta(days=10)

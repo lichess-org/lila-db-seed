@@ -2,7 +2,6 @@ import random
 import bson
 import base64
 import pymongo
-from random import randrange as rrange
 from modules.event import evt
 from modules.datasrc import gen
 import modules.util as util
@@ -14,6 +13,7 @@ def create_game_colls(db: pymongo.MongoClient) -> None:
     crosstable: dict[str, Result] = {}
 
     for bson_game in gen.games:
+
         us = random.sample(gen.uids, 2)
         g = Game(bson_game, us[0], us[1])
         games.append(g)

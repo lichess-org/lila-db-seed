@@ -13,12 +13,12 @@ from modules.datasrc import gen
 
 def main():
     args = _get_args()
-    if args.users:
+    if args.users > -1:
         gen.set_num_uids(args.users)
-    if args.teams:
+    if args.teams > -1:
         gen.set_num_teams(args.teams)
 
-    with MongoContextMgr(
+    with _MongoContextMgr(
         "mongodb://127.0.0.1/lichess" if args.uri == None else args.uri
     ) as db:
 
@@ -63,7 +63,7 @@ def _do_drops(db: pymongo.MongoClient, drop) -> None:
         blog.drop(db)
 
 
-class MongoContextMgr:
+class _MongoContextMgr:
     def __init__(self, uri):
         self.client = pymongo.MongoClient(uri)
         self.client.admin.command(
@@ -115,6 +115,7 @@ def _get_args() -> argparse.Namespace:
         "-u",
         "--users",
         type=int,
+        default=-1,
         help="(default: # of items in users.txt)",
         action="store",
     )
@@ -122,6 +123,7 @@ def _get_args() -> argparse.Namespace:
         "-t",
         "--teams",
         type=int,
+        default=-1,
         help="(default: # of items in teams.txt)",
         action="store",
     )

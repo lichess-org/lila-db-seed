@@ -1,7 +1,6 @@
 import enum
 import bson
 import pymongo
-from random import randrange as rrange
 from datetime import datetime
 import modules.util as util
 from modules.datasrc import gen
@@ -61,7 +60,7 @@ class EventApi:
         self, uid: str, time: datetime, pid: str, tid: str, tname: str
     ) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).forum_post(
+            TimelineEntry(time, self.relation_map.get(uid, [])).forum_post(
                 uid, pid, tid, tname
             )
         )
@@ -69,7 +68,9 @@ class EventApi:
 
     def add_team(self, uid: str, time: datetime, tid: str, tname: str) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).team_create(uid, tid)
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_create(
+                uid, tid
+            )
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 
@@ -77,7 +78,9 @@ class EventApi:
         self, uid: str, time: datetime, tid: str, tname: str
     ) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).team_join(uid, tid)
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_join(
+                uid, tid
+            )
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 

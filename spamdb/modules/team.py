@@ -1,6 +1,5 @@
 import pymongo
 import random
-from random import randrange as rrange
 from modules.event import evt
 from modules.datasrc import gen
 import modules.forum as forum
@@ -80,14 +79,16 @@ class Team:
         self.enabled = True
         self.open = util.chance(0.5)
         self.createdAt = util.time_since_days_ago(1440)
-        self.leaders = list(random.sample(gen.uids, (rrange(1, 4))))
+        self.leaders = random.sample(
+            gen.uids, util.rrange(1, min(len(gen.uids), 4))
+        )
         self.createdBy = self.leaders[0]
         self.chat = 20  # of course chat and forum are equal to 20.
         self.forum = 20  # wtf else would they possibly be??
 
     def create_members(self) -> list[TeamMember]:
         users: set[str] = set(self.leaders).union(
-            random.sample(gen.uids, (rrange(2, len(gen.uids) / 4)))
+            random.sample(gen.uids, util.rrange(2, int(len(gen.uids) / 4)))
         )
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]

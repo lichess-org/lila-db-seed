@@ -2,7 +2,6 @@ import pymongo
 import random
 from datetime import datetime
 from datetime import timedelta
-from random import randrange as rrange
 from modules.event import evt
 from modules.datasrc import gen
 import modules.util as util
@@ -54,8 +53,8 @@ class UBlogPost:
         self.lived = self.created
         self.updated = self.created
         self.rank = self.created["at"] - timedelta(days=30)  # wtf is this?
-        self.views = rrange(10, 100)
-        self.likes = rrange(3, 10)
+        self.views = util.rrange(10, 100)
+        self.likes = util.rrange(0, len(gen.uids))
         self.likers = random.sample(gen.uids, self.likes)
 
 

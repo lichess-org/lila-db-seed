@@ -3,7 +3,6 @@ import base64
 import pymongo
 import random
 import datetime
-from random import randrange as rrange
 from modules.datasrc import gen
 from modules.event import evt
 import modules.perf as perf
@@ -66,7 +65,7 @@ class User:
         self.createdAt = util.time_since_days_ago(365)
         self.seenAt = util.time_since(self.createdAt)
         self.lang = "en-US"
-        self.time = {"total": rrange(10000, 20000), "tv": 0}
+        self.time = {"total": util.rrange(10000, 20000), "tv": 0}
         self.roles = ["ROLE_VERIFIED"]
         self.roles.extend(roles)
         self.marks = marks
@@ -86,14 +85,14 @@ class User:
             "firstName": self.username,
             "lastName": self.username + "bertson",
             "fideRating": rating,
-            "uscfRating": rrange(rating - 200, rating + 200),
-            "ecfRating": rrange(rating - 200, rating + 200),
-            "rcfRating": rrange(rating - 200, rating + 200),
-            "cfcRating": rrange(rating - 200, rating + 200),
-            "dsbRating": rrange(rating - 200, rating + 200),
+            "uscfRating": util.rrange(rating - 200, rating + 200),
+            "ecfRating": util.rrange(rating - 200, rating + 200),
+            "rcfRating": util.rrange(rating - 200, rating + 200),
+            "cfcRating": util.rrange(rating - 200, rating + 200),
+            "dsbRating": util.rrange(rating - 200, rating + 200),
             "links": "\n".join(gen.random_social_media_links()),
         }
-        total_games = rrange(2000, 10000)
+        total_games = util.rrange(2000, 10000)
         total_wins = total_losses = total_draws = 0
         if with_perfs:
             self.perfStats = {}  # we'll detach this later
@@ -116,7 +115,7 @@ class User:
                 self.perfs[perf_name] = {
                     "nb": p.count["all"],
                     "la": util.time_since_days_ago(30),
-                    "re": [rrange(-32, 32) for _ in range(12)],
+                    "re": [util.rrange(-32, 32) for _ in range(12)],
                     "gl": {
                         "r": p.r,
                         "d": random.uniform(0.5, 120),
@@ -202,14 +201,14 @@ class History:
 
             newR = u.perfs[name]["gl"]["r"]
             origR = min(
-                3000, max(400, rrange(newR - 500, newR + 500))
+                3000, max(400, util.rrange(newR - 500, newR + 500))
             )  # used to be sooo much better/worse!
 
             self.__dict__[name] = {}
             days: int = (datetime.datetime.now() - u.createdAt).days
-            for x in range(0, days, rrange(2, 10)):
+            for x in range(0, days, util.rrange(2, 10)):
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
-                self.__dict__[name][str(x)] = rrange(
+                self.__dict__[name][str(x)] = util.rrange(
                     intermediateR - 100, intermediateR + 100
                 )
 
