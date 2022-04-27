@@ -35,13 +35,14 @@ class DataSrc:
         self.fide_map: dict[str, int] = {}  # a hack sure, but what isn't?
 
     def set_num_uids(self, num_uids: int) -> None:
-        if (num_uids < 2):
-            raise ValueError(f"Cannot make db with less than {num_uids} users.")
+        if num_uids < 2:
+            raise ValueError(
+                f"Cannot make db with less than 2 users because reasons."
+            )
         self.uids = self._genN(num_uids, self.uids, "user")
 
     def set_num_teams(self, num_teams: int) -> None:
         self.teams = self._genN(num_teams, self.teams, "team")
-        print(len(self.teams))
 
     def set_json_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir

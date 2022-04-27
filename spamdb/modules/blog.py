@@ -18,7 +18,7 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     ftopics: list = []
 
     categ = forum.Categ("Community Blog Discussions")
-    slugCounter = 0
+    # slug_counter = 0
 
     for (num_posts, uid) in zip(
         util.random_partition(num_blogs, len(gen.uids), 0), gen.uids
@@ -26,17 +26,26 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
         if num_posts == 0:
             continue
         ublogs.append(UBlog(uid))
-        # evt.add_blog()
 
         for _ in range(num_posts):
-            uposts.append(UBlogPost(uid))
-            ft = forum.Topic(uposts[-1].title, categ._id)
-            ft.slug = f"{ft.slug}-{slugCounter}"
-            slugCounter = slugCounter + 1
+            up = UBlogPost(uid)
+            uposts.append(up)
+            up.slug = util.normalize_id(up.title)
+            ft = forum.Topic(up.title, categ._id)
+            ft.userId = uid
+            ft.slug = f"ublog-{uid}-{up._id}"
             ft.createdAt = uposts[-1].created["at"]
+            ft.blogUrl = (
+                f"http://localhost:9663/@/{uid}/blog/{up.slug}/{up._id}"
+            )
+            fpost = forum.Post(uid)
+            fpost.text = "Discussing: " + ft.blogUrl
+            fposts.append(fpost)
             ftopics.append(ft)
+            ft.correlate_post(fpost)
+            #          slug_counter = slug_counter + 1
 
-            for _ in range(util.rrange(4, 48)):
+            for _ in range(util.rrange(2, 8)):
                 fp = forum.Post(gen.random_uid())
                 fposts.append(fp)
                 ft.correlate_post(fp)

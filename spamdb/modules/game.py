@@ -7,7 +7,13 @@ from modules.datasrc import gen
 import modules.util as util
 
 
-def create_game_colls(db: pymongo.MongoClient) -> None:
+def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
+    if num_games == 0:
+        return
+    elif num_games < 0:
+        num_games = len(gen.games)
+    elif num_games < len(gen.games):
+        gen.games = gen.games[:num_games]
 
     games: list[game.Game] = []
     crosstable: dict[str, Result] = {}

@@ -29,10 +29,10 @@ def main():
 
         if not args.no_create:
             user.create_user_colls(db, args.follow)
-            game.create_game_colls(db)
+            game.create_game_colls(db, int(args.games))
             forum.create_forum_colls(db, int(int(args.posts) / 2))
             team.create_team_colls(db, int(int(args.posts) / 2))
-            blog.create_blog_colls(db, int(args.ublogs))
+            blog.create_blog_colls(db, int(args.blogs))
             event.create_event_colls(db)
 
         if args.insert:
@@ -106,10 +106,10 @@ def _get_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-b",
-        "--ublogs",
+        "--blogs",
         type=int,
-        help="(default: 400)",
-        default=400,
+        help="(default: 20)",
+        default=40,
         action="store",
     )
     parser.add_argument(
@@ -126,6 +126,14 @@ def _get_args() -> argparse.Namespace:
         type=int,
         default=-1,
         help="(default: # of items in teams.txt)",
+        action="store",
+    )
+    parser.add_argument(
+        "-g",
+        "--games",
+        type=int,
+        default=-1,
+        help="(default/max = # of objects in game5.bson (prolly 3000))",
         action="store",
     )
     parser.add_argument(
