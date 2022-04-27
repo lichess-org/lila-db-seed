@@ -176,6 +176,10 @@ class TimelineEntry:
         self.chan = f"forum:{tid}"
         return self
 
+    def ublog_post(self, uid: str, pid: str):
+        self
+        # TODO implement this
+
     def follow(self, uid: str, following: str):
         self.typ = "follow"
         self.data = {"u1": uid, "u2": following}
