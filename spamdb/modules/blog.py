@@ -18,6 +18,7 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     ftopics: list = []
 
     categ = forum.Categ("Community Blog Discussions")
+    categ.hidden = True
     # slug_counter = 0
 
     for (num_posts, uid) in zip(
