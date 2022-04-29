@@ -84,11 +84,11 @@ def days_since_genesis(then: datetime = datetime.now()) -> int:
 
 # time_shortly_after provides a date between then and (then + 4 hrs)
 def time_shortly_after(then: datetime) -> datetime:
-    mintime = int(
-        then.timestamp()
-    )  # not using timedelta because i can't be bothered to look up how to min/max it
+    mintime = int(then.timestamp())
     maxtime = int(min(datetime.now().timestamp(), mintime + 14400))
-    return datetime.fromtimestamp(rrange(mintime, maxtime))
+    return datetime.fromtimestamp(
+        rrange(mintime, maxtime if maxtime > mintime else mintime + 20)
+    )
 
 
 # time_since returns a date between then and now

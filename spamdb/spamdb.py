@@ -38,7 +38,7 @@ def main():
         if args.insert:
             util.insert_json(db, args.insert)
         elif args.insert_file:
-            util.insert_file(db, args.insert_file)
+            util.insert_json_file(db, args.insert_file)
 
 
 def _do_drops(db: pymongo.MongoClient, drop) -> None:
@@ -109,7 +109,7 @@ def _get_args() -> argparse.Namespace:
         "--blogs",
         type=int,
         help="(default: 20)",
-        default=40,
+        default=20,
         action="store",
     )
     parser.add_argument(
@@ -152,17 +152,27 @@ def _get_args() -> argparse.Namespace:
         "-d",
         "--dump-bson",
         type=str,
-        help="leave db alone but dump BSONs to provided directory",
+        help="leave db alone, generate and dump BSONs to provided directory",
         action="store",
     )
     group.add_argument(
         "-dj",
         "--dump-json",
         type=str,
-        help="leave db alone but dump JSONs to provided directory",
+        help="leave db alone, generate and dump JSONs to provided directory",
         action="store",
     )
     group.add_argument(
+        "-nc",
+        "--no-create",
+        action="store_true",
+        help=(
+            "skip procedural object generation (usually in conjunction with "
+            "--drop or --insert/insert-file)"
+        ),
+    )
+    group2 = parser.add_mutually_exclusive_group()
+    group2.add_argument(
         "-i",
         "--insert",
         type=str,
@@ -171,23 +181,20 @@ def _get_args() -> argparse.Namespace:
             "of the form {collname:[listOfObjs]}.  for example:  "
             '--insert=\'{"f_categ": [{"_id": "blah", "name": "blah", "desc": "blah", '
             '"nbTopics": 0, "nbPosts": 0, "nbTopicsTroll": 0, "nbPostsTroll": 0, '
-            '"quiet": false}]}\' will create the new forum category "blah".  You '
-            "will usually want to specify -nc/--no-create with this"
+            '"quiet": false}]}\' will create the new forum category "blah".  '
+            "-nc/--no-create does not suppress insertion so use it for a "
+            "targeted insert"
         ),
     )
-    group.add_argument(
+    group2.add_argument(
         "-if",
         "--insert-file",
         type=str,
-        help=("same as --insert but reads the json string from provided file"),
-    )
-    group.add_argument(
-        "-nc",
-        "--no-create",
-        action="store_true",
         help=(
-            "skip procedural object generation (usually in conjunction with "
-            "--drop or --insert)"
+            "same as --insert but reads the json string from provided file.  "
+            'for example:  --insert-file="data/create-blog-categ.json" will '
+            "create a category having attributes as specified in that file (look "
+            "for it in the data directory)"
         ),
     )
     parser.add_argument(

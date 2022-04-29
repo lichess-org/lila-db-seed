@@ -157,6 +157,8 @@ class User:
         users.append(
             User("puzzle-curator", [], ["ROLE_PUZZLE_CURATOR"], False)
         )
+        users.append(User("irwin", [], ["ROLE_ADMIN"], False))
+        users.append(User("kaladin", [], ["ROLE_ADMIN"], False))
         users.append(User("api-hog", [], ["ROLE_API_HOG"], False))
         users.append(User("troll", ["troll"], [], False))
         users.append(User("rank-ban", ["rankban"], [], False))
