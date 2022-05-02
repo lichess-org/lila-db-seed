@@ -18,8 +18,7 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     ftopics: list = []
 
     categ = forum.Categ("Community Blog Discussions")
-    categ.hidden = True  # this field already existed for some reason
-    # and I have stolen it for community blogs!
+    categ.hidden = True
 
     for (num_posts, uid) in zip(
         util.random_partition(num_blogs, len(gen.uids), 0), gen.uids
@@ -36,14 +35,12 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
             ft.userId = uid
             ft.slug = f"ublog-{uid}-{up._id}"
             ft.createdAt = uposts[-1].created["at"]
-            ft.blogUrl = (
-                f"http://localhost:9663/@/{uid}/blog/{up.slug}/{up._id}"
-            )
-            fpost = forum.Post(uid)
+            ft.blogUrl = f"{gen.base_url}/@/{uid}/blog/{up.slug}/{up._id}"
+            fpost = forum.Post(uid)  # welcome post
             fpost.text = "Discussing: " + ft.blogUrl
+            ft.correlate_post(fpost)
             fposts.append(fpost)
             ftopics.append(ft)
-            ft.correlate_post(fpost)
 
             for _ in range(util.rrange(2, 8)):
                 fp = forum.Post(gen.random_uid())

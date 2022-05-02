@@ -30,8 +30,9 @@ class DataSrc:
             "games.txt", "\n"
         )
         self.seeds = dict[str, int]()
-        self.dump_dir = None
-        self.bson_mode = True
+        self.dump_dir: str = None
+        self.bson_mode: bool = True
+        self.user_bg_mode: int = 200
         self.fide_map: dict[str, int] = {}  # a hack sure, but what isn't?
 
     def set_num_uids(self, num_uids: int) -> None:
@@ -51,6 +52,11 @@ class DataSrc:
     def set_bson_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir
         self.bson_mode = True
+
+    def set_base_url(self, base_url: str) -> None:  # remove trailing slash
+        self.base_url = (
+            base_url if not base_url.endswith("/") else base_url[:-1]
+        )
 
     def random_uid(self) -> str:
         return random.choice(self.uids)

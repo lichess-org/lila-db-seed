@@ -186,7 +186,7 @@ class Pref:
     def __init__(self, uid: str):
         self._id = uid
         self.is3d = False
-        self.bg = 400  # random.choice([100, 200, 400]) # you did the work, now make em look at it!
+        self.bg = gen.user_bg_mode
         if self.bg == 400:
             self.bgImg = gen.random_image_link()
 
