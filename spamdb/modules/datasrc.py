@@ -33,7 +33,7 @@ class DataSrc:
         self.dump_dir: str = None
         self.bson_mode: bool = True
         self.user_bg_mode: int = 200
-        self.fide_map: dict[str, int] = {}  # a hack sure, but what isn't?
+        self.fide_map: dict[str, int] = {}
 
     def set_num_uids(self, num_uids: int) -> None:
         if num_uids < 2:

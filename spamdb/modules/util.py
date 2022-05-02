@@ -109,9 +109,7 @@ def time_since_days_ago(days_ago: int) -> datetime:
 def insert_json(db: pymongo.MongoClient, filename: str) -> None:
     with open(filename, "r") as f:
         for (collName, objList) in json.load(f).items():
-            bulk_write(
-                db[collName], objList
-            )  # [ObjWrapper(o) for o in objList])
+            bulk_write(db[collName], objList)
 
 
 def _dict(o: object) -> dict:

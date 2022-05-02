@@ -57,12 +57,19 @@ class EventApi:
         # wtf here
 
     def add_post(
-        self, uid: str, time: datetime, pid: str, tid: str, tname: str
+        self,
+        uid: str,
+        time: datetime,
+        pid: str,
+        tid: str,
+        tname: str,
+        constrain_listeners: list[str] = [],
     ) -> None:
+        listeners = self.relation_map.get(uid, [])
+        if constrain_listeners:
+            listeners = [l for l in listeners if l in set(constrain_listeners)]
         self.timeline.append(
-            TimelineEntry(time, self.relation_map.get(uid, [])).forum_post(
-                uid, pid, tid, tname
-            )
+            TimelineEntry(time, listeners).forum_post(uid, pid, tid, tname)
         )
         self._lazy_make_activity(uid, time, "p", []).append(pid)
 
