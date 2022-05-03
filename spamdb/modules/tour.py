@@ -72,9 +72,7 @@ class TournamentPlayer:
         self._id = gen.next_id(TournamentPlayer)
         self.uid = uid
         self.tid = tid
-        print(f"calling gen.fide_map[{uid}]...")
         self.r = gen.fide_map[uid]
-        print(uid)
         self.s = util.rrange(0, 32)
         self.m = self.s * 10017
         self.f = util.chance(self.s / 64)
