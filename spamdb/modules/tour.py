@@ -20,6 +20,7 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
     pairings: list[TournamentPairing] = []
     players: list[TournamentPlayer] = []
     leaderboards: list[TournamentLeaderboard] = []
+    trophies: list[Trophy] = []
 
     for _ in range(num_tours):
         t = Tournament()
@@ -39,6 +40,11 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
             #            print("made a leaderboard: " + str(tlb))
             leaderboards.append(tlb)
 
+    # award some trophies, everyone wins an average of 2.  well done all!
+    for i in range(len(gen.uids) * 2):
+        trophies.append(Trophy(gen.random_uid()))
+
+    util.bulk_write(db.trophy, trophies)
     util.bulk_write(db.tournament2, tours)
     util.bulk_write(db.tournament_leaderboard, leaderboards)
     util.bulk_write(db.tournament_pairing, pairings)
@@ -50,6 +56,7 @@ def drop(db: pymongo.MongoClient) -> None:
     db.tournament_leaderboard.drop()
     db.tournament_pairing.drop()
     db.tournament_player.drop()
+    db.trophy.drop()
 
 
 class Tournament:
@@ -110,19 +117,16 @@ class TournamentLeaderboard:
         self.v = 1
 
 
-#  case object Created       extends Status(10)
-#   case object Started       extends Status(20)
-#   case object Aborted       extends Status(25) // from this point the game is finished
-#   case object Mate          extends Status(30)
-#   case object Resign        extends Status(31)
-#   case object Stalemate     extends Status(32)
-#   case object Timeout       extends Status(33) // when player leaves the game
-#   case object Draw          extends Status(34)
-#   case object Outoftime     extends Status(35) // clock flag
-#   case object Cheat         extends Status(36)
-#   case object NoStart       extends Status(37) // the player did not make the first move in time
-#   case object UnknownFinish extends Status(38) // we don't know why the game ended
-#   case object VariantEnd    extends Status(60) // the variant has a special ending
+# TODO: move Trophy and TrophyKind into tournament?
+class Trophy:
+    def __init__(self, uid: str):
+        self._id = gen.next_id(Trophy)
+        self.user = uid
+        self.kind = random.choice(_trophyKind)
+        self.date = util.time_since_days_ago(720)
+
+
+# class TrophyKind: use bin/mongodb/create-trophy-kinds.js for now
 
 _speed: dict[str, int] = {
     "ultrabullet": 5,
@@ -151,4 +155,18 @@ _status: list[int] = [
     10,  # created
     20,  # started
     30,  # finished
+]
+
+
+_trophyKind: list[str] = [
+    "marathonWinner",
+    "marathonTopTen",
+    "marathonTopFifty",
+    "marathonTopHundred",
+    "marathonTopFiveHundred",
+    "moderator",
+    "developer",
+    "verified",
+    "contentTeam",
+    "zugMiracle",
 ]
