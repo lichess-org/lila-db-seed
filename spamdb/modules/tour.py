@@ -24,17 +24,19 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
     for _ in range(num_tours):
         t = Tournament()
         tours.append(t)
+
         pids = random.sample(gen.uids, t.nbPlayers)
-        t.winner = random.choice(pids)
-        for pid in players:
+        random.shuffle(pids)
+        t.winner = pids[0]
+        for (pid, index) in zip(pids, range(t.nbPlayers)):
             tplay = TournamentPlayer(pid, t._id)
             players.append(tplay)
-            others = [oid for oid in pids if oid != pid]
             tpair = TournamentPairing(
-                pid, random.choice(others), t._id, t.startsAt
+                pid, random.choice([oid for oid in pids if oid != pid]), t
             )
             pairings.append(tpair)
-            tlb = TournamentLeaderboard(pid, t)
+            tlb = TournamentLeaderboard(pid, index + 1, t)
+            #            print("made a leaderboard: " + str(tlb))
             leaderboards.append(tlb)
 
     util.bulk_write(db.tournament2, tours)
@@ -55,16 +57,18 @@ class Tournament:
         self._id = gen.next_id(Tournament)
         perf = "bullet"
         freq = random.choice(list(_frequency.keys()))
+
+        freq = "marathon"
+
         self.name = f"{freq.capitalize()} {perf.capitalize()}"
         self.status = 30
         self.clock = {"limit": 30, "increment": 0}
-        self.minutes = 30
+        self.minutes = random.choice([20, 30, 40, 60, 90, 120])
         self.schedule = {"freq": freq, "speed": perf}
         self.nbPlayers = util.rrange(4, 32)
         self.createdAt = util.time_since_days_ago(365)
         self.startsAt = util.time_shortly_after(self.createdAt)
         # self.featured
-        self.winner = gen.random_uid()
 
 
 class TournamentPlayer:
@@ -73,8 +77,8 @@ class TournamentPlayer:
         self.uid = uid
         self.tid = tid
         self.r = gen.fide_map[uid]
-        self.s = util.rrange(0, 32)
-        self.m = self.s * 10017
+        self.s = util.rrange(0, 35)
+        self.m = self.s * 10000
         self.f = util.chance(self.s / 64)
         self.e = self.r + util.rrange(-200, 200)
         # self.t = # team id
@@ -82,29 +86,27 @@ class TournamentPlayer:
 
 
 class TournamentPairing:
-    def __init__(self, p1: str, p2: str, tid: str, time: datetime):
+    def __init__(self, p1: str, p2: str, t: Tournament):
         self._id = gen.next_id(TournamentPairing)
         self.u = [p1, p2]
-        self.t = tid
+        self.tid = t._id
         self.s = util.rrange(30, 35)
-        self.d = time
+        self.d = util.time_shortly_after(t.startsAt)
         self.t = util.rrange(10, 70)
         self.b1 = self.b2 = False
 
 
 class TournamentLeaderboard:
-    def __init__(self, uid: str, tour: Tournament):
+    def __init__(self, uid: str, place: int, t: Tournament):
         self._id = gen.next_id(TournamentLeaderboard)
-        self.uid = uid
-        self.tid = tour._id
-        self.s = util.rrange(0, 32)
-        self.d = tour.startsAt
-        self.r = (
-            1 if uid == tour.winner else util.rrange(2, tour.nbPlayers + 1)
-        )
+        self.u = uid
+        self.t = t._id
+        self.s = (t.nbPlayers - place) * 2
+        self.d = t.startsAt
+        self.r = place
         self.w = self.r * 25000
-        self.f = _frequency[tour.schedule["freq"]]
-        self.p = _speed[tour.schedule["speed"]]
+        self.f = t.schedule["freq"]
+        self.p = t.schedule["speed"]
         self.v = 1
 
 
