@@ -1,6 +1,5 @@
 import pymongo
 import random
-from random import randrange as rrange
 from modules.event import evt
 from modules.datasrc import gen
 import modules.forum as forum
@@ -36,18 +35,28 @@ def create_team_colls(db: pymongo.MongoClient, total_num_posts: int) -> None:
 
         all_members.extend(team_members)
 
+        remaining_topics = gen.topics.copy()
+        random.shuffle(remaining_topics)
         for num_posts in util.random_partition(
-            num_team_posts, int(num_team_posts / 10) + 1
+            num_team_posts,
+            min(int(num_team_posts / 10) + 1, len(remaining_topics)),
         ):
             if num_posts == 0:
                 continue
-            t = forum.Topic(random.choice(gen.topics), categs[-1]._id)
+            t = forum.Topic(remaining_topics.pop(), categs[-1]._id)
             topics.append(t)
             for _ in range(num_posts):
                 p = forum.Post(random.choice(team_members).user)
                 posts.append(p)
                 t.correlate_post(p)
-                evt.add_post(p.userId, p.createdAt, p._id, t._id, t.name)
+                evt.add_post(
+                    p.userId,
+                    p.createdAt,
+                    p._id,
+                    t._id,
+                    t.name,
+                    [u.user for u in team_members],
+                )
             categs[-1].add_topic(t)
 
     util.bulk_write(db.f_categ, categs, True)
@@ -80,14 +89,16 @@ class Team:
         self.enabled = True
         self.open = util.chance(0.5)
         self.createdAt = util.time_since_days_ago(1440)
-        self.leaders = list(random.sample(gen.uids, (rrange(1, 4))))
+        self.leaders = random.sample(
+            gen.uids, util.rrange(1, min(len(gen.uids), 4))
+        )
         self.createdBy = self.leaders[0]
         self.chat = 20  # of course chat and forum are equal to 20.
         self.forum = 20  # wtf else would they possibly be??
 
     def create_members(self) -> list[TeamMember]:
         users: set[str] = set(self.leaders).union(
-            random.sample(gen.uids, (rrange(2, len(gen.uids) / 4)))
+            random.sample(gen.uids, util.rrange(2, int(len(gen.uids) / 4)))
         )
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]

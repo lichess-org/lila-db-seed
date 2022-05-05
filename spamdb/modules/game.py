@@ -2,18 +2,24 @@ import random
 import bson
 import base64
 import pymongo
-from random import randrange as rrange
 from modules.event import evt
 from modules.datasrc import gen
 import modules.util as util
 
 
-def create_game_colls(db: pymongo.MongoClient) -> None:
+def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
+    if num_games == 0:
+        return
+    elif num_games < 0:
+        num_games = len(gen.games)
+    elif num_games < len(gen.games):
+        gen.games = gen.games[:num_games]
 
     games: list[game.Game] = []
     crosstable: dict[str, Result] = {}
 
     for bson_game in gen.games:
+
         us = random.sample(gen.uids, 2)
         g = Game(bson_game, us[0], us[1])
         games.append(g)
@@ -28,10 +34,8 @@ def create_game_colls(db: pymongo.MongoClient) -> None:
         crosstable.setdefault(id, Result(id)).add_game(g)
 
     util.bulk_write(db.game5, games)
-    util.bulk_write(
-        db.puzzle2_path, [ObjWrapper(pp) for pp in gen.puzzle_paths]
-    )
-    util.bulk_write(db.puzzle2_puzzle, [ObjWrapper(p) for p in gen.puzzles])
+    util.bulk_write(db.puzzle2_path, gen.puzzle_paths)
+    util.bulk_write(db.puzzle2_puzzle, gen.puzzles)
     # TODO find out why crosstable and matchup are separate slices of what
     # could be same collection
     util.bulk_write(db.crosstable2, crosstable.values())
@@ -44,11 +48,6 @@ def drop(db: pymongo.MongoClient) -> None:
     db.puzzle2_puzzle.drop()
     db.crosstable2.drop()
     db.matchup.drop()
-
-
-class ObjWrapper:
-    def __init__(self, obj: dict):
-        self.__dict__ = obj
 
 
 class Game:
@@ -86,13 +85,13 @@ class Game:
             return evt.Outcome.LOSS
 
 
-pidseed: int = 1
+_pidseed: int = 1
 
 
 def _next_pid(white: bool) -> str:
-    global pidseed
-    pid = (pidseed << 6) | (0x0020 if white else 0x0000)
-    pidseed = pidseed + 1
+    global _pidseed
+    pid = (_pidseed << 6) | (0x0020 if white else 0x0000)
+    _pidseed = _pidseed + 1
     return base64.b64encode(pid.to_bytes(3, "big")).decode("ascii")[:4]
 
 

@@ -14,10 +14,12 @@ def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
     categs: dict[str, Categ] = {}
     topics: list[Topic] = []
     posts: list[Post] = []
+    emptyCategs: list[Categ] = []
 
     for cat_name in gen.categs:
         categ = Categ(cat_name)
         categs[categ._id] = categ
+
     for topic_name in gen.topics:
         topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
     for _ in range(num_posts):

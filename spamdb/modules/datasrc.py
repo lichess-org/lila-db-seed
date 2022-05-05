@@ -2,13 +2,12 @@ import random
 import os
 import base64
 import bson
-from random import randrange as rrange
+import modules.util as util
 from datetime import datetime
 
-
+# filenames used in DataSrc.__init__ are REQUIRED to be in <spamdb-path>/data
 class DataSrc:
     def __init__(self):
-        # data source files are assumed to be at <module_dir>/../data
         self.data_path: str = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "data"
         )
@@ -31,15 +30,20 @@ class DataSrc:
             "games.txt", "\n"
         )
         self.seeds = dict[str, int]()
-        self.dump_dir = None
-        self.bson_mode = True
-        self.fide_map: dict[str, int] = {}  # a hack but it's ok
+        self.dump_dir: str = None
+        self.bson_mode: bool = True
+        self.user_bg_mode: int = 200
+        self.fide_map: dict[str, int] = {}
 
     def set_num_uids(self, num_uids: int) -> None:
-        self.uids = _genN(num_uids, self.uids, "user")
+        if num_uids < 2:
+            raise ValueError(
+                f"Cannot make db with less than 2 users because reasons."
+            )
+        self.uids = self._genN(num_uids, self.uids, "user")
 
     def set_num_teams(self, num_teams: int) -> None:
-        self.teams = _genN(num_teams, self.teams, "team")
+        self.teams = self._genN(num_teams, self.teams, "team")
 
     def set_json_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir
@@ -48,6 +52,11 @@ class DataSrc:
     def set_bson_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir
         self.bson_mode = True
+
+    def set_base_url(self, base_url: str) -> None:  # remove trailing slash
+        self.base_url = (
+            base_url if not base_url.endswith("/") else base_url[:-1]
+        )
 
     def random_uid(self) -> str:
         return random.choice(self.uids)
@@ -65,31 +74,30 @@ class DataSrc:
         return random.choice(self.paragraphs)
 
     def random_social_media_links(self) -> list[str]:
-        return random.sample(self.social_media_links, rrange(0, 6))
+        return random.sample(self.social_media_links, util.rrange(0, 6))
 
     def random_image_link(self) -> str:
         return random.choice(self.image_links)
 
-    def next_id(
-        self, key_obj, num_bytes: int = 6
-    ) -> str:  # ids only unique inside a collection
+    # ids only unique per collection
+    def next_id(self, key_obj, num_bytes: int = 6) -> str:
         seed = self.seeds.setdefault(key_obj.__class__.__name__, 1)
         self.seeds[key_obj.__class__.__name__] = seed + 1
         return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode(
             "ascii"
         )
 
-    def _genN(num: int, ls: list[str], default: str) -> list[str]:
+    def _genN(self, num: int, ls: list[str], default: str) -> list[str]:
+        if num == 0:
+            return []
         if not ls:
             ls = [default]
         next_num: int = 1
         new_list: list[str] = ls.copy()
         while len(new_list) < num:
-            new_list.append([e + str(next_num) for e in ls])
+            new_list.extend([e + str(next_num) for e in ls])
             next_num = next_num + 1
-        return list(set(new_list))[
-            0:num
-        ]  # remove dupes, for example if users.txt had both "u" and "u1"
+        return new_list[0:num]
 
     def _read_strings(self, name: str, sep: str = None) -> list[str]:
         with open(os.path.join(self.data_path, name), "r") as f:
@@ -100,4 +108,4 @@ class DataSrc:
             return bson.decode_all(f.read())
 
 
-gen = DataSrc()
+gen = DataSrc()  # used by other modules

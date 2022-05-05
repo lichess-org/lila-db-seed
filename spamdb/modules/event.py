@@ -1,7 +1,6 @@
 import enum
 import bson
 import pymongo
-from random import randrange as rrange
 from datetime import datetime
 import modules.util as util
 from modules.datasrc import gen
@@ -27,7 +26,7 @@ def drop(db: pymongo.MongoClient) -> None:
     db.relation.drop()
 
 
-# handles activity and timeline collections
+# singleton evt, collects activity and timeline collections
 class EventApi:
     def __init__(self):
         self.relation_map: dict[str, list[str]] = {}
@@ -40,7 +39,7 @@ class EventApi:
         WIN = enum.auto()
         LOSS = enum.auto()
 
-        def invert(self):
+        def opponentPov(self):
             return {
                 self.WIN: self.LOSS,
                 self.LOSS: self.WIN,
@@ -58,18 +57,27 @@ class EventApi:
         # wtf here
 
     def add_post(
-        self, uid: str, time: datetime, pid: str, tid: str, tname: str
+        self,
+        uid: str,
+        time: datetime,
+        pid: str,
+        tid: str,
+        tname: str,
+        constrain_listeners: list[str] = [],
     ) -> None:
+        listeners = self.relation_map.get(uid, [])
+        if constrain_listeners:
+            listeners = [l for l in listeners if l in set(constrain_listeners)]
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).forum_post(
-                uid, pid, tid, tname
-            )
+            TimelineEntry(time, listeners).forum_post(uid, pid, tid, tname)
         )
         self._lazy_make_activity(uid, time, "p", []).append(pid)
 
     def add_team(self, uid: str, time: datetime, tid: str, tname: str) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).team_create(uid, tid)
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_create(
+                uid, tid
+            )
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 
@@ -77,7 +85,9 @@ class EventApi:
         self, uid: str, time: datetime, tid: str, tname: str
     ) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).team_join(uid, tid)
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_join(
+                uid, tid
+            )
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 
@@ -95,7 +105,7 @@ class EventApi:
             )
         )
         self._game_activity(uid, time, outcome)
-        self._game_activity(opponent, time, outcome.invert())
+        self._game_activity(opponent, time, outcome.opponentPov())
 
     def _game_activity(
         self, uid: str, time: datetime, outcome: Outcome
@@ -129,7 +139,7 @@ class EventApi:
         return getattr(activity, key)
 
 
-evt = EventApi()
+evt = EventApi()  # used by other modules
 
 
 class Relation:
@@ -172,6 +182,10 @@ class TimelineEntry:
         }
         self.chan = f"forum:{tid}"
         return self
+
+    def ublog_post(self, uid: str, pid: str):
+        self
+        # TODO implement this
 
     def follow(self, uid: str, following: str):
         self.typ = "follow"
