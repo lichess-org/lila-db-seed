@@ -27,7 +27,7 @@ def bulk_write(coll, objs, append=False):
                     f.write(bson.encode(_dict(o)))
                 else:
                     f.write(json.dumps(_dict(o), default=str, indent=4))
-        print(f"Colleciton {coll.name}: dumped to {outpath}")
+        print(f"Collection {coll.name}: dumped to {outpath}")
     else:
         ledger = []
         for x in objs:
@@ -84,11 +84,11 @@ def days_since_genesis(then: datetime = datetime.now()) -> int:
 
 # time_shortly_after provides a date between then and (then + 4 hrs)
 def time_shortly_after(then: datetime) -> datetime:
-    mintime = int(
-        then.timestamp()
-    )  # not using timedelta because i can't be bothered to look up how to min/max it
+    mintime = int(then.timestamp())
     maxtime = int(min(datetime.now().timestamp(), mintime + 14400))
-    return datetime.fromtimestamp(rrange(mintime, maxtime))
+    return datetime.fromtimestamp(
+        rrange(mintime, maxtime if maxtime > mintime else mintime + 20)
+    )
 
 
 # time_since returns a date between then and now
@@ -106,19 +106,11 @@ def time_since_days_ago(days_ago: int) -> datetime:
     return datetime.now() - timedelta(days=rrange(0, days_ago))
 
 
-def insert_json(db: pymongo.MongoClient, jsonStr: str) -> None:
-    _insert_json(db, json.loads(jsonStr))
-
-
-def insert_json_file(db: pymongo.MongoClient, filename: str) -> None:
+def insert_json(db: pymongo.MongoClient, filename: str) -> None:
     with open(filename, "r") as f:
-        _insert_json(db, json.load(f))
+        for (collName, objList) in json.load(f).items():
+            bulk_write(db[collName], objList)
 
 
 def _dict(o: object) -> dict:
     return o.__dict__ if hasattr(o, "__dict__") else o
-
-
-def _insert_json(db: pymongo.MongoClient, collDict: dict) -> None:
-    for (collName, objList) in collDict.items():
-        bulk_write(db[collName], objList)  # [ObjWrapper(o) for o in objList])

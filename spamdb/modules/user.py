@@ -157,6 +157,8 @@ class User:
         users.append(
             User("puzzle-curator", [], ["ROLE_PUZZLE_CURATOR"], False)
         )
+        users.append(User("irwin", [], ["ROLE_ADMIN"], False))
+        users.append(User("kaladin", [], ["ROLE_ADMIN"], False))
         users.append(User("api-hog", [], ["ROLE_API_HOG"], False))
         users.append(User("troll", ["troll"], [], False))
         users.append(User("rank-ban", ["rankban"], [], False))
@@ -164,6 +166,8 @@ class User:
         users.append(User("alt", ["alt"], [], False))
         users.append(User("boost", ["boost"], [], False))
         users.append(User("engine", ["engine"], [], False))
+        users.append(User("coach", [], ["ROLE_COACH"], False))
+        users.append(User("teacher", [], ["ROLE_TEACHER"], False))
         users.append(User("kid", [], ["ROLE_VERIFIED"], False))
         users[-1].kid = True
         users.append(User("unverified", [], [], False))
@@ -184,7 +188,7 @@ class Pref:
     def __init__(self, uid: str):
         self._id = uid
         self.is3d = False
-        self.bg = 400  # random.choice([100, 200, 400]) # you did the work, now make em look at it!
+        self.bg = gen.user_bg_mode
         if self.bg == 400:
             self.bgImg = gen.random_image_link()
 

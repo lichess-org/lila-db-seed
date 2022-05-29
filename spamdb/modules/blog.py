@@ -4,12 +4,21 @@ from datetime import datetime
 from datetime import timedelta
 from modules.event import evt
 from modules.datasrc import gen
+import modules.forum as forum
 import modules.util as util
 
 
 def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
+    if num_blogs < 1:
+        return
+
     ublogs: list = []
     uposts: list = []
+    fposts: list = []
+    ftopics: list = []
+
+    categ = forum.Categ("Community Blog Discussions")
+    categ.hidden = True
 
     for (num_posts, uid) in zip(
         util.random_partition(num_blogs, len(gen.uids), 0), gen.uids
@@ -17,9 +26,34 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
         if num_posts == 0:
             continue
         ublogs.append(UBlog(uid))
-        for _ in range(num_posts):
-            uposts.append(UBlogPost(uid))
 
+        for _ in range(num_posts):
+            up = UBlogPost(uid)
+            uposts.append(up)
+            up.slug = util.normalize_id(up.title)
+            ft = forum.Topic(up.title, categ._id)
+            ft.userId = uid
+            ft.slug = f"ublog-{uid}-{up._id}"
+            ft.createdAt = uposts[-1].created["at"]
+            ft.blogUrl = f"{gen.base_url}/@/{uid}/blog/{up.slug}/{up._id}"
+            fpost = forum.Post(uid)  # welcome post
+            fpost.text = "Discussing: " + ft.blogUrl
+            ft.correlate_post(fpost)
+            fposts.append(fpost)
+            ftopics.append(ft)
+
+            for _ in range(util.rrange(2, 8)):
+                fp = forum.Post(gen.random_uid())
+                fposts.append(fp)
+                ft.correlate_post(fp)
+                evt.add_post(fp.userId, fp.createdAt, fp._id, ft._id, ft.name)
+
+        for ft in ftopics:
+            categ.add_topic(ft)
+
+    util.bulk_write(db.f_categ, [categ], True)
+    util.bulk_write(db.f_topic, ftopics, True)
+    util.bulk_write(db.f_post, fposts, True)
     util.bulk_write(db.ublog_blog, ublogs)
     util.bulk_write(db.ublog_post, uposts)
 
@@ -48,6 +82,7 @@ class UBlogPost:
         )
         self.language = "en-US"
         self.live = True
+        self.discuss = True
         self.topics = random.sample(_blog_topics, 3)
         self.created = {"by": uid, "at": util.time_since_days_ago(365)}
         self.lived = self.created

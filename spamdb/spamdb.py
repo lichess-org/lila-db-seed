@@ -8,6 +8,7 @@ import modules.blog as blog
 import modules.game as game
 import modules.team as team
 import modules.util as util
+import modules.tour as tour
 from modules.datasrc import gen
 
 
@@ -17,7 +18,8 @@ def main():
         gen.set_num_uids(args.users)
     if args.teams > -1:
         gen.set_num_teams(args.teams)
-
+    gen.user_bg_mode = args.user_bg
+    gen.set_base_url(args.base_url)
     with _MongoContextMgr(args.uri) as db:
 
         _do_drops(db, args.drop)
@@ -29,16 +31,15 @@ def main():
 
         if not args.no_create:
             user.create_user_colls(db, args.follow)
-            game.create_game_colls(db)
+            game.create_game_colls(db, int(args.games))
+            tour.create_tour_colls(db, int(args.tours))
             forum.create_forum_colls(db, int(int(args.posts) / 2))
             team.create_team_colls(db, int(int(args.posts) / 2))
-            blog.create_blog_colls(db, int(args.ublogs))
+            blog.create_blog_colls(db, int(args.blogs))
             event.create_event_colls(db)
 
         if args.insert:
             util.insert_json(db, args.insert)
-        elif args.insert_file:
-            util.insert_file(db, args.insert_file)
 
 
 def _do_drops(db: pymongo.MongoClient, drop) -> None:
@@ -54,7 +55,10 @@ def _do_drops(db: pymongo.MongoClient, drop) -> None:
         user.drop(db)
     elif drop == "blog":
         blog.drop(db)
+    elif drop == "tour":
+        tour.drop(db)
     elif drop == "all":
+        tour.drop(db)
         game.drop(db)
         event.drop(db)
         forum.drop(db)
@@ -91,7 +95,33 @@ def _get_args() -> argparse.Namespace:
             "mongodb://127.0.0.1/lichess)"
         ),
         default="mongodb://127.0.0.1/lichess",
-        action="store",
+    )
+    parser.add_argument(
+        "--base-url",
+        type=str,
+        help=(
+            "scheme and domain of generated urls.  same as net.base_url in "
+            "lila conf.  (default: http://localhost:9663)"
+        ),
+        default="http://localhost:9663",
+    )
+    parser.add_argument(
+        "-u",
+        "--users",
+        type=int,
+        default=-1,
+        help="(defaults to number of names in uids.txt)",
+    )
+    parser.add_argument(
+        "-bg",
+        "--user-bg",
+        type=int,
+        help=(
+            "force generated users to have this background set in their "
+            "associated Pref object, 100 = light mode, 200 = dark mode, "
+            "400 = transparent with random image.  (default: 200)"
+        ),
+        default=200,
     )
     parser.add_argument(
         "-p",
@@ -102,31 +132,34 @@ def _get_args() -> argparse.Namespace:
             "main categories get the other half.  (default: 4000)"
         ),
         default=4000,
-        action="store",
     )
     parser.add_argument(
         "-b",
-        "--ublogs",
+        "--blogs",
         type=int,
-        help="(default: 400)",
-        default=400,
-        action="store",
+        help="(default: 20)",
+        default=20,
     )
     parser.add_argument(
-        "-u",
-        "--users",
-        type=int,
-        default=-1,
-        help="(default: # of items in users.txt)",
-        action="store",
-    )
-    parser.add_argument(
-        "-t",
+        "-te",
         "--teams",
         type=int,
         default=-1,
         help="(default: # of items in teams.txt)",
-        action="store",
+    )
+    parser.add_argument(
+        "-to",
+        "--tours",
+        type=int,
+        default=80,
+        help="(default: 80)",
+    )
+    parser.add_argument(
+        "-g",
+        "--games",
+        type=int,
+        default=-1,
+        help="(default/max = # of objects in game5.bson (prolly 3000))",
     )
     parser.add_argument(
         "-f",
@@ -144,34 +177,13 @@ def _get_args() -> argparse.Namespace:
         "-d",
         "--dump-bson",
         type=str,
-        help="leave db alone but dump BSONs to provided directory",
-        action="store",
+        help="leave db alone, generate and dump BSONs to provided directory",
     )
     group.add_argument(
         "-dj",
         "--dump-json",
         type=str,
-        help="leave db alone but dump JSONs to provided directory",
-        action="store",
-    )
-    group.add_argument(
-        "-i",
-        "--insert",
-        type=str,
-        help=(
-            "insert items into one or more collections.  provide a json string "
-            "of the form {collname:[listOfObjs]}.  for example:  "
-            '--insert=\'{"f_categ": [{"_id": "blah", "name": "blah", "desc": "blah", '
-            '"nbTopics": 0, "nbPosts": 0, "nbTopicsTroll": 0, "nbPostsTroll": 0, '
-            '"quiet": false}]}\' will create the new forum category "blah".  You '
-            "will usually want to specify -nc/--no-create with this"
-        ),
-    )
-    group.add_argument(
-        "-if",
-        "--insert-file",
-        type=str,
-        help=("same as --insert but reads the json string from provided file"),
+        help="leave db alone, generate and dump JSONs to provided directory",
     )
     group.add_argument(
         "-nc",
@@ -183,13 +195,34 @@ def _get_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "-i",
+        "--insert",
+        type=str,
+        help=(
+            "insert contents of file specified by INSERT parameter as json into "
+            "one or more collections. -nc/--no-create does NOT suppress insertion "
+            "so use that to limit db updates to this insert.  contents must have "
+            "the form {collname:[listOfObjs]} see example at "
+            "data/create-blog-categ.json"
+        ),
+    )
+
+    parser.add_argument(
         "--drop",
         help=(
             "useful during development of this utility but beware!  multiple "
-            "collections dropped by each choice:  see code."
+            "collections dropped by each choice:  see code"
         ),
-        action="store",
-        choices=["game", "event", "forum", "team", "user", "blog", "all"],
+        choices=[
+            "game",
+            "event",
+            "forum",
+            "team",
+            "user",
+            "blog",
+            "all",
+            "tour",
+        ],
     )
 
     return parser.parse_args()

@@ -35,18 +35,28 @@ def create_team_colls(db: pymongo.MongoClient, total_num_posts: int) -> None:
 
         all_members.extend(team_members)
 
+        remaining_topics = gen.topics.copy()
+        random.shuffle(remaining_topics)
         for num_posts in util.random_partition(
-            num_team_posts, int(num_team_posts / 10) + 1
+            num_team_posts,
+            min(int(num_team_posts / 10) + 1, len(remaining_topics)),
         ):
             if num_posts == 0:
                 continue
-            t = forum.Topic(random.choice(gen.topics), categs[-1]._id)
+            t = forum.Topic(remaining_topics.pop(), categs[-1]._id)
             topics.append(t)
             for _ in range(num_posts):
                 p = forum.Post(random.choice(team_members).user)
                 posts.append(p)
                 t.correlate_post(p)
-                evt.add_post(p.userId, p.createdAt, p._id, t._id, t.name)
+                evt.add_post(
+                    p.userId,
+                    p.createdAt,
+                    p._id,
+                    t._id,
+                    t.name,
+                    [u.user for u in team_members],
+                )
             categs[-1].add_topic(t)
 
     util.bulk_write(db.f_categ, categs, True)

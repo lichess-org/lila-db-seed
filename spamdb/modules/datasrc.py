@@ -30,18 +30,20 @@ class DataSrc:
             "games.txt", "\n"
         )
         self.seeds = dict[str, int]()
-        self.dump_dir = None
-        self.bson_mode = True
-        self.fide_map: dict[str, int] = {}  # a hack sure, but what isn't?
+        self.dump_dir: str = None
+        self.bson_mode: bool = True
+        self.user_bg_mode: int = 200
+        self.fide_map: dict[str, int] = {}
 
     def set_num_uids(self, num_uids: int) -> None:
-        if (num_uids < 2):
-            raise ValueError(f"Cannot make db with less than {num_uids} users.")
+        if num_uids < 2:
+            raise ValueError(
+                f"Cannot make db with less than 2 users because reasons."
+            )
         self.uids = self._genN(num_uids, self.uids, "user")
 
     def set_num_teams(self, num_teams: int) -> None:
         self.teams = self._genN(num_teams, self.teams, "team")
-        print(len(self.teams))
 
     def set_json_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir
@@ -50,6 +52,11 @@ class DataSrc:
     def set_bson_dump_mode(self, dir: str) -> None:
         self.dump_dir = dir
         self.bson_mode = True
+
+    def set_base_url(self, base_url: str) -> None:  # remove trailing slash
+        self.base_url = (
+            base_url if not base_url.endswith("/") else base_url[:-1]
+        )
 
     def random_uid(self) -> str:
         return random.choice(self.uids)
@@ -74,8 +81,8 @@ class DataSrc:
 
     # ids only unique per collection
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
-        seed = self.seeds.setdefault(key_obj.__class__.__name__, 1)
-        self.seeds[key_obj.__class__.__name__] = seed + 1
+        seed = self.seeds.setdefault(key_obj.__name__, 1)
+        self.seeds[key_obj.__name__] = seed + 1
         return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode(
             "ascii"
         )
