@@ -35,7 +35,7 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
             ft.userId = uid
             ft.slug = f"ublog-{uid}-{up._id}"
             ft.createdAt = uposts[-1].created["at"]
-            ft.blogUrl = f"{gen.base_url}/@/{uid}/blog/{up.slug}/{up._id}"
+            ft.blogUrl = f"/@/{uid}/blog/{up.slug}/{up._id}"
             fpost = forum.Post(uid)  # welcome post
             fpost.text = "Discussing: " + ft.blogUrl
             ft.correlate_post(fpost)

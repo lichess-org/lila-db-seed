@@ -29,19 +29,19 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
         pids = random.sample(gen.uids, t.nbPlayers)
         random.shuffle(pids)
         t.winner = pids[0]
+        trophies.append(Trophy(t.winner))
         for (pid, index) in zip(pids, range(t.nbPlayers)):
-            tplay = TournamentPlayer(pid, t._id)
-            players.append(tplay)
-            tpair = TournamentPairing(
-                pid, random.choice([oid for oid in pids if oid != pid]), t
-            )
-            pairings.append(tpair)
+            tp = TournamentPlayer(pid, t._id)
+            players.append(tp)
+
+            for oppIndex in range(index + 1, t.nbPlayers):
+                pairings.append(TournamentPairing(pid, pids[oppIndex], t))
+
             tlb = TournamentLeaderboard(pid, index + 1, t)
-            #            print("made a leaderboard: " + str(tlb))
             leaderboards.append(tlb)
 
-    # award some trophies, everyone wins an average of 2.  well done all!
-    for i in range(len(gen.uids) * 2):
+    # award some more trophies, everyone wins.  well done all!
+    for _ in range(len(gen.uids) * 2):
         trophies.append(Trophy(gen.random_uid()))
 
     util.bulk_write(db.trophy, trophies)
@@ -62,16 +62,13 @@ def drop(db: pymongo.MongoClient) -> None:
 class Tournament:
     def __init__(self):
         self._id = gen.next_id(Tournament)
-        perf = "bullet"
         freq = random.choice(list(_frequency.keys()))
-
-        freq = "marathon"
-
-        self.name = f"{freq.capitalize()} {perf.capitalize()}"
+        speed = random.choice(list(_speed.keys()))
+        self.name = f"{freq.capitalize()} {speed.capitalize()}"
         self.status = 30
         self.clock = {"limit": 30, "increment": 0}
         self.minutes = random.choice([20, 30, 40, 60, 90, 120])
-        self.schedule = {"freq": freq, "speed": perf}
+        self.schedule = {"freq": freq, "speed": speed}
         self.nbPlayers = util.rrange(4, 32)
         self.createdAt = util.time_since_days_ago(365)
         self.startsAt = util.time_shortly_after(self.createdAt)

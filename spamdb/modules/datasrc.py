@@ -81,8 +81,8 @@ class DataSrc:
 
     # ids only unique per collection
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
-        seed = self.seeds.setdefault(key_obj.__class__.__name__, 1)
-        self.seeds[key_obj.__class__.__name__] = seed + 1
+        seed = self.seeds.setdefault(key_obj.__name__, 1)
+        self.seeds[key_obj.__name__] = seed + 1
         return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode(
             "ascii"
         )
