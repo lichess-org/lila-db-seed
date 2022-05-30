@@ -36,8 +36,6 @@ def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
     util.bulk_write(db.game5, games)
     util.bulk_write(db.puzzle2_path, gen.puzzle_paths)
     util.bulk_write(db.puzzle2_puzzle, gen.puzzles)
-    # TODO find out why crosstable and matchup are separate slices of what
-    # could be same collection
     util.bulk_write(db.crosstable2, crosstable.values())
     util.bulk_write(db.matchup, crosstable.values())
 
@@ -61,7 +59,7 @@ class Game:
         self.t = game["t"]
         self.v = 1
         self.ra = game["ra"]
-        self.ca = util.time_since_days_ago(730)
+        self.ca = util.time_since_days_ago(1460)
         self.ua = util.time_shortly_after(self.ca)
         self.so = game["so"]
         self.hp = bson.binary.Binary(game["hp"])
@@ -115,4 +113,4 @@ class Result:
             self.s1 = self.s1 + 5
             self.s2 = self.s2 + 5
         self.r.append(game._id + flag)
-        self.d = game.ca
+        self.d = max(self.d, game.ca) if hasattr(self, "d") else game.ca

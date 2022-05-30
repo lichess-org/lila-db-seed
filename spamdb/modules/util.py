@@ -96,14 +96,14 @@ def time_since(then: datetime) -> datetime:
     restime = datetime.now()
     if then < restime:
         restime = datetime.fromtimestamp(
-            rrange(int(then.timestamp()), int(restime.timestamp()))
+            random.uniform(int(then.timestamp()), int(restime.timestamp()))
         )
     return restime
 
 
 # time_since_days_ago returns a date between (now - days_ago) and now
 def time_since_days_ago(days_ago: int) -> datetime:
-    return datetime.now() - timedelta(days=rrange(0, days_ago))
+    return datetime.now() - timedelta(days=random.uniform(0, days_ago))
 
 
 def insert_json(db: pymongo.MongoClient, filename: str) -> None:
