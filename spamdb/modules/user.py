@@ -2,7 +2,7 @@ import bson
 import base64
 import pymongo
 import random
-import datetime
+from datetime import datetime
 from modules.datasrc import gen
 from modules.event import evt
 import modules.perf as perf
@@ -14,7 +14,7 @@ def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
-    relations: list[Relation] = []
+    #TODO relations: list[Relation] = [] 
     history: list[History] = []
 
     for uid in gen.uids:
@@ -69,7 +69,6 @@ class User:
         self.roles = ["ROLE_VERIFIED"]
         self.roles.extend(roles)
         self.marks = marks
-        self.kid = util.chance(0.05)
         if util.chance(0.1):
             self.title = random.choice(_titles)
         self.plan = {
@@ -101,9 +100,7 @@ class User:
                 total_games, len(perf.types), 0
             )
 
-            for [index, perf_name, draw_ratio], num_games in zip(
-                perf.types, perf_games
-            ):
+            for [index, perf_name, draw_ratio], num_games in zip(perf.types, perf_games):
                 if num_games == 0:
                     continue
                 p = perf.Perf(self._id, index, num_games, draw_ratio, rating)
@@ -166,6 +163,8 @@ class User:
         users.append(User("alt", ["alt"], [], False))
         users.append(User("boost", ["boost"], [], False))
         users.append(User("engine", ["engine"], [], False))
+        users.append(User("coach", [], ["ROLE_COACH"], False))
+        users.append(User("teacher", [], ["ROLE_TEACHER"], False))
         users.append(User("kid", [], ["ROLE_VERIFIED"], False))
         users[-1].kid = True
         users.append(User("unverified", [], [], False))
@@ -189,6 +188,7 @@ class Pref:
         self.bg = gen.user_bg_mode
         if self.bg == 400:
             self.bgImg = gen.random_image_link()
+        self.agreement = 2
 
         # can't imagine there's anything here that would be useful for testing since it's quick to
         # modify prefs directly
@@ -207,7 +207,7 @@ class History:
             )  # used to be sooo much better/worse!
 
             self.__dict__[name] = {}
-            days: int = (datetime.datetime.now() - u.createdAt).days
+            days: int = (datetime.now() - u.createdAt).days
             for x in range(0, days, util.rrange(2, 10)):
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
                 self.__dict__[name][str(x)] = util.rrange(

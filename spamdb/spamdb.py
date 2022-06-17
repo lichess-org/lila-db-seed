@@ -19,7 +19,6 @@ def main():
     if args.teams > -1:
         gen.set_num_teams(args.teams)
     gen.user_bg_mode = args.user_bg
-    gen.set_base_url(args.base_url)
     with _MongoContextMgr(args.uri) as db:
 
         _do_drops(db, args.drop)
@@ -95,15 +94,6 @@ def _get_args() -> argparse.Namespace:
             "mongodb://127.0.0.1/lichess)"
         ),
         default="mongodb://127.0.0.1/lichess",
-    )
-    parser.add_argument(
-        "--base-url",
-        type=str,
-        help=(
-            "scheme and domain of generated urls.  same as net.base_url in "
-            "lila conf.  (default: http://localhost:9663)"
-        ),
-        default="http://localhost:9663",
     )
     parser.add_argument(
         "-u",
