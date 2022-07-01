@@ -1,5 +1,6 @@
 import random
 import os
+import subprocess
 import base64
 import bson
 import modules.util as util
@@ -8,17 +9,16 @@ from datetime import datetime
 # filenames used in DataSrc.__init__ are REQUIRED to be in <spamdb-path>/data
 class DataSrc:
     def __init__(self):
-        self.data_path: str = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "data"
-        )
-        self.uids: list[str] = self._read_strings("uids.txt")
+        parent_path = os.path.dirname(os.path.dirname(__file__))
+        self.data_path: str = os.path.join(parent_path, "data")
+        self.uids: list[str] = []
+        self.custom_pwds: dict[str, str] = {}
+        self._read_users()
         self.countries: list[str] = self._read_strings("countries.txt")
-        self.teams: list[str] = self._read_strings("teams.txt", "\n")
-        self.categs: list[str] = self._read_strings("categs.txt", "\n")
-        self.topics: list[str] = self._read_strings("topics.txt", "\n")
-        self.paragraphs: list[str] = self._read_strings(
-            "paragraphs.txt", "\n\n"
-        )
+        self.teams: list[str] = self._read_strings("teams.txt")
+        self.categs: list[str] = self._read_strings("categs.txt")
+        self.topics: list[str] = self._read_strings("topics.txt")
+        self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
         self.social_media_links: list[str] = self._read_strings(
             "social_media_links.txt"
         )
@@ -26,20 +26,19 @@ class DataSrc:
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
-        self.bullshit_mode_games: list[str] = self._read_strings(
-            "games.txt", "\n"
-        )
         self.seeds = dict[str, int]()
         self.dump_dir: str = None
         self.bson_mode: bool = True
         self.user_bg_mode: int = 200
         self.fide_map: dict[str, int] = {}
+        self.default_password = "password"
+        self.lila_crypt_path = os.path.join(
+            os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
+        )
 
     def set_num_uids(self, num_uids: int) -> None:
         if num_uids < 2:
-            raise ValueError(
-                f"Cannot make db with less than 2 users because reasons."
-            )
+            num_uids = 2  # can't have less than 2 normal users because reasons
         self.uids = self._genN(num_uids, self.uids, "user")
 
     def set_num_teams(self, num_teams: int) -> None:
@@ -53,10 +52,26 @@ class DataSrc:
         self.dump_dir = dir
         self.bson_mode = True
 
-    def set_base_url(self, base_url: str) -> None:  # remove trailing slash
-        self.base_url = (
-            base_url if not base_url.endswith("/") else base_url[:-1]
-        )
+    # it takes a while to make unique salt for each user, launching java each time.
+    # but if a dev is overriding password, they probably care about security.
+    # could make this orders of magnitude faster by just sending all the
+    # passwords to the jar in a batch (only invoking it once), but how often does one
+    # create a new db with this.  If you don't want to wait, leave it at "password"
+    def get_password_hash(self, uid: str) -> bytes:
+        password = self.custom_pwds.get(uid, self.default_password)
+        if password == "password":  # who cares about unique salt then?
+            return base64.b64decode(
+                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
+            )
+        print(".", sep="", end="", flush=True)
+        result = subprocess.run(
+            ["java", "-jar", self.lila_crypt_path],
+            stdout=subprocess.PIPE,
+            input=password.encode("utf-8"),
+        ).stdout
+        if result[0] != 68 or result[1] != 68:
+            raise Exception(f"bad output from {self.lila_crypt_path}")
+        return result[2:]
 
     def random_uid(self) -> str:
         return random.choice(self.uids)
@@ -99,13 +114,38 @@ class DataSrc:
             next_num = next_num + 1
         return new_list[0:num]
 
-    def _read_strings(self, name: str, sep: str = None) -> list[str]:
+    def _read_strings(self, name: str) -> list[str]:
         with open(os.path.join(self.data_path, name), "r") as f:
-            return [s for s in f.read().split(sep) if s != ""]
+            return [
+                s.strip()
+                for s in f.read().splitlines()
+                if s and not s.lstrip().startswith("#")
+            ]
 
     def _read_bson(self, filename: str) -> list[dict]:
         with open(os.path.join(self.data_path, filename), "rb") as f:
             return bson.decode_all(f.read())
+
+    _special_users: list[str] = [
+        "lichess",
+        "admin",
+        "shusher",
+        "hunter",
+        "puzzler",
+        "api",
+    ]
+
+    def _read_users(self) -> None:
+        with open(os.path.join(self.data_path, "uids.txt"), "r") as f:
+            for line in f.read().splitlines():
+                if line.lstrip().startswith("#"):
+                    continue
+                bits = line.strip().split("/", 1)
+                uid = bits[0].lower()
+                if uid not in self._special_users:
+                    self.uids.append(uid)
+                if len(bits) == 2:
+                    self.custom_pwds[uid] = bits[1]
 
 
 gen = DataSrc()  # used by other modules

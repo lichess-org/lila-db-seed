@@ -1,3 +1,18 @@
+# passwords in this file will override the command line parameter.
+# anything following the / is considered part of the password until
+# the first white space.
+#
+# you can specify stronger passwords for the 7 priveleged users here.  
+
+lichess/password
+admin/password
+shusher/password
+hunter/password
+puzzler/password
+api/password
+
+li
+ana
 yaroslava
 yevgeny
 iryna
@@ -33,8 +48,6 @@ guang
 nushi
 mohammed
 jose
-li
-ana
 luis
 mary
 hui

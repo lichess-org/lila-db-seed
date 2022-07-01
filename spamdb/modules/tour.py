@@ -69,7 +69,7 @@ class Tournament:
         self.clock = {"limit": 30, "increment": 0}
         self.minutes = random.choice([20, 30, 40, 60, 90, 120])
         self.schedule = {"freq": freq, "speed": speed}
-        self.nbPlayers = util.rrange(4, 32)
+        self.nbPlayers = min(len(gen.uids), util.rrange(4, 32))
         self.createdAt = util.time_since_days_ago(365)
         self.startsAt = util.time_shortly_after(self.createdAt)
         # self.featured
