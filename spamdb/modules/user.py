@@ -2,6 +2,7 @@ import bson
 import base64
 import pymongo
 import random
+from sys import stdout
 from datetime import datetime
 from modules.datasrc import gen
 from modules.event import evt
@@ -10,11 +11,12 @@ import modules.util as util
 
 
 def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
+    print("Mining bitcoin", sep="", end="", flush=True)  # hash progress
 
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
-    #TODO relations: list[Relation] = [] 
+    # TODO relations: list[Relation] = []
     history: list[History] = []
 
     for uid in gen.uids:
@@ -30,6 +32,7 @@ def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
         for f in random.sample(gen.uids, int(follow_factor * len(gen.uids))):
             evt.follow(u._id, util.time_since(u.createdAt), f)
 
+    print()
     util.bulk_write(db.pref, [Pref(u._id) for u in users])
     util.bulk_write(db.user4, users)
     util.bulk_write(db.ranking, rankings)
@@ -56,17 +59,13 @@ class User:
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
         self.email = f"lichess.waste.basket+{name}@gmail.com"
-        self.bpass = bson.binary.Binary(
-            base64.b64decode(
-                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
-            )
-        )
+        self.bpass = bson.binary.Binary(gen.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago(365)
         self.seenAt = util.time_since(self.createdAt)
         self.lang = "en-US"
         self.time = {"total": util.rrange(10000, 20000), "tv": 0}
-        self.roles = ["ROLE_VERIFIED"]
+        self.roles = []
         self.roles.extend(roles)
         self.marks = marks
         if util.chance(0.1):
@@ -100,7 +99,9 @@ class User:
                 total_games, len(perf.types), 0
             )
 
-            for [index, perf_name, draw_ratio], num_games in zip(perf.types, perf_games):
+            for [index, perf_name, draw_ratio], num_games in zip(
+                perf.types, perf_games
+            ):
                 if num_games == 0:
                     continue
                 p = perf.Perf(self._id, index, num_games, draw_ratio, rating)
@@ -148,32 +149,22 @@ class User:
         users[-1].title = "LM"
         users.append(User("admin", [], ["ROLE_ADMIN"], False))
         users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
-        users.append(User("cheat-hunter", [], ["ROLE_CHEAT_HUNTER"], False))
-        users.append(User("boost-hunter", [], ["ROLE_BOOST_HUNTER"], False))
-        users.append(User("timeout-mod", [], ["ROLE_TIMEOUT_MOD"], False))
-        users.append(
-            User("puzzle-curator", [], ["ROLE_PUZZLE_CURATOR"], False)
-        )
-        users.append(User("irwin", [], ["ROLE_ADMIN"], False))
-        users.append(User("kaladin", [], ["ROLE_ADMIN"], False))
-        users.append(User("api-hog", [], ["ROLE_API_HOG"], False))
+        users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
+        users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
+        users.append(User("api", [], ["ROLE_API_HOG"], False))
         users.append(User("troll", ["troll"], [], False))
-        users.append(User("rank-ban", ["rankban"], [], False))
-        users.append(User("report-ban", ["reportban"], [], False))
+        users.append(User("rankban", ["rankban"], [], False))
+        users.append(User("reportban", ["reportban"], [], False))
         users.append(User("alt", ["alt"], [], False))
         users.append(User("boost", ["boost"], [], False))
         users.append(User("engine", ["engine"], [], False))
         users.append(User("coach", [], ["ROLE_COACH"], False))
         users.append(User("teacher", [], ["ROLE_TEACHER"], False))
-        users.append(User("kid", [], ["ROLE_VERIFIED"], False))
+        users.append(User("kid", [], [], False))
         users[-1].kid = True
-        users.append(User("unverified", [], [], False))
-        users[-1].roles = []
-        users.append(User("bot", [], ["ROLE_VERIFIED"], False))
+        users.append(User("bot", [], [], False))
         users[-1].title = "BOT"
-        users.append(
-            User("wide", [], ["ROLE_VERIFIED"], False)
-        )  # for ui testing
+        users.append(User("wide", [], [], False))
         users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
         users[-1].title = "WGM"
         users[-1].plan["active"] = True  # patron
@@ -184,14 +175,12 @@ class User:
 class Pref:
     def __init__(self, uid: str):
         self._id = uid
-        self.is3d = False
+        self.is3d = False  # completely mandatory
         self.bg = gen.user_bg_mode
-        if self.bg == 400:
-            self.bgImg = gen.random_image_link()
+        self.bgImg = gen.random_image_link()
         self.agreement = 2
-
-        # can't imagine there's anything here that would be useful for testing since it's quick to
-        # modify prefs directly
+        # can't imagine there's anything else here that would be useful for testing
+        # since it's quick to modify prefs directly
 
 
 class History:
@@ -200,7 +189,6 @@ class History:
         if not hasattr(u, "perfs"):
             return
         for (name, perf) in u.perfs.items():
-
             newR = u.perfs[name]["gl"]["r"]
             origR = min(
                 3000, max(400, util.rrange(newR - 500, newR + 500))
@@ -226,6 +214,6 @@ _titles: list[str] = [
     "CM",
     "WCM",
     "WNM",
-    "BOT"
-    # "LM"
+    "BOT",
+    # "LM",
 ]

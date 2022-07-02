@@ -13,41 +13,45 @@ mongorestore dump
 - 3000 games from which the puzzles were made, required by lila to use the puzzles
 - lots of other stuff including users & mods. see below
 
-```
-
-```
-
 ---
 
-# Create your own database:
+# Populate your database:
 
-If you want to customize database size, users, text, forum categories, teams, images, blogs, etc. then use the provided spamdb.py utility (feel free to improve the code). spamdb.py will insert into mongodb directly and can export jsons and bsons. Most of the bsons in dump were generated with spamdb.py. Usage help:
-
-```
-python3 ./spamdb.py --help
-```
-
-python3.9+ and pymongo module are both required. get pymongo with:
+[python3.9+](https://www.python.org/) and the pymongo module are both required. If you don't have python3, use your package manager or the [downloads page](https://www.python.org/downloads/) to install it, then get pip3 and pymongo with command line:
 
 ```
+python -m ensurepip --upgrade
+# NOTE - On windows it might be "py -m ensurepip --upgrade"
 pip3 install pymongo
 ```
 
+The lila-db-seed/spamdb/spamdb.py script can do a few things.  Usage help:
+
+```
+python3 spamdb/spamdb.py --help
+```
+Usually, the script will generate a new set of data from inputs in the provided arguments as well as the spamdb/data directory.  This data will be merged into your running mongodb instance at 127.0.0.1:27071 by default.  To customize connection details use the --uri argument.  Set the password for your users with the --password flag (otherwise they will default to "password").  Set the default background in user prefs with --user-bg (default is dark mode, use 400 for transparency).  For other options see spamdb.py --help.  Add, remove, or modify entries to the various .txt files in the data directory if you want to customize fluffy stuff.  
+
+### Do consider editing uids.txt to give the mod users different passwords than the default if your dev instance will be exposed to others.
+
 ## Special users:
 
-- lichess/password - ROLE_SUPER_ADMIN # lichess mod such power!
-- boost-hunter/password - ROLE_BOOST_HUNTER # mod ui is very robust
-- shusher/password - ROLE_SHUSHER
-- cheat-hunter/password - ROLE_CHEAT_HUNTER
-- troll/password - marked as troll
-- bot/password - marked as bot
-- kid/password - they're just children, how could you checkmate children?
-- wide/password - 20 W's in visible username, WGM title, and a patron. It's the widest possible (for ui testing)
+- lichess - ROLE_SUPER_ADMIN # check out the mod UI if you haven't seen it, very cool!
+- admin - ROLE_ADMIN 
+- shusher - ROLE_SHUSHER
+- cheat-hunter - ROLE_CHEAT_HUNTER
+- timeout-mod - ROLE_TIMEOUT_MOD
+- puzzle-curator - ROLE_PUZZLE_CURATOR
+- api-hog - ROLE_API_HOG   (this guy is useful for api testing, both server and clients)
+- troll - marked as troll
+- bot - marked as bot
+- kid - they're just children, how could you checkmate children?
+- wide - 20 W's in visible username, WGM title, and a patron to test css formatting for extremely wide usernames.
+- and assorted others, student, coach, see spamdb/modules/user.py
 
 ## Normal users:
 
-userids found in users.txt, chosen from international baby names. All accounts created by spamdb.py utilize "password" as their password. The normal users have all the data: the follows, the notifications, the ratings, the game histories, the timelines. You're missing out if you don't take svetlana or marcel for a spin
+The normal users have all the data.  This includes notifications, ratings, follows, game histories, activity, timelines, blogs, forums, teams, tournaments.  Their usernames can be found and customized in data/uids.txt.  Specify user/password to set individual passwords
 
 ## Caveats:
-
-Right now game search doesn't work at all.
+There are no indices for game or forum search yet.  This will be fixed never/soon.
