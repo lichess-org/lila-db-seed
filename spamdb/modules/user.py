@@ -11,8 +11,6 @@ import modules.util as util
 
 
 def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
-    print("Mining bitcoin", sep="", end="", flush=True)  # hash progress
-
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
