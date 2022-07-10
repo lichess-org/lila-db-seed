@@ -1,5 +1,6 @@
 import pymongo
 import random
+import argparse
 from datetime import datetime
 from datetime import timedelta
 from modules.event import evt
@@ -8,8 +9,14 @@ import modules.forum as forum
 import modules.util as util
 
 
-def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
-    if num_blogs < 1:
+def create_blog_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
+    if args.drop == "blog" or args.drop == "all":
+        db.ublog_blog.drop()
+        db.ublog_post.drop()
+
+    if args.blogs < 1 or args.no_create:
         return
 
     ublogs: list = []
@@ -21,7 +28,7 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     categ.hidden = True
 
     for (num_posts, uid) in zip(
-        util.random_partition(num_blogs, len(gen.uids), 0), gen.uids
+        util.random_partition(args.blogs, len(gen.uids), 0), gen.uids
     ):
         if num_posts == 0:
             continue
@@ -58,9 +65,9 @@ def create_blog_colls(db: pymongo.MongoClient, num_blogs: int) -> None:
     util.bulk_write(db.ublog_post, uposts)
 
 
-def drop(db: pymongo.MongoClient) -> None:
-    db.ublog_blog.drop()
-    db.ublog_post.drop()
+# def drop(db: pymongo.MongoClient) -> None:
+#     db.ublog_blog.drop()
+#     db.ublog_post.drop()
 
 
 class UBlog:

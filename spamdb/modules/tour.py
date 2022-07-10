@@ -1,19 +1,26 @@
 import pymongo
 import random
+import argparse
 from datetime import datetime
 import modules.util as util
 from modules.datasrc import gen
 from modules.event import evt
 
 
-#   for each tournament, tracks tournament name, status, clock {limit: secs, increment: secs}
-#   length, number of players, conditions: { nbRatedGame {nb: 20, perf: <perf-type>},
-#   creation date, starts at, winner, schedule: {freq: hourly, speed: rapid/classical },
-#   and an id called "featured" which is a gameId i believe (dangerous to fabricate/map?)
+def create_tour_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
+    if args.tours == 0:
+        return
 
+    if args.drop == "tour" or args.drop == "all":
+        db.tournament2.drop()
+        db.tournament_leaderboard.drop()
+        db.tournament_pairing.drop()
+        db.tournament_player.drop()
+        db.trophy.drop()
 
-def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
-    if num_tours == 0:
+    if args.no_create:
         return
 
     tours: list[Tournament] = []
@@ -22,7 +29,7 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
     leaderboards: list[TournamentLeaderboard] = []
     trophies: list[Trophy] = []
 
-    for _ in range(num_tours):
+    for _ in range(args.tours):
         t = Tournament()
         tours.append(t)
 
@@ -49,14 +56,6 @@ def create_tour_colls(db: pymongo.MongoClient, num_tours: int) -> None:
     util.bulk_write(db.tournament_leaderboard, leaderboards)
     util.bulk_write(db.tournament_pairing, pairings)
     util.bulk_write(db.tournament_player, players)
-
-
-def drop(db: pymongo.MongoClient) -> None:
-    db.tournament2.drop()
-    db.tournament_leaderboard.drop()
-    db.tournament_pairing.drop()
-    db.tournament_player.drop()
-    db.trophy.drop()
 
 
 class Tournament:

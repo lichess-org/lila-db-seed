@@ -1,12 +1,24 @@
 import enum
 import bson
 import pymongo
+import argparse
 from datetime import datetime
 import modules.util as util
 from modules.datasrc import gen
 
 
-def create_event_colls(db: pymongo.MongoClient) -> None:
+def create_event_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
+    if args.drop == "event" or args.drop == "all":
+        print("drop event")
+        db.activity2.drop()
+        db.timeline_entry.drop()
+        db.relation.drop()
+
+    if args.no_create:
+        return
+
     activities: list[dict] = []
     relations: list[Relation] = []
 
@@ -20,13 +32,7 @@ def create_event_colls(db: pymongo.MongoClient) -> None:
     util.bulk_write(db.timeline_entry, evt.timeline)
 
 
-def drop(db: pymongo.MongoClient) -> None:
-    db.activity2.drop()
-    db.timeline_entry.drop()
-    db.relation.drop()
-
-
-# singleton evt, collects activity and timeline collections
+# singleton EventApi, collects activity and timeline entries from other modules
 class EventApi:
     def __init__(self):
         self.relation_map: dict[str, list[str]] = {}

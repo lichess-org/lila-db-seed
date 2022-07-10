@@ -1,14 +1,25 @@
 import pymongo
 import random
+import argparse
 from datetime import datetime
 from modules.event import evt
 from modules.datasrc import gen
 import modules.util as util
 
 
-def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
+def create_forum_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
 
-    if num_posts < 1:
+    if args.drop == "forum" or args.drop == "all":
+        db.f_categ.drop()
+        db.f_topic.drop()
+        db.f_post.drop()
+
+    if args.posts < 1:
+        return
+
+    if args.no_create:
         return
 
     categs: dict[str, Categ] = {}
@@ -22,7 +33,8 @@ def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
 
     for topic_name in gen.topics:
         topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
-    for _ in range(num_posts):
+
+    for _ in range(args.posts):
         p = Post(gen.random_uid())
         posts.append(p)
         t = random.choice(topics)
@@ -36,12 +48,6 @@ def create_forum_colls(db: pymongo.MongoClient, num_posts: int) -> None:
     util.bulk_write(db.f_categ, categs.values())
     util.bulk_write(db.f_topic, topics)
     util.bulk_write(db.f_post, posts)
-
-
-def drop(db: pymongo.MongoClient) -> None:
-    db.f_categ.drop()
-    db.f_topic.drop()
-    db.f_post.drop()
 
 
 class Post:
