@@ -2,12 +2,28 @@ import random
 import bson
 import base64
 import pymongo
+import argparse
 from modules.event import evt
 from modules.datasrc import gen
 import modules.util as util
+from datetime import timedelta
 
 
-def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
+def create_game_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
+
+    if args.drop == "game" or args.drop == "all":
+        db.game5.drop()
+        db.puzzle2_path.drop()
+        db.puzzle2_puzzle.drop()
+        db.crosstable2.drop()
+        db.matchup.drop()
+
+    if args.no_create:
+        return
+
+    num_games = args.games
     if num_games == 0:
         return
     elif num_games < 0:
@@ -19,7 +35,6 @@ def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
     crosstable: dict[str, Result] = {}
 
     for bson_game in gen.games:
-
         us = random.sample(gen.uids, 2)
         g = Game(bson_game, us[0], us[1])
         games.append(g)
@@ -29,23 +44,23 @@ def create_game_colls(db: pymongo.MongoClient, num_games: int) -> None:
         evt.add_game(
             us[1], g.ca, us[0], g.outcome(us[1]), g._id + g.__dict__["is"][4:]
         )
-
         id: str = f"{us[0]}/{us[1]}" if us[0] < us[1] else f"{us[1]}/{us[0]}"
         crosstable.setdefault(id, Result(id)).add_game(g)
+
+    for puz in gen.puzzles:  # increase plays to allow daily puzzles
+        puz["plays"] = util.rrange(3000, 30000)
+
+    for path in gen.puzzle_paths:
+        # breaking min/max ratings, loosen criteria so we get more then 3 puzzles
+        # in puzzle storm.  why only select Good tier puzzles and not Top?
+        path["min"] = path["min"][:-4] + "0000"
+        path["max"] = path["max"][:-4] + "9999"
 
     util.bulk_write(db.game5, games)
     util.bulk_write(db.puzzle2_path, gen.puzzle_paths)
     util.bulk_write(db.puzzle2_puzzle, gen.puzzles)
     util.bulk_write(db.crosstable2, crosstable.values())
     util.bulk_write(db.matchup, crosstable.values())
-
-
-def drop(db: pymongo.MongoClient) -> None:
-    db.game5.drop()
-    db.puzzle2_path.drop()
-    db.puzzle2_puzzle.drop()
-    db.crosstable2.drop()
-    db.matchup.drop()
 
 
 class Game:

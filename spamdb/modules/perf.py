@@ -2,7 +2,6 @@ import random
 import datetime
 import modules.util as util
 
-# should probably be in game.py but it's here because reasons
 types: list[list[int, str, float]] = [
     [0, "ultrabullet", 0.05],
     [1, "bullet", 0.1],

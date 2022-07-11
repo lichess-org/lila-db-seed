@@ -31,10 +31,16 @@ def bulk_write(coll, objs, append=False):
     else:
         ledger = []
         for x in objs:
-            ledger.append(pymongo.DeleteOne({"_id": _dict(x)["_id"]}))
-            ledger.append(pymongo.InsertOne(_dict(x)))
-        res = coll.bulk_write(ledger)
-        print(f"{coll.name}: {res.bulk_api_result}")
+            ledger.append(
+                pymongo.UpdateOne(
+                    {"_id": _dict(x)["_id"]}, {"$set": _dict(x)}, upsert=True
+                )
+            )
+        res = coll.bulk_write(ledger).bulk_api_result
+        print(
+            f"{coll.name}: {{Upserted: {res['nUpserted']}, Matched: "
+            f"{res['nMatched']}, Modified: {res['nModified']}}}"
+        )
 
 
 # return a list of n semi-random ints >= minval which add up to sum

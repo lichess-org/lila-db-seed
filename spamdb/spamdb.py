@@ -27,42 +27,13 @@ def main():
         gen.set_bson_dump_mode(args.dump_bson)
 
     with _MongoContextMgr(args.uri) as db:
-
-        _do_drops(db, args.drop)
-
-        if not args.no_create:
-            user.create_user_colls(db, args.follow)
-            game.create_game_colls(db, int(args.games))
-            tour.create_tour_colls(db, int(args.tours))
-            forum.create_forum_colls(db, int(int(args.posts) / 2))
-            team.create_team_colls(db, int(int(args.posts) / 2))
-            blog.create_blog_colls(db, int(args.blogs))
-            event.create_event_colls(db)
-
-
-def _do_drops(db: pymongo.MongoClient, drop) -> None:
-    if drop == "game":
-        game.drop(db)
-    elif drop == "event":
-        event.drop(db)
-    elif drop == "forum":
-        forum.drop(db)
-    elif drop == "team":
-        team.drop(db)
-    elif drop == "user":
-        user.drop(db)
-    elif drop == "blog":
-        blog.drop(db)
-    elif drop == "tour":
-        tour.drop(db)
-    elif drop == "all":
-        tour.drop(db)
-        game.drop(db)
-        event.drop(db)
-        forum.drop(db)
-        team.drop(db)
-        user.drop(db)
-        blog.drop(db)
+        user.create_user_colls(db, args)  # args.follow)
+        game.create_game_colls(db, args)  # int(args.games))
+        tour.create_tour_colls(db, args)  # int(args.tours))
+        forum.create_forum_colls(db, args)  # int(int(args.posts) / 2))
+        team.create_team_colls(db, args)  # int(int(args.posts) / 2))
+        blog.create_blog_colls(db, args)  # int(args.blogs))
+        event.create_event_colls(db, args)
 
 
 class _MongoContextMgr:
@@ -188,17 +159,17 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument(
         "--drop",
         help=(
-            "drop pre-existing collections prior to any update. see code "
+            "drop pre-existing collections prior to any update. see module code "
             "for specific collections dropped by each choice"
         ),
         choices=[
+            "all",
             "game",
             "event",
             "forum",
             "team",
             "user",
             "blog",
-            "all",
             "tour",
         ],
     )

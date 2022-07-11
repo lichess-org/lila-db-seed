@@ -35,6 +35,11 @@ class DataSrc:
         self.lila_crypt_path = os.path.join(
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
+        self.hash_cache: dict[str, int] = {
+            "password": base64.b64decode(
+                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
+            ),
+        }
 
     def set_num_uids(self, num_uids: int) -> None:
         if num_uids < 2:
@@ -52,18 +57,17 @@ class DataSrc:
         self.dump_dir = dir
         self.bson_mode = True
 
-    # it takes a while to make unique salt for each user, launching java each time.
-    # but if a dev is overriding password, they probably care about security.
-    # could make this orders of magnitude faster by just sending all the
-    # passwords to the jar in a batch (only invoking it once), but how often does one
-    # create a new db with this.  If you don't want to wait, leave it at "password"
+    # used to round trip with unique salt for each user for customized passwords,
+    # but apparently this could take many minutes for just 80'ish users for devs
+    # with slow pcs due to both context switching in the tight loop and bcrypt
+    # rounds.  unique salt really not necessary here so there's no need to batch,
+    # this here should be fast enough.
+
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_pwds.get(uid, self.default_password)
-        if password == "password":  # who cares about unique salt then?
-            return base64.b64decode(
-                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
-            )
-        print(".", sep="", end="", flush=True)
+        if password in self.hash_cache:
+            return self.hash_cache[password]
+
         result = subprocess.run(
             ["java", "-jar", self.lila_crypt_path],
             stdout=subprocess.PIPE,
@@ -71,7 +75,9 @@ class DataSrc:
         ).stdout
         if result[0] != 68 or result[1] != 68:
             raise Exception(f"bad output from {self.lila_crypt_path}")
-        return result[2:]
+        hash = result[2:]
+        self.hash_cache[password] = hash
+        return hash
 
     def random_uid(self) -> str:
         return random.choice(self.uids)

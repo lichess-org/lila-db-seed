@@ -1,14 +1,21 @@
 import pymongo
 import random
+import argparse
 from modules.event import evt
 from modules.datasrc import gen
 import modules.forum as forum
 import modules.util as util
 
 
-def create_team_colls(db: pymongo.MongoClient, total_num_posts: int) -> None:
+def create_team_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
 
-    if len(gen.teams) == 0:
+    if args.drop == "team" or args.drop == "all":
+        db.team.drop()
+        db.team_member.drop()
+
+    if len(gen.teams) == 0 or args.no_create:
         return
 
     categs: list[forum.Categ] = []
@@ -18,7 +25,7 @@ def create_team_colls(db: pymongo.MongoClient, total_num_posts: int) -> None:
     all_members: list[TeamMember] = []
 
     for (team_name, num_team_posts) in zip(
-        gen.teams, util.random_partition(total_num_posts, len(gen.teams))
+        gen.teams, util.random_partition(args.posts, len(gen.teams))
     ):
 
         t = Team(team_name)
@@ -59,16 +66,11 @@ def create_team_colls(db: pymongo.MongoClient, total_num_posts: int) -> None:
                 )
             categs[-1].add_topic(t)
 
-    util.bulk_write(db.f_categ, categs, True)
-    util.bulk_write(db.f_topic, topics, True)
-    util.bulk_write(db.f_post, posts, True)
+    util.bulk_write(db.f_categ, categs, append=True)
+    util.bulk_write(db.f_topic, topics, append=True)
+    util.bulk_write(db.f_post, posts, append=True)
     util.bulk_write(db.team, teams)
     util.bulk_write(db.team_member, all_members)
-
-
-def drop(db: pymongo.MongoClient) -> None:
-    db.team.drop()
-    db.team_member.drop()
 
 
 class TeamMember:

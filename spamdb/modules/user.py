@@ -2,6 +2,7 @@ import bson
 import base64
 import pymongo
 import random
+import argparse
 from sys import stdout
 from datetime import datetime
 from modules.datasrc import gen
@@ -10,12 +11,27 @@ import modules.perf as perf
 import modules.util as util
 
 
-def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
+def create_user_colls(
+    db: pymongo.MongoClient, args: argparse.Namespace
+) -> None:
+
+    if args.drop == "user" or args.drop == "all":
+        db.perf_stat.drop()
+        db.pref.drop()
+        db.ranking.drop()
+        db.history4.drop()
+        db.user4.drop()
+
+    if args.no_create:
+        return
+
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
     # TODO relations: list[Relation] = []
     history: list[History] = []
+
+    follow_factor = args.follow
 
     for uid in gen.uids:
         users.append(User(uid))
@@ -30,20 +46,11 @@ def create_user_colls(db: pymongo.MongoClient, follow_factor: float) -> None:
         for f in random.sample(gen.uids, int(follow_factor * len(gen.uids))):
             evt.follow(u._id, util.time_since(u.createdAt), f)
 
-    print()
     util.bulk_write(db.pref, [Pref(u._id) for u in users])
     util.bulk_write(db.user4, users)
     util.bulk_write(db.ranking, rankings)
     util.bulk_write(db.perf_stat, perfs)
     util.bulk_write(db.history4, history)
-
-
-def drop(db: pymongo.MongoClient) -> None:
-    db.perf_stat.drop()
-    db.pref.drop()
-    db.ranking.drop()
-    db.history4.drop()
-    db.user4.drop()
 
 
 class User:
@@ -135,7 +142,7 @@ class User:
 
     def detach_perfs(
         self,
-    ) -> list[perf.Perf]:  # build perfs here, but they aren't stored in user4
+    ) -> list[perf.Perf]:
         detached_list: list[perf.Perf] = list(self.perfStats.values())
         delattr(self, "perfStats")
         return detached_list
@@ -160,8 +167,9 @@ class User:
         users.append(User("teacher", [], ["ROLE_TEACHER"], False))
         users.append(User("kid", [], [], False))
         users[-1].kid = True
-        users.append(User("bot", [], [], False))
-        users[-1].title = "BOT"
+        for i in range(10):
+            users.append(User(f"bot{i}", [], [], False))
+            users[-1].title = "BOT"
         users.append(User("wide", [], [], False))
         users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
         users[-1].title = "WGM"
@@ -188,9 +196,7 @@ class History:
             return
         for (name, perf) in u.perfs.items():
             newR = u.perfs[name]["gl"]["r"]
-            origR = min(
-                3000, max(400, util.rrange(newR - 500, newR + 500))
-            )  # used to be sooo much better/worse!
+            origR = min(3000, max(400, util.rrange(newR - 500, newR + 500)))
 
             self.__dict__[name] = {}
             days: int = (datetime.now() - u.createdAt).days
