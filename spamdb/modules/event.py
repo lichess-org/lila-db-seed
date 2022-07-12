@@ -4,32 +4,36 @@ import pymongo
 import argparse
 from datetime import datetime
 import modules.util as util
-from modules.datasrc import gen
+from modules.datasrc import env
 
 
-def create_event_colls(
-    db: pymongo.MongoClient, args: argparse.Namespace
-) -> None:
-    if args.drop == "event" or args.drop == "all":
-        print("drop event")
+def update_event_colls() -> None:
+    args = env.args
+    db = env.db
+    do_drop = args.drop == "event" or args.drop == "all"
+
+    if do_drop:
         db.activity2.drop()
         db.timeline_entry.drop()
         db.relation.drop()
 
-    if args.no_create:
+    if args.no_timeline:
         return
 
     activities: list[dict] = []
     relations: list[Relation] = []
 
-    for (days, udicts) in sorted(evt.activity_map.items()):
+    for (days, udicts) in sorted(events.activity_map.items()):
         activities.extend(udicts.values())
-    for uid in evt.relation_map.keys():
-        relations.extend([Relation(uid, f) for f in evt.relation_map[uid]])
+    for uid in events.relation_map.keys():
+        relations.extend([Relation(uid, f) for f in events.relation_map[uid]])
 
-    util.bulk_write(db.relation, relations)
-    util.bulk_write(db.activity2, activities)
-    util.bulk_write(db.timeline_entry, evt.timeline)
+    if args.no_create:
+        return
+
+    util.bulk_write(db.relation, relations, do_drop)
+    util.bulk_write(db.activity2, activities, do_drop)
+    util.bulk_write(db.timeline_entry, events.timeline, do_drop)
 
 
 # singleton EventApi, collects activity and timeline entries from other modules
@@ -73,7 +77,7 @@ class EventApi:
     ) -> None:
         listeners = self.relation_map.get(uid, [])
         if constrain_listeners:
-            listeners = [l for l in listeners if l in set(constrain_listeners)]
+            listeners = list(set(constrain_listeners) & set(listeners))
         self.timeline.append(
             TimelineEntry(time, listeners).forum_post(uid, pid, tid, tname)
         )
@@ -122,7 +126,7 @@ class EventApi:
                 "w": 0,
                 "l": 0,
                 "d": 0,
-                "r": [gen.fide_map[uid], gen.fide_map[uid]],
+                "r": [env.fide_map[uid], env.fide_map[uid]],
             },
         )
         if outcome == self.Outcome.DRAW:
@@ -145,14 +149,14 @@ class EventApi:
         return getattr(activity, key)
 
 
-evt = EventApi()  # used by other modules
+events = EventApi()  # used by other modules
 
 
 class Relation:
     def __init__(self, uid: str, follows: str, friend: bool = True):
-        self._id = f"{uid}/{follows}"
-        self.u1 = uid
-        self.u2 = follows
+        self._id = f"{follows}/{uid}"
+        self.u1 = follows
+        self.u2 = uid
         self.r = friend
 
 

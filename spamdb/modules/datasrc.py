@@ -3,16 +3,18 @@ import os
 import subprocess
 import base64
 import bson
+import argparse
 import modules.util as util
 from datetime import datetime
 
-# filenames used in DataSrc.__init__ are REQUIRED to be in <spamdb-path>/data
+# files used in DataSrc.__init__ are found in spamdb/data folder
 class DataSrc:
     def __init__(self):
+        self.args = None  # will be argparse.Namespace
         parent_path = os.path.dirname(os.path.dirname(__file__))
         self.data_path: str = os.path.join(parent_path, "data")
         self.uids: list[str] = []
-        self.custom_pwds: dict[str, str] = {}
+        self.custom_passwords: dict[str, str] = {}
         self._read_users()
         self.countries: list[str] = self._read_strings("countries.txt")
         self.teams: list[str] = self._read_strings("teams.txt")
@@ -28,7 +30,7 @@ class DataSrc:
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
         self.seeds = dict[str, int]()
         self.dump_dir: str = None
-        self.bson_mode: bool = True
+        self.bson_mode: bool = True  # False means json mode
         self.user_bg_mode: int = 200
         self.fide_map: dict[str, int] = {}
         self.default_password = "password"
@@ -41,30 +43,27 @@ class DataSrc:
             ),
         }
 
-    def set_num_uids(self, num_uids: int) -> None:
-        if num_uids < 2:
-            num_uids = 2  # can't have less than 2 normal users because reasons
-        self.uids = self._genN(num_uids, self.uids, "user")
+    def set_args(self, args: argparse.Namespace):
+        self.args = args
+        self.user_bg_mode = args.user_bg
+        self.default_password = args.password
+        if args.users is not None and args.users > -1:
+            self.uids = self._genN(max(args.users, 2), self.uids, "user")
+        if args.teams is not None and args.teams > -1:
+            self.teams = self._genN(args.teams, self.teams, "team")
+        if args.games is not None and args.games > -1:
+            self.games = self.games[: args.games]
+            # can't have more than 3000 currently
+        if args.dump_bson:
+            self.dump_dir = args.dump_bson
+        elif args.dump_json:
+            self.dump_dir = args.dump_json
+            self.bson_mode = False
 
-    def set_num_teams(self, num_teams: int) -> None:
-        self.teams = self._genN(num_teams, self.teams, "team")
-
-    def set_json_dump_mode(self, dir: str) -> None:
-        self.dump_dir = dir
-        self.bson_mode = False
-
-    def set_bson_dump_mode(self, dir: str) -> None:
-        self.dump_dir = dir
-        self.bson_mode = True
-
-    # used to round trip with unique salt for each user for customized passwords,
-    # but apparently this could take many minutes for just 80'ish users for devs
-    # with slow pcs due to both context switching in the tight loop and bcrypt
-    # rounds.  unique salt really not necessary here so there's no need to batch,
     # this here should be fast enough.
 
     def get_password_hash(self, uid: str) -> bytes:
-        password = self.custom_pwds.get(uid, self.default_password)
+        password = self.custom_passwords.get(uid, self.default_password)
         if password in self.hash_cache:
             return self.hash_cache[password]
 
@@ -108,17 +107,15 @@ class DataSrc:
             "ascii"
         )
 
-    def _genN(self, num: int, ls: list[str], default: str) -> list[str]:
-        if num == 0:
-            return []
-        if not ls:
-            ls = [default]
-        next_num: int = 1
-        new_list: list[str] = ls.copy()
-        while len(new_list) < num:
-            new_list.extend([e + str(next_num) for e in ls])
-            next_num = next_num + 1
-        return new_list[0:num]
+    def _genN(self, n: int, orig_list: list[str], default: str) -> list[str]:
+        if not orig_list:
+            orig_list = [default]
+        next_suffix: int = 1
+        new_list: list[str] = orig_list.copy()
+        while len(new_list) < n:
+            new_list.extend([e + str(next_suffix) for e in orig_list])
+            next_suffix = next_suffix + 1
+        return new_list[0:n]
 
     def _read_strings(self, name: str) -> list[str]:
         with open(os.path.join(self.data_path, name), "r") as f:
@@ -144,14 +141,15 @@ class DataSrc:
     def _read_users(self) -> None:
         with open(os.path.join(self.data_path, "uids.txt"), "r") as f:
             for line in f.read().splitlines():
-                if line.lstrip().startswith("#"):
+                entry = line.strip()
+                if not entry or entry.startswith("#"):
                     continue
-                bits = line.strip().split("/", 1)
-                uid = bits[0].lower()
+                fields = entry.split("/", 1)
+                uid = fields[0].lower().rstrip()
                 if uid not in self._special_users:
                     self.uids.append(uid)
-                if len(bits) == 2:
-                    self.custom_pwds[uid] = bits[1]
+                if len(fields) > 1:
+                    self.custom_passwords[uid] = fields[1].lstrip()
 
 
-gen = DataSrc()  # used by other modules
+env = DataSrc()  # used by other modules
