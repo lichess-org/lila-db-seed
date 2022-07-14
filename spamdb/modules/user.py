@@ -5,52 +5,53 @@ import random
 import argparse
 from sys import stdout
 from datetime import datetime
-from modules.datasrc import gen
-from modules.event import evt
+from modules.datasrc import env
+from modules.event import events
 import modules.perf as perf
 import modules.util as util
 
 
-def create_user_colls(
-    db: pymongo.MongoClient, args: argparse.Namespace
-) -> None:
+def update_user_colls() -> None:
+    args = env.args
+    db = env.db
+    do_drop = args.drop == "user" or args.drop == "all"
 
-    if args.drop == "user" or args.drop == "all":
+    if do_drop:
         db.perf_stat.drop()
         db.pref.drop()
         db.ranking.drop()
         db.history4.drop()
         db.user4.drop()
 
-    if args.no_create:
-        return
-
     users: list[User] = []
     rankings: list[perf.Ranking] = []
     perfs: list[perf.Perf] = []
-    # TODO relations: list[Relation] = []
     history: list[History] = []
 
     follow_factor = args.follow
 
-    for uid in gen.uids:
+    for uid in env.uids:
         users.append(User(uid))
         for stat in users[-1].detach_perfs():
             perfs.append(stat)
             rankings.append(stat.get_ranking())
-        gen.fide_map[uid] = users[-1].profile["fideRating"]
+        env.fide_map[uid] = users[-1].profile["fideRating"]
         history.append(History(users[-1]))
 
-    users.extend(User.create_special_users())
     for u in users:
-        for f in random.sample(gen.uids, int(follow_factor * len(gen.uids))):
-            evt.follow(u._id, util.time_since(u.createdAt), f)
+        for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
+            events.follow(u._id, util.time_since(u.createdAt), f)
 
-    util.bulk_write(db.pref, [Pref(u._id) for u in users])
-    util.bulk_write(db.user4, users)
-    util.bulk_write(db.ranking, rankings)
-    util.bulk_write(db.perf_stat, perfs)
-    util.bulk_write(db.history4, history)
+    users.extend(_create_special_users())
+
+    if args.no_create:
+        return
+
+    util.bulk_write(db.pref, [Pref(u._id) for u in users], do_drop)
+    util.bulk_write(db.user4, users, do_drop)
+    util.bulk_write(db.ranking, rankings, do_drop)
+    util.bulk_write(db.perf_stat, perfs, do_drop)
+    util.bulk_write(db.history4, history, do_drop)
 
 
 class User:
@@ -64,7 +65,7 @@ class User:
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
         self.email = f"lichess.waste.basket+{name}@gmail.com"
-        self.bpass = bson.binary.Binary(gen.get_password_hash(name))
+        self.bpass = bson.binary.Binary(env.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago(365)
         self.seenAt = util.time_since(self.createdAt)
@@ -82,9 +83,9 @@ class User:
         }
         rating = min(3000, max(int(random.normalvariate(1700, 300)), 400))
         self.profile = {
-            "country": gen.random_country(),
+            "country": env.random_country(),
             "location": self.username + " City",
-            "bio": gen.random_paragraph(),
+            "bio": env.random_paragraph(),
             "firstName": self.username,
             "lastName": self.username + "bertson",
             "fideRating": rating,
@@ -93,7 +94,7 @@ class User:
             "rcfRating": util.rrange(rating - 200, rating + 200),
             "cfcRating": util.rrange(rating - 200, rating + 200),
             "dsbRating": util.rrange(rating - 200, rating + 200),
-            "links": "\n".join(gen.random_social_media_links()),
+            "links": "\n".join(env.random_social_media_links()),
         }
         total_games = util.rrange(2000, 10000)
         total_wins = total_losses = total_draws = 0
@@ -147,43 +148,13 @@ class User:
         delattr(self, "perfStats")
         return detached_list
 
-    @staticmethod
-    def create_special_users():
-        users: list[User] = []
-        users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
-        users[-1].title = "LM"
-        users.append(User("admin", [], ["ROLE_ADMIN"], False))
-        users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
-        users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
-        users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
-        users.append(User("api", [], ["ROLE_API_HOG"], False))
-        users.append(User("troll", ["troll"], [], False))
-        users.append(User("rankban", ["rankban"], [], False))
-        users.append(User("reportban", ["reportban"], [], False))
-        users.append(User("alt", ["alt"], [], False))
-        users.append(User("boost", ["boost"], [], False))
-        users.append(User("engine", ["engine"], [], False))
-        users.append(User("coach", [], ["ROLE_COACH"], False))
-        users.append(User("teacher", [], ["ROLE_TEACHER"], False))
-        users.append(User("kid", [], [], False))
-        users[-1].kid = True
-        for i in range(10):
-            users.append(User(f"bot{i}", [], [], False))
-            users[-1].title = "BOT"
-        users.append(User("wide", [], [], False))
-        users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
-        users[-1].title = "WGM"
-        users[-1].plan["active"] = True  # patron
-        users[-1].plan["months"] = 12
-        return users
-
 
 class Pref:
     def __init__(self, uid: str):
         self._id = uid
         self.is3d = False  # completely mandatory
-        self.bg = gen.user_bg_mode
-        self.bgImg = gen.random_image_link()
+        self.bg = env.user_bg_mode
+        self.bgImg = env.random_image_link()
         self.agreement = 2
         # can't imagine there's anything else here that would be useful for testing
         # since it's quick to modify prefs directly
@@ -207,6 +178,36 @@ class History:
                 )
 
 
+def _create_special_users():
+    users: list[User] = []
+    users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
+    users[-1].title = "LM"
+    users.append(User("admin", [], ["ROLE_ADMIN"], False))
+    users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
+    users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
+    users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
+    users.append(User("api", [], ["ROLE_API_HOG"], False))
+    users.append(User("troll", ["troll"], [], False))
+    users.append(User("rankban", ["rankban"], [], False))
+    users.append(User("reportban", ["reportban"], [], False))
+    users.append(User("alt", ["alt"], [], False))
+    users.append(User("boost", ["boost"], [], False))
+    users.append(User("engine", ["engine"], [], False))
+    users.append(User("coach", [], ["ROLE_COACH"], False))
+    users.append(User("teacher", [], ["ROLE_TEACHER"], False))
+    users.append(User("kid", [], [], False))
+    users[-1].kid = True
+    for i in range(10):
+        users.append(User(f"bot{i}", [], [], False))
+        users[-1].title = "BOT"
+    users.append(User("wide", [], [], False))
+    users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
+    users[-1].title = "WGM"
+    users[-1].plan["active"] = True  # patron
+    users[-1].plan["months"] = 12
+    return users
+
+
 _titles: list[str] = [
     "GM",
     "WGM",
@@ -218,6 +219,6 @@ _titles: list[str] = [
     "CM",
     "WCM",
     "WNM",
-    "BOT",
+    # "BOT",
     # "LM",
 ]

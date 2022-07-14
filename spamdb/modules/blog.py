@@ -3,20 +3,22 @@ import random
 import argparse
 from datetime import datetime
 from datetime import timedelta
-from modules.event import evt
-from modules.datasrc import gen
+from modules.event import events
+from modules.datasrc import env
 import modules.forum as forum
 import modules.util as util
 
 
-def create_blog_colls(
-    db: pymongo.MongoClient, args: argparse.Namespace
-) -> None:
-    if args.drop == "blog" or args.drop == "all":
+def update_blog_colls() -> None:
+    args = env.args
+    db = env.db
+    do_drop = args.drop == "blog" or args.drop == "all"
+
+    if do_drop:
         db.ublog_blog.drop()
         db.ublog_post.drop()
 
-    if args.blogs < 1 or args.no_create:
+    if args.blogs < 1:
         return
 
     ublogs: list = []
@@ -28,7 +30,7 @@ def create_blog_colls(
     categ.hidden = True
 
     for (num_posts, uid) in zip(
-        util.random_partition(args.blogs, len(gen.uids), 0), gen.uids
+        util.random_partition(args.blogs, len(env.uids), 0), env.uids
     ):
         if num_posts == 0:
             continue
@@ -50,24 +52,24 @@ def create_blog_colls(
             ftopics.append(ft)
 
             for _ in range(util.rrange(2, 8)):
-                fp = forum.Post(gen.random_uid())
+                fp = forum.Post(env.random_uid())
                 fposts.append(fp)
                 ft.correlate_post(fp)
-                evt.add_post(fp.userId, fp.createdAt, fp._id, ft._id, ft.name)
+                events.add_post(
+                    fp.userId, fp.createdAt, fp._id, ft._id, ft.name
+                )
 
         for ft in ftopics:
             categ.add_topic(ft)
 
-    util.bulk_write(db.f_categ, [categ], True)
-    util.bulk_write(db.f_topic, ftopics, True)
-    util.bulk_write(db.f_post, fposts, True)
-    util.bulk_write(db.ublog_blog, ublogs)
-    util.bulk_write(db.ublog_post, uposts)
+    if args.no_create:
+        return
 
-
-# def drop(db: pymongo.MongoClient) -> None:
-#     db.ublog_blog.drop()
-#     db.ublog_post.drop()
+    util.bulk_write(db.f_categ, [categ], do_drop, True)
+    util.bulk_write(db.f_topic, ftopics, do_drop, True)
+    util.bulk_write(db.f_post, fposts, do_drop, True)
+    util.bulk_write(db.ublog_blog, ublogs, do_drop)
+    util.bulk_write(db.ublog_post, uposts, do_drop)
 
 
 class UBlog:
@@ -78,14 +80,14 @@ class UBlog:
 
 class UBlogPost:
     def __init__(self, uid: str):
-        self._id = gen.next_id(UBlogPost)
+        self._id = env.next_id(UBlogPost)
         self.blog = f"user:{uid}"
-        self.title = gen.random_topic()
-        self.intro = gen.random_topic()
+        self.title = env.random_topic()
+        self.intro = env.random_topic()
         self.markdown = (
-            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}\n"
-            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}\n"
-            f"![image]({gen.random_image_link()})\n{gen.random_paragraph()}"
+            f"![image]({env.random_image_link()})\n{env.random_paragraph()}\n"
+            f"![image]({env.random_image_link()})\n{env.random_paragraph()}\n"
+            f"![image]({env.random_image_link()})\n{env.random_paragraph()}"
         )
         self.language = "en-US"
         self.live = True
@@ -96,8 +98,8 @@ class UBlogPost:
         self.updated = self.created
         self.rank = self.created["at"] - timedelta(days=30)  # wtf is this?
         self.views = util.rrange(10, 100)
-        self.likes = util.rrange(0, len(gen.uids))
-        self.likers = random.sample(gen.uids, self.likes)
+        self.likes = util.rrange(0, len(env.uids))
+        self.likers = random.sample(env.uids, self.likes)
 
 
 _blog_topics: list[str] = [

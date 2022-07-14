@@ -1,17 +1,18 @@
 import pymongo
 import random
 import argparse
-from datetime import datetime
-from modules.event import evt
-from modules.datasrc import gen
+from datetime import datetime, timedelta
+from modules.event import events
+from modules.datasrc import env
 import modules.util as util
 
 
-def create_forum_colls(
-    db: pymongo.MongoClient, args: argparse.Namespace
-) -> None:
+def update_forum_colls() -> None:
+    args = env.args
+    db = env.db
+    do_drop = args.drop == "forum" or args.drop == "all"
 
-    if args.drop == "forum" or args.drop == "all":
+    if do_drop:
         db.f_categ.drop()
         db.f_topic.drop()
         db.f_post.drop()
@@ -19,41 +20,41 @@ def create_forum_colls(
     if args.posts < 1:
         return
 
-    if args.no_create:
-        return
-
     categs: dict[str, Categ] = {}
     topics: list[Topic] = []
     posts: list[Post] = []
     emptyCategs: list[Categ] = []
 
-    for cat_name in gen.categs:
+    for cat_name in env.categs:
         categ = Categ(cat_name)
         categs[categ._id] = categ
 
-    for topic_name in gen.topics:
+    for topic_name in env.topics:
         topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
 
     for _ in range(args.posts):
-        p = Post(gen.random_uid())
+        p = Post(env.random_uid())
         posts.append(p)
         t = random.choice(topics)
         t.correlate_post(p)
-        evt.add_post(p.userId, p.createdAt, p._id, t._id, t.name)
+        events.add_post(p.userId, p.createdAt, p._id, t._id, t.name)
 
     for t in topics:
         if hasattr(t, "lastPostId"):
             categs[t.categId].add_topic(t)
 
-    util.bulk_write(db.f_categ, categs.values())
-    util.bulk_write(db.f_topic, topics)
-    util.bulk_write(db.f_post, posts)
+    if args.no_create:
+        return
+
+    util.bulk_write(db.f_categ, categs.values(), do_drop)
+    util.bulk_write(db.f_topic, topics, do_drop)
+    util.bulk_write(db.f_post, posts, do_drop)
 
 
 class Post:
     def __init__(self, uid: str):
-        self._id = gen.next_id(Post)
-        self.text = gen.random_paragraph()
+        self._id = env.next_id(Post)
+        self.text = env.random_paragraph()
         self.troll = False
         self.hidden = False
         self.createdAt = datetime.now()
@@ -62,17 +63,17 @@ class Post:
 
 class Topic:
     def __init__(self, name: str, categ_id: str):
-        self._id = gen.next_id(Topic)
+        self._id = env.next_id(Topic)
         self.name = name
         self.slug = util.normalize_id(name)
         self.categId = categ_id
-        self.createdAt = util.time_since_days_ago(180)
+        self.createdAt = util.time_since_days_ago(180) - timedelta(days=2)
         self.updatedAt = self.updatedAtTroll = self.createdAt
         self.nbPosts = self.nbPostsTroll = 0
         self.troll = False
         self.hidden = False
         self.closed = util.chance(0.1)
-        self.userId = gen.random_uid()
+        self.userId = env.random_uid()
 
     # keep the refs and sequencing fields consistent
     def correlate_post(self, p: Post):
@@ -90,7 +91,7 @@ class Categ:
     def __init__(self, name: str, team: bool = False):
         self._id = ("team-" if team else "") + util.normalize_id(name)
         self.name = name
-        self.desc = gen.random_topic()
+        self.desc = env.random_topic()
         self.nbTopics = 0
         self.nbPosts = 0
         self.nbTopicsTroll = 0

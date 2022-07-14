@@ -4,43 +4,43 @@ import os
 import random
 import json
 import bson
-from datetime import timedelta
-from datetime import datetime
-from modules.datasrc import gen
+from datetime import timedelta, datetime
+from modules.datasrc import env
 
 
-def bulk_write(coll, objs, append=False):
-    # append parameter is used during bson/json export
+def bulk_write(
+    coll: pymongo.collection.Collection,
+    objs: list,
+    did_drop: bool,
+    append: bool = False,
+) -> None:
+    # append parameter is for bson/json export to forum collections
     if len(objs) < 1:
         return
-    if gen.dump_dir != None:
-        if not os.path.isdir(gen.dump_dir):
-            os.makedirs(gen.dump_dir, exist_ok=True)
-        if not os.path.isdir(gen.dump_dir):
-            raise FileNotFoundError(gen.dump_dir)
-        ext: str = "bson" if gen.bson_mode else "json"
-        outpath: str = os.path.join(gen.dump_dir, f"{coll.name}.{ext}")
-        openmode = ("a" if append else "w") + ("b" if gen.bson_mode else "")
+    if env.dump_dir == None:
+        # database mode
+        ledger = []
+        for o in objs:
+            ledger.append(_inupsert(_dict(o), did_drop))
+        res = coll.bulk_write(ledger).bulk_api_result
+
+        print(_report(coll.name, res, did_drop))
+    else:
+        # export mode
+        if not os.path.isdir(env.dump_dir):
+            os.makedirs(env.dump_dir, exist_ok=True)
+        if not os.path.isdir(env.dump_dir):
+            raise FileNotFoundError(env.dump_dir)
+        ext: str = "bson" if env.bson_mode else "json"
+        outpath: str = os.path.join(env.dump_dir, f"{coll.name}.{ext}")
+        openmode = ("a" if append else "w") + ("b" if env.bson_mode else "")
         with open(outpath, openmode) as f:
             for o in objs:
-                if gen.bson_mode:
+                if env.bson_mode:
                     f.write(bson.encode(_dict(o)))
                 else:
                     f.write(json.dumps(_dict(o), default=str, indent=4))
-        print(f"Collection {coll.name}: dumped to {outpath}")
-    else:
-        ledger = []
-        for x in objs:
-            ledger.append(
-                pymongo.UpdateOne(
-                    {"_id": _dict(x)["_id"]}, {"$set": _dict(x)}, upsert=True
-                )
-            )
-        res = coll.bulk_write(ledger).bulk_api_result
-        print(
-            f"{coll.name}: {{Upserted: {res['nUpserted']}, Matched: "
-            f"{res['nMatched']}, Modified: {res['nModified']}}}"
-        )
+        print(f"{coll.name} dumped to {outpath}")
 
 
 # return a list of n semi-random ints >= minval which add up to sum
@@ -88,10 +88,10 @@ def days_since_genesis(then: datetime = datetime.now()) -> int:
     return (then - datetime(2010, 1, 1, 0, 0, 0)).days
 
 
-# time_shortly_after provides a date between then and (then + 4 hrs)
+# time_shortly_after provides a date between then and (then + 1 hr)
 def time_shortly_after(then: datetime) -> datetime:
     mintime = int(then.timestamp())
-    maxtime = int(min(datetime.now().timestamp(), mintime + 14400))
+    maxtime = int(min(datetime.now().timestamp(), mintime + 3600))
     return datetime.fromtimestamp(
         rrange(mintime, maxtime if maxtime > mintime else mintime + 20)
     )
@@ -118,5 +118,28 @@ def insert_json(db: pymongo.MongoClient, filename: str) -> None:
             bulk_write(db[collName], objList)
 
 
+def _inupsert(o: object, do_drop: bool) -> object:
+    if do_drop:
+        return pymongo.InsertOne(o)
+    else:
+        return pymongo.UpdateOne({"_id": o["_id"]}, {"$set": o}, upsert=True)
+
+
 def _dict(o: object) -> dict:
     return o.__dict__ if hasattr(o, "__dict__") else o
+
+
+def _report(
+    coll: str, res: pymongo.results.BulkWriteResult, did_drop: bool
+) -> str:
+    report = f"{coll}: {{"
+    if did_drop:
+        report += f"Inserted: {res['nInserted']}"
+    else:
+        report += (
+            f"Upserted: {res['nUpserted']}, Matched: {res['nMatched']}, "
+            f"Modified: {res['nModified']}"
+        )
+    if res["writeErrors"]:
+        report += f", Errors: {res['writeErrors']}"
+    return report + "}"
