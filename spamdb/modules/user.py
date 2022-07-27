@@ -156,8 +156,7 @@ class Pref:
         self.bg = env.user_bg_mode
         self.bgImg = env.random_image_link()
         self.agreement = 2
-        # can't imagine there's anything else here that would be useful for testing
-        # since it's quick to modify prefs directly
+        self.submitMove = 0
 
 
 class History:
