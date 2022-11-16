@@ -71,7 +71,7 @@ class Game:
         self.ua = util.time_shortly_after(self.ca)
         self.so = game["so"]
         self.hp = bson.binary.Binary(game["hp"])
-        self.an = game["an"]
+        self.an = False
         if "c" in game:
             self.c = bson.binary.Binary(game["c"])
         if "cw" in game:
