@@ -3,7 +3,7 @@ import random
 import argparse
 from datetime import datetime
 import modules.util as util
-from modules.datasrc import env
+from modules.seed import env
 from modules.event import events
 
 

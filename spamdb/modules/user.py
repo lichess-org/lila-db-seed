@@ -5,7 +5,7 @@ import random
 import argparse
 from sys import stdout
 from datetime import datetime
-from modules.datasrc import env
+from modules.seed import env
 from modules.event import events
 import modules.perf as perf
 import modules.util as util

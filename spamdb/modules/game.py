@@ -4,7 +4,7 @@ import base64
 import pymongo
 import argparse
 from modules.event import events
-from modules.datasrc import env
+from modules.seed import env
 import modules.util as util
 from datetime import timedelta
 

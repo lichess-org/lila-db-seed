@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime
 from datetime import timedelta
 from modules.event import events
-from modules.datasrc import env
+from modules.seed import env
 import modules.forum as forum
 import modules.util as util
 
