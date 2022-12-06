@@ -5,7 +5,7 @@ import random
 import argparse
 from sys import stdout
 from datetime import datetime
-from modules.datasrc import env
+from modules.seed import env
 from modules.event import events
 import modules.perf as perf
 import modules.util as util
@@ -156,8 +156,7 @@ class Pref:
         self.bg = env.user_bg_mode
         self.bgImg = env.random_image_link()
         self.agreement = 2
-        # can't imagine there's anything else here that would be useful for testing
-        # since it's quick to modify prefs directly
+        self.submitMove = 0
 
 
 class History:

@@ -8,7 +8,7 @@ import modules.blog as blog
 import modules.game as game
 import modules.team as team
 import modules.tour as tour
-from modules.datasrc import env
+from modules.seed import env
 
 
 def main():
@@ -43,12 +43,10 @@ class _MongoContextMgr:
 def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="""
-            seed lila database with all kinds of spam. using the --drop all
-            argument will speed up database creation.  it is highly recommended
-            to at least use --drop event on modify runs as event collections
-            don't match on upserts, causing them to accumulate. this would be
-            default behavior if I was the sort to drop your database collections
-            without asking in a script
+            seed lila database with all kinds of spam. using the '--drop all'
+            argument will speed up database creation.  consider using '--drop event'
+            on modify runs as event collections don't match on upserts, causing
+            zombie objects to accumulate.
         """
     )
     parser.add_argument(
@@ -100,8 +98,8 @@ def _get_args() -> argparse.Namespace:
         "--posts",
         type=int,
         help="""
-            approximate number of POSTS generated for both teams and regular
-            forums (default: 4000)
+            approximate number of POSTS generated for teams and regular forums
+            (default: 4000)
         """,
         default=4000,
     )
@@ -115,6 +113,15 @@ def _get_args() -> argparse.Namespace:
         "--teams",
         type=int,
         help="(default: # of items in teams.txt)",
+    )
+    parser.add_argument(
+        "--membership",
+        type=float,
+        default=0.25,
+        help="""
+            team membership ratio to total users from 0 (empty aside from leaders)
+            to 1 (each team contains all users) (default: .25)
+        """,
     )
     parser.add_argument(
         "--tours",
@@ -143,7 +150,7 @@ def _get_args() -> argparse.Namespace:
         "-n",
         action="store_true",
         help="""
-            timeline entries are constructed with unique object ids from the
+            timeline entries are constructed with unique object ids from pymongo's
             bson module. their ids will not match on subsequent spamdb upserts
             and therefore they keep accumulating until you --drop event or
             --drop all. if you do not wish to drop, you may also prevent entries

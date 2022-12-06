@@ -2,7 +2,7 @@ import pymongo
 import random
 import argparse
 from modules.event import events
-from modules.datasrc import env
+from modules.seed import env
 import modules.forum as forum
 import modules.util as util
 
@@ -30,7 +30,7 @@ def update_team_colls() -> None:
         events.add_team(t.createdBy, t.createdAt, t._id, t.name)
         categs.append(forum.Categ(team_name, True))
 
-        team_members = t.create_members()
+        team_members = t.create_members(args.membership)
         for m in team_members:
             if m.user != t.createdBy:
                 events.join_team(
@@ -96,9 +96,9 @@ class Team:
         self.chat = 20  # of course chat and forum are equal to 20.
         self.forum = 20  # wtf else would they possibly be??
 
-    def create_members(self) -> list[TeamMember]:
+    def create_members(self, membership: float) -> list[TeamMember]:
         users: set[str] = set(self.leaders).union(
-            random.sample(env.uids, util.rrange(2, int(len(env.uids) / 4)))
+            random.sample(env.uids, int(len(env.uids) * membership))
         )
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]

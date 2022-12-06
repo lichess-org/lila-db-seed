@@ -5,7 +5,7 @@ import random
 import json
 import bson
 from datetime import timedelta, datetime
-from modules.datasrc import env
+from modules.seed import env
 
 
 def bulk_write(

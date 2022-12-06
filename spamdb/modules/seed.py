@@ -7,8 +7,8 @@ import argparse
 import modules.util as util
 from datetime import datetime
 
-# files used in DataSrc.__init__ are found in spamdb/data folder
-class DataSrc:
+# files used in seed.__init__ are found in spamdb/data folder
+class Seed:
     def __init__(self):
         self.args = None  # will be argparse.Namespace
         parent_path = os.path.dirname(os.path.dirname(__file__))
@@ -152,4 +152,4 @@ class DataSrc:
                     self.custom_passwords[uid] = fields[1].lstrip()
 
 
-env = DataSrc()  # used by other modules
+env = Seed()  # used by other modules
