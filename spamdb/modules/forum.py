@@ -10,9 +10,8 @@ import modules.util as util
 def update_forum_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "forum" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.f_categ.drop()
         db.f_topic.drop()
         db.f_post.drop()
@@ -46,9 +45,9 @@ def update_forum_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.f_categ, categs.values(), do_drop)
-    util.bulk_write(db.f_topic, topics, do_drop)
-    util.bulk_write(db.f_post, posts, do_drop)
+    util.bulk_write(db.f_categ, categs.values())
+    util.bulk_write(db.f_topic, topics)
+    util.bulk_write(db.f_post, posts)
 
 
 class Post:

@@ -21,16 +21,15 @@ mongorestore dump
 
 ```
 python -m ensurepip --upgrade
-# NOTE - On windows it might be "py -m ensurepip --upgrade"
 pip3 install pymongo
 ```
 
-The lila-db-seed/spamdb/spamdb.py script can do a few things.  Usage help:
+The lila-db-seed/spamdb/spamdb.py script will generate semi-realistic dummy data that is useful for testing and makes your dev instance a lot more colorful.  Usage help:
 
 ```
-python3 spamdb/spamdb.py --help
+spamdb/spamdb.py --help
 ```
-Usually, the script will generate a new set of data from inputs in the provided arguments as well as the spamdb/data directory.  This data will be merged into your running mongodb instance at 127.0.0.1:27071 by default.  To customize connection details use the --uri argument.  Set the password for your users with the --password flag (otherwise they will default to "password").  Set the default background in user prefs with --user-bg (default is dark mode, use 400 for transparency).  For other options see spamdb.py --help.  Add, remove, or modify entries to the various .txt files in the data directory if you want to customize fluffy stuff.  
+Usually, the script will generate a new set of data from inputs in the provided arguments as well as the spamdb/data directory.  This data will be merged into your running mongodb instance at 127.0.0.1:27071 by default.  To customize connection details use the --uri argument.  Set the password for your users with the --password flag (otherwise they will default to "password").  Set the default background in user prefs with --user-bg (default is dark mode, use 400 for transparency).  For other options see spamdb.py --help.  Add, remove, or modify entries to the various .txt files in the data directory if you want to customize text.  
 
 ### Do consider editing uids.txt to give the mod users different passwords than the default if your dev instance will be exposed to others.
 
@@ -39,19 +38,18 @@ Usually, the script will generate a new set of data from inputs in the provided 
 - lichess - ROLE_SUPER_ADMIN # check out the mod UI if you haven't seen it, very cool!
 - admin - ROLE_ADMIN 
 - shusher - ROLE_SHUSHER
-- cheat-hunter - ROLE_CHEAT_HUNTER
-- timeout-mod - ROLE_TIMEOUT_MOD
-- puzzle-curator - ROLE_PUZZLE_CURATOR
-- api-hog - ROLE_API_HOG   (this guy is useful for api testing, both server and clients)
+- hunter - ROLE_CHEAT_HUNTER
+- puzzler - ROLE_PUZZLE_CURATOR
+- api - ROLE_API_HOG   (this guy is useful for api testing, both server and clients)
 - troll - marked as troll
-- bot - marked as bot
+- bot0 thru bot9 - marked as bot
 - kid - they're just children, how could you checkmate children?
-- wide - 20 W's in visible username, WGM title, and a patron to test css formatting for extremely wide usernames.
-- and assorted others, student, coach, see spamdb/modules/user.py
+- wide - 20 W's in visible username, WGM title, and a patron to test ui for extremely wide usernames.
+- and assorted others, see spamdb/modules/user.py for the full list
 
 ## Normal users:
 
-The normal users have all the data.  This includes notifications, ratings, follows, game histories, activity, timelines, blogs, forums, teams, tournaments.  Their usernames can be found and customized in data/uids.txt.  Specify user/password to set individual passwords
+The normal users have all the data.  This includes notifications, ratings, follows, game histories, activity, timelines, blogs, forums, teams, tournaments.  Their usernames can be found and customized in data/uids.txt.  Specify user/password as shown in uids.txt to hard code individual passwords
 
 ## Caveats:
 There are no indices for game or forum search yet.  This will be fixed never/soon.

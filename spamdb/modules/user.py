@@ -1,9 +1,5 @@
 import bson
-import base64
-import pymongo
 import random
-import argparse
-from sys import stdout
 from datetime import datetime
 from modules.seed import env
 from modules.event import events
@@ -14,9 +10,8 @@ import modules.util as util
 def update_user_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "user" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.perf_stat.drop()
         db.pref.drop()
         db.ranking.drop()
@@ -47,11 +42,11 @@ def update_user_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.pref, [Pref(u._id) for u in users], do_drop)
-    util.bulk_write(db.user4, users, do_drop)
-    util.bulk_write(db.ranking, rankings, do_drop)
-    util.bulk_write(db.perf_stat, perfs, do_drop)
-    util.bulk_write(db.history4, history, do_drop)
+    util.bulk_write(db.pref, [Pref(u._id) for u in users])
+    util.bulk_write(db.user4, users)
+    util.bulk_write(db.ranking, rankings)
+    util.bulk_write(db.perf_stat, perfs)
+    util.bulk_write(db.history4, history)
 
 
 class User:

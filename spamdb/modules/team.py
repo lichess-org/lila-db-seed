@@ -10,9 +10,8 @@ import modules.util as util
 def update_team_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "team" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.team.drop()
         db.team_member.drop()
 
@@ -64,11 +63,11 @@ def update_team_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.f_categ, categs, do_drop, True)
-    util.bulk_write(db.f_topic, topics, do_drop, True)
-    util.bulk_write(db.f_post, posts, do_drop, True)
-    util.bulk_write(db.team, teams, do_drop)
-    util.bulk_write(db.team_member, all_members, do_drop)
+    util.bulk_write(db.f_categ, categs, True)
+    util.bulk_write(db.f_topic, topics, True)
+    util.bulk_write(db.f_post, posts, True)
+    util.bulk_write(db.team, teams)
+    util.bulk_write(db.team_member, all_members)
 
 
 class TeamMember:
