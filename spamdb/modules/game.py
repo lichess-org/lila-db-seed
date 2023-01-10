@@ -12,16 +12,15 @@ from datetime import timedelta
 def update_game_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "game" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.game5.drop()
         db.puzzle2_path.drop()
         db.puzzle2_puzzle.drop()
         db.crosstable2.drop()
         db.matchup.drop()
 
-    games: list[game.Game] = []
+    games: list[Game] = []
     crosstable: dict[str, Result] = {}
 
     for bson_game in env.games:
@@ -49,11 +48,11 @@ def update_game_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.game5, games, do_drop)
-    util.bulk_write(db.puzzle2_path, env.puzzle_paths, do_drop)
-    util.bulk_write(db.puzzle2_puzzle, env.puzzles, do_drop)
-    util.bulk_write(db.crosstable2, crosstable.values(), do_drop)
-    util.bulk_write(db.matchup, crosstable.values(), do_drop)
+    util.bulk_write(db.game5, games)
+    util.bulk_write(db.puzzle2_path, env.puzzle_paths)
+    util.bulk_write(db.puzzle2_puzzle, env.puzzles)
+    util.bulk_write(db.crosstable2, crosstable.values())
+    util.bulk_write(db.matchup, crosstable.values())
 
 
 class Game:

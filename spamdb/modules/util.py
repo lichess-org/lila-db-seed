@@ -11,7 +11,6 @@ from modules.seed import env
 def bulk_write(
     coll: pymongo.collection.Collection,
     objs: list,
-    did_drop: bool,
     append: bool = False,
 ) -> None:
     # append parameter is for bson/json export to forum collections
@@ -21,10 +20,10 @@ def bulk_write(
         # database mode
         ledger = []
         for o in objs:
-            ledger.append(_inupsert(_dict(o), did_drop))
+            ledger.append(_inupsert(_dict(o)))
         res = coll.bulk_write(ledger).bulk_api_result
 
-        print(_report(coll.name, res, did_drop))
+        print(_report(coll.name, res))
     else:
         # export mode
         if not os.path.isdir(env.dump_dir):
@@ -118,8 +117,8 @@ def insert_json(db: pymongo.MongoClient, filename: str) -> None:
             bulk_write(db[collName], objList)
 
 
-def _inupsert(o: object, do_drop: bool) -> object:
-    if do_drop:
+def _inupsert(o: object) -> object:
+    if env.args.drop or env.args.drop_db:
         return pymongo.InsertOne(o)
     else:
         return pymongo.UpdateOne({"_id": o["_id"]}, {"$set": o}, upsert=True)
@@ -130,10 +129,10 @@ def _dict(o: object) -> dict:
 
 
 def _report(
-    coll: str, res: pymongo.results.BulkWriteResult, did_drop: bool
+    coll: str, res: pymongo.results.BulkWriteResult
 ) -> str:
     report = f"{coll}: {{"
-    if did_drop:
+    if env.args.drop or env.args.drop_db:
         report += f"Inserted: {res['nInserted']}"
     else:
         report += (

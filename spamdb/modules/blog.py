@@ -12,9 +12,8 @@ import modules.util as util
 def update_blog_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "blog" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.ublog_blog.drop()
         db.ublog_post.drop()
 
@@ -65,11 +64,11 @@ def update_blog_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.f_categ, [categ], do_drop, True)
-    util.bulk_write(db.f_topic, ftopics, do_drop, True)
-    util.bulk_write(db.f_post, fposts, do_drop, True)
-    util.bulk_write(db.ublog_blog, ublogs, do_drop)
-    util.bulk_write(db.ublog_post, uposts, do_drop)
+    util.bulk_write(db.f_categ, [categ], True)
+    util.bulk_write(db.f_topic, ftopics, True)
+    util.bulk_write(db.f_post, fposts, True)
+    util.bulk_write(db.ublog_blog, ublogs)
+    util.bulk_write(db.ublog_post, uposts)
 
 
 class UBlog:

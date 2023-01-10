@@ -18,6 +18,7 @@ class Seed:
         self._read_users()
         self.countries: list[str] = self._read_strings("countries.txt")
         self.teams: list[str] = self._read_strings("teams.txt")
+        self.msgs: list[str] = self._read_strings("msgs.txt")
         self.categs: list[str] = self._read_strings("categs.txt")
         self.topics: list[str] = self._read_strings("topics.txt")
         self.paragraphs: list[str] = self._read_strings("paragraphs.txt")

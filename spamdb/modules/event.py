@@ -10,9 +10,8 @@ from modules.seed import env
 def update_event_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "event" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.activity2.drop()
         db.timeline_entry.drop()
         db.relation.drop()
@@ -23,7 +22,7 @@ def update_event_colls() -> None:
     activities: list[dict] = []
     relations: list[Relation] = []
 
-    for (days, udicts) in sorted(events.activity_map.items()):
+    for (_, udicts) in sorted(events.activity_map.items()):
         activities.extend(udicts.values())
     for uid in events.relation_map.keys():
         relations.extend([Relation(uid, f) for f in events.relation_map[uid]])
@@ -31,9 +30,9 @@ def update_event_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.relation, relations, do_drop)
-    util.bulk_write(db.activity2, activities, do_drop)
-    util.bulk_write(db.timeline_entry, events.timeline, do_drop)
+    util.bulk_write(db.relation, relations)
+    util.bulk_write(db.activity2, activities)
+    util.bulk_write(db.timeline_entry, events.timeline)
 
 
 # singleton EventApi, collects activity and timeline entries from other modules
@@ -41,7 +40,7 @@ class EventApi:
     def __init__(self):
         self.relation_map: dict[str, list[str]] = {}
         self.activity_map: dict[int, dict[str, dict]] = {}
-        self.history_map: dict[str, History] = {}
+        #self.history_map: dict[str, History] = {}
         self.timeline: list = []
 
     class Outcome(enum.Enum):

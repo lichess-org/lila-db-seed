@@ -8,31 +8,35 @@ import modules.blog as blog
 import modules.game as game
 import modules.team as team
 import modules.tour as tour
+import modules.msg as msg
 from modules.seed import env
 
 
 def main():
     env.set_args(_get_args())
 
-    with _MongoContextMgr(env.args.uri) as db:
+    with _MongoContextMgr(env.args.uri, env.args.drop_db) as db:
         env.db = db
         user.update_user_colls()
         game.update_game_colls()
         tour.update_tour_colls()
         forum.update_forum_colls()
         team.update_team_colls()
+        msg.update_msg_colls()
         blog.update_blog_colls()
         event.update_event_colls()
 
 
 class _MongoContextMgr:
-    def __init__(self, uri):
+    def __init__(self, uri, drop_db = False):
         self.client = pymongo.MongoClient(uri)
         self.client.admin.command(
             "ping"
         )  # should raise an exception if we cant connect
         self.db = self.client.get_default_database()
-
+        if drop_db:
+            self.client.drop_database(self.db)
+            
     def __enter__(self):
         return self.db
 
@@ -43,10 +47,7 @@ class _MongoContextMgr:
 def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="""
-            seed lila database with all kinds of spam. using the '--drop all'
-            argument will speed up database creation.  consider using '--drop event'
-            on modify runs as event collections don't match on upserts, causing
-            zombie objects to accumulate.
+            seed lila database with the finest spam.
         """
     )
     parser.add_argument(
@@ -91,7 +92,7 @@ def _get_args() -> argparse.Namespace:
             postfix increasing numbers to the uids listed in data/uids.txt.
             special users are always generated and are not affected by this flag.
             users with postfixed numbers get the default password. (default:
-            # of users in uids.txt)
+            # of users in data/uids.txt)
         """,
     )
     parser.add_argument(
@@ -99,9 +100,9 @@ def _get_args() -> argparse.Namespace:
         type=int,
         help="""
             approximate number of POSTS generated for teams and regular forums
-            (default: 4000)
+            (default: 200)
         """,
-        default=4000,
+        default=200,
     )
     parser.add_argument(
         "--blogs",
@@ -112,7 +113,7 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument(
         "--teams",
         type=int,
-        help="(default: # of items in teams.txt)",
+        help="(default: # of teams in data/teams.txt)",
     )
     parser.add_argument(
         "--membership",
@@ -132,7 +133,7 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument(
         "--games",
         type=int,
-        help="(default/max = # of objects in game5.bson (around 3000))",
+        help="(default/max = # of objects in data/game5.bson (around 3000))",
     )
     parser.add_argument(
         "--follow",
@@ -152,8 +153,8 @@ def _get_args() -> argparse.Namespace:
         help="""
             timeline entries are constructed with unique object ids from pymongo's
             bson module. their ids will not match on subsequent spamdb upserts
-            and therefore they keep accumulating until you --drop event or
-            --drop all. if you do not wish to drop, you may also prevent entries
+            and therefore they keep accumulating unless you --drop or --drop-db.
+            if you do not wish to drop anything, you may also prevent entries
             from accumulating by including the --no-timeline argument. this will
             suppress their generation for this run.
         """,
@@ -177,23 +178,21 @@ def _get_args() -> argparse.Namespace:
             code or just erasing spamdb stuff in conjunction with --drop
         """,
     )
-    parser.add_argument(
+    drops = parser.add_mutually_exclusive_group()
+    drops.add_argument(
         "--drop",
+        action="store_true",
         help="""
-            drop pre-existing collections prior to any object creation. see module
-            code for specific collections dropped by each choice. specify "all" to
-            drop ALL collections managed by spamdb (others will be left alone).
+            drop spamdb managed collections prior to any object creation. others
+            will be left alone.
         """,
-        choices=[
-            "all",
-            "game",
-            "event",
-            "forum",
-            "team",
-            "user",
-            "blog",
-            "tour",
-        ],
+    )
+    drops.add_argument(
+        "--drop-db",
+        action="store_true",
+        help="""
+        drop lichess database prior to any object creation.
+        """
     )
     return parser.parse_args()
 

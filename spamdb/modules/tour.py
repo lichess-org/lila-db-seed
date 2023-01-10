@@ -10,9 +10,8 @@ from modules.event import events
 def update_tour_colls() -> None:
     args = env.args
     db = env.db
-    do_drop = args.drop == "tour" or args.drop == "all"
 
-    if do_drop:
+    if args.drop:
         db.tournament2.drop()
         db.tournament_leaderboard.drop()
         db.tournament_pairing.drop()
@@ -53,11 +52,11 @@ def update_tour_colls() -> None:
     if args.no_create:
         return
 
-    util.bulk_write(db.trophy, trophies, do_drop)
-    util.bulk_write(db.tournament2, tours, do_drop)
-    util.bulk_write(db.tournament_leaderboard, leaderboards, do_drop)
-    util.bulk_write(db.tournament_pairing, pairings, do_drop)
-    util.bulk_write(db.tournament_player, players, do_drop)
+    util.bulk_write(db.trophy, trophies)
+    util.bulk_write(db.tournament2, tours)
+    util.bulk_write(db.tournament_leaderboard, leaderboards)
+    util.bulk_write(db.tournament_pairing, pairings)
+    util.bulk_write(db.tournament_player, players)
 
 
 class Tournament:
