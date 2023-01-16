@@ -1,15 +1,12 @@
 import random
 import bson
 import base64
-import pymongo
-import argparse
 from modules.event import events
 from modules.seed import env
 import modules.util as util
-from datetime import timedelta
 
 
-def update_game_colls() -> None:
+def update_game_colls() -> list:
     args = env.args
     db = env.db
 
@@ -27,12 +24,8 @@ def update_game_colls() -> None:
         us = random.sample(env.uids, 2)
         g = Game(bson_game, us[0], us[1])
         games.append(g)
-        events.add_game(
-            us[0], g.ca, us[1], g.outcome(us[0]), g._id + g.__dict__["is"][0:4]
-        )
-        events.add_game(
-            us[1], g.ca, us[0], g.outcome(us[1]), g._id + g.__dict__["is"][4:]
-        )
+        events.add_game(us[0], g.ca, us[1], g.outcome(us[0]), g._id + g.__dict__["is"][0:4])
+        events.add_game(us[1], g.ca, us[0], g.outcome(us[1]), g._id + g.__dict__["is"][4:])
         id: str = f"{us[0]}/{us[1]}" if us[0] < us[1] else f"{us[1]}/{us[0]}"
         crosstable.setdefault(id, Result(id)).add_game(g)
 
@@ -45,14 +38,13 @@ def update_game_colls() -> None:
         path["min"] = path["min"][:-4] + "0000"
         path["max"] = path["max"][:-4] + "9999"
 
-    if args.no_create:
-        return
-
-    util.bulk_write(db.game5, games)
-    util.bulk_write(db.puzzle2_path, env.puzzle_paths)
-    util.bulk_write(db.puzzle2_puzzle, env.puzzles)
-    util.bulk_write(db.crosstable2, crosstable.values())
-    util.bulk_write(db.matchup, crosstable.values())
+    if not args.no_create:
+        util.bulk_write(db.game5, games)
+        util.bulk_write(db.puzzle2_path, env.puzzle_paths)
+        util.bulk_write(db.puzzle2_puzzle, env.puzzles)
+        util.bulk_write(db.crosstable2, crosstable.values())
+        util.bulk_write(db.matchup, crosstable.values())
+    return games
 
 
 class Game:

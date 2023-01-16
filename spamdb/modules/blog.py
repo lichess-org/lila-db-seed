@@ -1,6 +1,4 @@
-import pymongo
 import random
-import argparse
 from datetime import datetime
 from datetime import timedelta
 from modules.event import events
@@ -28,9 +26,7 @@ def update_blog_colls() -> None:
     categ = forum.Categ("Community Blog Discussions")
     categ.hidden = True
 
-    for (num_posts, uid) in zip(
-        util.random_partition(args.blogs, len(env.uids), 0), env.uids
-    ):
+    for (num_posts, uid) in zip(util.random_partition(args.blogs, len(env.uids), 0), env.uids):
         if num_posts == 0:
             continue
         ublogs.append(UBlog(uid))
@@ -54,9 +50,7 @@ def update_blog_colls() -> None:
                 fp = forum.Post(env.random_uid())
                 fposts.append(fp)
                 ft.correlate_post(fp)
-                events.add_post(
-                    fp.userId, fp.createdAt, fp._id, ft._id, ft.name
-                )
+                events.add_post(fp.userId, fp.createdAt, fp._id, ft._id, ft.name)
 
         for ft in ftopics:
             categ.add_topic(ft)

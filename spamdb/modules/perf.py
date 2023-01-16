@@ -22,6 +22,11 @@ types: list[list[int, str, float]] = [
 ]
 
 
+def clock_to_perf(init: int, inc: int) -> int:
+    # incorrectly map clock to perf type, just to reinforce that this is shit data
+    return 1 if init < 3 else 2 if init < 8 else 6 if init < 21 else 3 if init < 181 else 4
+
+
 class Perf:
     def __init__(
         self,
@@ -37,9 +42,7 @@ class Perf:
         self.bestWins = self._results()
         self.worstLosses = self._results()
 
-        variant_variance = random.uniform(
-            -0.03, 0.03
-        )  # best variable name ever
+        variant_variance = random.uniform(-0.03, 0.03)  # best variable name ever
         win_ratio = 0.5 + variant_variance
         r = rating + int(8000 * variant_variance)  # ass math at its best
         draw = int(num_games * random.uniform(draw_ratio / 5, draw_ratio))

@@ -9,6 +9,7 @@ import modules.game as game
 import modules.team as team
 import modules.tour as tour
 import modules.msg as msg
+import modules.search as search
 from modules.seed import env
 
 
@@ -18,25 +19,25 @@ def main():
     with _MongoContextMgr(env.args.uri, env.args.drop_db) as db:
         env.db = db
         user.update_user_colls()
-        game.update_game_colls()
+        games = game.update_game_colls()
         tour.update_tour_colls()
-        forum.update_forum_colls()
-        team.update_team_colls()
+        posts = forum.update_forum_colls()
+        teams = team.update_team_colls()
         msg.update_msg_colls()
         blog.update_blog_colls()
         event.update_event_colls()
+        if env.args.es:
+            search.update_elasticsearch(games, posts, teams)
 
 
 class _MongoContextMgr:
-    def __init__(self, uri, drop_db = False):
+    def __init__(self, uri, drop_db=False):
         self.client = pymongo.MongoClient(uri)
-        self.client.admin.command(
-            "ping"
-        )  # should raise an exception if we cant connect
+        self.client.admin.command("ping")  # should raise an exception if we cant connect
         self.db = self.client.get_default_database()
         if drop_db:
             self.client.drop_database(self.db)
-            
+
     def __enter__(self):
         return self.db
 
@@ -59,6 +60,15 @@ def _get_args() -> argparse.Namespace:
             mongodb://127.0.0.1/lichess)
         """,
         default="mongodb://127.0.0.1/lichess",
+    )
+    parser.add_argument(
+        "--es",
+        action="store_true",
+        help="""
+            create elasticsearch indices for games, posts, and teams to allow
+            search functionality in lila.  elasticsearch is assumed to be running at
+            localhost:9200, otherwise change the code in search.py.
+        """,
     )
     parser.add_argument(
         "--password",
@@ -192,7 +202,7 @@ def _get_args() -> argparse.Namespace:
         action="store_true",
         help="""
         drop lichess database prior to any object creation.
-        """
+        """,
     )
     return parser.parse_args()
 

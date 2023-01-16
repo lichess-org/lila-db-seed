@@ -1,13 +1,11 @@
-import pymongo
 import random
-import argparse
 from modules.event import events
 from modules.seed import env
 import modules.forum as forum
 import modules.util as util
 
 
-def update_team_colls() -> None:
+def update_team_colls() -> list:
     args = env.args
     db = env.db
 
@@ -32,9 +30,7 @@ def update_team_colls() -> None:
         team_members = t.create_members(args.membership)
         for m in team_members:
             if m.user != t.createdBy:
-                events.join_team(
-                    m.user, util.time_since(t.createdAt), t._id, t.name
-                )
+                events.join_team(m.user, util.time_since(t.createdAt), t._id, t.name)
         all_members.extend(team_members)
         remaining_topics = env.topics.copy()
         random.shuffle(remaining_topics)
@@ -60,14 +56,14 @@ def update_team_colls() -> None:
                 )
             categs[-1].add_topic(t)
 
-    if args.no_create:
-        return
+    if not args.no_create:
+        util.bulk_write(db.f_categ, categs, True)
+        util.bulk_write(db.f_topic, topics, True)
+        util.bulk_write(db.f_post, posts, True)
+        util.bulk_write(db.team, teams)
+        util.bulk_write(db.team_member, all_members)
 
-    util.bulk_write(db.f_categ, categs, True)
-    util.bulk_write(db.f_topic, topics, True)
-    util.bulk_write(db.f_post, posts, True)
-    util.bulk_write(db.team, teams)
-    util.bulk_write(db.team_member, all_members)
+    return teams
 
 
 class TeamMember:
@@ -88,9 +84,7 @@ class Team:
         self.enabled = True
         self.open = util.chance(0.5)
         self.createdAt = util.time_since_days_ago(1440)
-        self.leaders = random.sample(
-            env.uids, util.rrange(1, min(len(env.uids), 4))
-        )
+        self.leaders = random.sample(env.uids, util.rrange(1, min(len(env.uids), 4)))
         self.createdBy = self.leaders[0]
         self.chat = 20  # of course chat and forum are equal to 20.
         self.forum = 20  # wtf else would they possibly be??

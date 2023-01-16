@@ -45,9 +45,7 @@ def bulk_write(
 # return a list of n semi-random ints >= minval which add up to sum
 def random_partition(sum: int, n: int, minval: int = 1) -> list[int]:
     if n < 1 or sum < 0 or minval < 0:
-        raise ValueError(
-            f"invalid arguments:  sum={sum}, n={n}, minval={minval}"
-        )
+        raise ValueError(f"invalid arguments:  sum={sum}, n={n}, minval={minval}")
     if n * minval > sum:
         minval = 0
     parts: list[int] = []
@@ -91,9 +89,7 @@ def days_since_genesis(then: datetime = datetime.now()) -> int:
 def time_shortly_after(then: datetime) -> datetime:
     mintime = int(then.timestamp())
     maxtime = int(min(datetime.now().timestamp(), mintime + 3600))
-    return datetime.fromtimestamp(
-        rrange(mintime, maxtime if maxtime > mintime else mintime + 20)
-    )
+    return datetime.fromtimestamp(rrange(mintime, maxtime if maxtime > mintime else mintime + 20))
 
 
 # time_since returns a date between then and now
@@ -128,9 +124,7 @@ def _dict(o: object) -> dict:
     return o.__dict__ if hasattr(o, "__dict__") else o
 
 
-def _report(
-    coll: str, res: pymongo.results.BulkWriteResult
-) -> str:
+def _report(coll: str, res: pymongo.results.BulkWriteResult) -> str:
     report = f"{coll}: {{"
     if env.args.drop or env.args.drop_db:
         report += f"Inserted: {res['nInserted']}"
