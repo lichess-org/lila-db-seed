@@ -5,7 +5,6 @@ import base64
 import bson
 import argparse
 import modules.util as util
-from datetime import datetime
 
 # files used in seed.__init__ are found in spamdb/data folder
 class Seed:
@@ -22,9 +21,7 @@ class Seed:
         self.categs: list[str] = self._read_strings("categs.txt")
         self.topics: list[str] = self._read_strings("topics.txt")
         self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
-        self.social_media_links: list[str] = self._read_strings(
-            "social_media_links.txt"
-        )
+        self.social_media_links: list[str] = self._read_strings("social_media_links.txt")
         self.image_links: list[str] = self._read_strings("image_links.txt")
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
@@ -39,9 +36,7 @@ class Seed:
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
         self.hash_cache: dict[str, int] = {
-            "password": base64.b64decode(
-                "E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"
-            ),
+            "password": base64.b64decode("E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"),
         }
 
     def set_args(self, args: argparse.Namespace):
@@ -60,8 +55,6 @@ class Seed:
         elif args.dump_json:
             self.dump_dir = args.dump_json
             self.bson_mode = False
-
-    # this here should be fast enough.
 
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_passwords.get(uid, self.default_password)
@@ -104,9 +97,7 @@ class Seed:
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
         seed = self.seeds.setdefault(key_obj.__name__, 1)
         self.seeds[key_obj.__name__] = seed + 1
-        return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode(
-            "ascii"
-        )
+        return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode("ascii")
 
     def _genN(self, n: int, orig_list: list[str], default: str) -> list[str]:
         if not orig_list:
@@ -121,9 +112,7 @@ class Seed:
     def _read_strings(self, name: str) -> list[str]:
         with open(os.path.join(self.data_path, name), "r") as f:
             return [
-                s.strip()
-                for s in f.read().splitlines()
-                if s and not s.lstrip().startswith("#")
+                s.strip() for s in f.read().splitlines() if s and not s.lstrip().startswith("#")
             ]
 
     def _read_bson(self, filename: str) -> list[dict]:

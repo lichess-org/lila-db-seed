@@ -96,13 +96,9 @@ class User:
         if with_perfs:
             self.perfStats = {}  # we'll detach this later
             self.perfs = {}
-            perf_games: list[int] = util.random_partition(
-                total_games, len(perf.types), 0
-            )
+            perf_games: list[int] = util.random_partition(total_games, len(perf.types), 0)
 
-            for [index, perf_name, draw_ratio], num_games in zip(
-                perf.types, perf_games
-            ):
+            for [index, perf_name, draw_ratio], num_games in zip(perf.types, perf_games):
                 if num_games == 0:
                     continue
                 p = perf.Perf(self._id, index, num_games, draw_ratio, rating)
@@ -167,9 +163,7 @@ class History:
             days: int = (datetime.now() - u.createdAt).days
             for x in range(0, days, util.rrange(2, 10)):
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
-                self.__dict__[name][str(x)] = util.rrange(
-                    intermediateR - 100, intermediateR + 100
-                )
+                self.__dict__[name][str(x)] = util.rrange(intermediateR - 100, intermediateR + 100)
 
 
 def _create_special_users():

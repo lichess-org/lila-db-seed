@@ -1,10 +1,6 @@
-import pymongo
 import random
-import argparse
-from datetime import datetime
 import modules.util as util
 from modules.seed import env
-from modules.event import events
 
 
 def update_tour_colls() -> None:

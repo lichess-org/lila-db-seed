@@ -1,7 +1,5 @@
 import enum
 import bson
-import pymongo
-import argparse
 from datetime import datetime
 import modules.util as util
 from modules.seed import env
@@ -40,7 +38,7 @@ class EventApi:
     def __init__(self):
         self.relation_map: dict[str, list[str]] = {}
         self.activity_map: dict[int, dict[str, dict]] = {}
-        #self.history_map: dict[str, History] = {}
+        # self.history_map: dict[str, History] = {}
         self.timeline: list = []
 
     class Outcome(enum.Enum):
@@ -59,9 +57,7 @@ class EventApi:
         if uid == following:
             return
         self.relation_map.setdefault(uid, []).append(following)
-        self.timeline.append(
-            TimelineEntry(time, self.relation_map[uid]).follow(uid, following)
-        )
+        self.timeline.append(TimelineEntry(time, self.relation_map[uid]).follow(uid, following))
         f = self._lazy_make_activity(uid, time, "f", [])
         # wtf here
 
@@ -77,26 +73,18 @@ class EventApi:
         listeners = self.relation_map.get(uid, [])
         if constrain_listeners:
             listeners = list(set(constrain_listeners) & set(listeners))
-        self.timeline.append(
-            TimelineEntry(time, listeners).forum_post(uid, pid, tid, tname)
-        )
+        self.timeline.append(TimelineEntry(time, listeners).forum_post(uid, pid, tid, tname))
         self._lazy_make_activity(uid, time, "p", []).append(pid)
 
     def add_team(self, uid: str, time: datetime, tid: str, tname: str) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map.get(uid, [])).team_create(
-                uid, tid
-            )
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_create(uid, tid)
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 
-    def join_team(
-        self, uid: str, time: datetime, tid: str, tname: str
-    ) -> None:
+    def join_team(self, uid: str, time: datetime, tid: str, tname: str) -> None:
         self.timeline.append(
-            TimelineEntry(time, self.relation_map.get(uid, [])).team_join(
-                uid, tid
-            )
+            TimelineEntry(time, self.relation_map.get(uid, [])).team_join(uid, tid)
         )
         self._lazy_make_activity(uid, time, "e", []).append(tname)
 
@@ -109,16 +97,12 @@ class EventApi:
         pid: str,
     ) -> None:
         self.timeline.append(
-            TimelineEntry(time, [uid]).game_end(
-                opponent, outcome == self.Outcome.WIN, pid
-            )
+            TimelineEntry(time, [uid]).game_end(opponent, outcome == self.Outcome.WIN, pid)
         )
         self._game_activity(uid, time, outcome)
         self._game_activity(opponent, time, outcome.opponentPov())
 
-    def _game_activity(
-        self, uid: str, time: datetime, outcome: Outcome
-    ) -> None:
+    def _game_activity(self, uid: str, time: datetime, outcome: Outcome) -> None:
         v = self._lazy_make_activity(uid, time, "g", {}).setdefault(
             "standard",
             {
@@ -140,9 +124,7 @@ class EventApi:
 
     def _lazy_make_activity(self, uid: str, time: datetime, key: str, default):
         days = util.days_since_genesis(time)
-        activity = self.activity_map.setdefault(days, {}).setdefault(
-            uid, Activity(uid, days)
-        )
+        activity = self.activity_map.setdefault(days, {}).setdefault(uid, Activity(uid, days))
         if not hasattr(activity, key):
             setattr(activity, key, default)
         return getattr(activity, key)

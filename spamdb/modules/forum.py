@@ -1,13 +1,11 @@
-import pymongo
 import random
-import argparse
 from datetime import datetime, timedelta
 from modules.event import events
 from modules.seed import env
 import modules.util as util
 
 
-def update_forum_colls() -> None:
+def update_forum_colls() -> list:
     args = env.args
     db = env.db
 
@@ -17,7 +15,7 @@ def update_forum_colls() -> None:
         db.f_post.drop()
 
     if args.posts < 1:
-        return
+        return []
 
     categs: dict[str, Categ] = {}
     topics: list[Topic] = []
@@ -42,12 +40,11 @@ def update_forum_colls() -> None:
         if hasattr(t, "lastPostId"):
             categs[t.categId].add_topic(t)
 
-    if args.no_create:
-        return
-
-    util.bulk_write(db.f_categ, categs.values())
-    util.bulk_write(db.f_topic, topics)
-    util.bulk_write(db.f_post, posts)
+    if not args.no_create:
+        util.bulk_write(db.f_categ, categs.values())
+        util.bulk_write(db.f_topic, topics)
+        util.bulk_write(db.f_post, posts)
+    return posts
 
 
 class Post:
@@ -77,13 +74,12 @@ class Topic:
     # keep the refs and sequencing fields consistent
     def correlate_post(self, p: Post):
         self.lastPostId = self.lastPostIdTroll = p._id
-        self.updatedAt = (
-            self.updatedAtTroll
-        ) = p.createdAt = util.time_shortly_after(self.updatedAt)
+        self.updatedAt = self.updatedAtTroll = p.createdAt = util.time_shortly_after(self.updatedAt)
         self.nbPosts = self.nbPostsTroll = self.nbPosts + 1
         p.topicId = self._id
         p.categId = self.categId
         p.number = self.nbPosts
+        p.topic = self.name  # for search.py, otherwise unused
 
 
 class Categ:
