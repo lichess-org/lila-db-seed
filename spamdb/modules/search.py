@@ -9,14 +9,15 @@ from modules.perf import clock_to_perf
 
 def update_elasticsearch(games: list[Game], posts: list[Post], teams: list[Team]):
     es = http.client.HTTPConnection("localhost", 9200)
+    try:
+        ngames = _make_indices(es, "game", _game_mapping, games, _game_to_index)
+        nposts = _make_indices(es, "forum", _forum_mapping, posts, _post_to_index)
+        nteams = _make_indices(es, "team", _team_mapping, teams, _team_to_index)
+        es.close()
 
-    ngames = _make_indices(es, "game", _game_mapping, games, _game_to_index)
-    nposts = _make_indices(es, "forum", _forum_mapping, posts, _post_to_index)
-    nteams = _make_indices(es, "team", _team_mapping, teams, _team_to_index)
-
-    es.close()
-
-    print(f"elasticsearch: {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
+        print(f"elasticsearch: {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
+    except:
+        print("elasticsearch: {Failed}")
 
 
 def _make_indices(
