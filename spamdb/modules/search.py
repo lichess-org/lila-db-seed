@@ -17,7 +17,7 @@ def update_elasticsearch(games: list[Game], posts: list[Post], teams: list[Team]
 
         print(f"elasticsearch: {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
     except:
-        print("elasticsearch: {Failed}")
+        print("elasticsearch: {Failed: is_elasticsearch_even_running?}")
 
 
 def _make_indices(
