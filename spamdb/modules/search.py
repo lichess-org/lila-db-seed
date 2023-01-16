@@ -61,26 +61,27 @@ def _make_indices(
 def _game_to_index(g: Game) -> str:
     r1 = env.fide_map[g.us[0]]
     r2 = env.fide_map[g.us[1]]
-    wid = g.wid if "wid" in g.__dict__ else None
     gi = {
         "s": g.s,
         "u": g.us,
         "d": g.ua.strftime("%Y-%m-%d %H:%M:%S"),
-        "w": wid,
-        "o": None if wid == None else g.us[0] if wid == g.us[1] else g.us[1],
         "so": g.so,
         "a": round(((1500 if r1 == None else r1) + (1500 if r2 == None else r2)) / 2),
         "wu": g.us[0],
         "bu": g.us[1],
         "t": round(g.t / 2),
         "n": g.an,
-        "ct": g.c[0],
+        "ct": g.c[0] * 60,
         "ci": g.c[1],
-        "l": round(g.c[0] * 1.85),
-        "c": 1 if "g" in g.__dict__ and g.w else 0,
+        "l": round(g.c[0] * 115),
         "r": g.ra,
         "p": clock_to_perf(g.c[0], g.c[1]),
     }
+    if "wid" in g.__dict__:
+        gi["w"] = g.wid
+        gi["o"] = g.us[0] if g.wid == g.us[1] else g.us[1]
+        gi["c"] = 1 if g.wid == g.us[0] else 2
+
     op = {"index": {"_index": "game", "_id": g._id, "_type": "_doc"}}
     return json.dumps(op, indent=None) + "\n" + json.dumps(gi, indent=None) + "\n"
 
