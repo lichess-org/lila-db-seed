@@ -43,6 +43,9 @@ class Seed:
         self.args = args
         self.user_bg_mode = args.user_bg
         self.default_password = args.password
+        if args.su_password is not None:
+            for admin in self._special_users:
+                self.custom_passwords[admin] = args.su_password
         if args.users is not None and args.users > -1:
             self.uids = self._genN(max(args.users, 2), self.uids, "user")
         if args.teams is not None and args.teams > -1:

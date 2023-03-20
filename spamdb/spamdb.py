@@ -83,6 +83,15 @@ def _get_args() -> argparse.Namespace:
         default="password",
     )
     parser.add_argument(
+        "--su-password",
+        type=str,
+        help="""
+            supply a password for admin and moderator users. this is needed for
+            exposed dev instances. this argument will override any other defaults
+            or values given in data/uids.txt.
+        """,
+    )
+    parser.add_argument(
         "--user-bg",
         "-b",
         type=int,

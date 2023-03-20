@@ -1,15 +1,13 @@
 # passwords in this file will override the command line parameter.
 # anything following the / is considered part of the password until
-# the first white space.
+# the first white space. example:
 #
-# you can specify stronger passwords for the 7 priveleged users here.  
-
-lichess/password
-admin/password
-shusher/password
-hunter/password
-puzzler/password
-api/password
+# gregory/password123456
+#
+# you could specify passwords for the 6 admin users (lichess, admin,
+# shusher, hunter, puzzler, api) here but it's recommended to use the
+# --su-password command line argument (or just change them from default
+# later). important credentials should never be in plaintext files.
 
 li
 ana
