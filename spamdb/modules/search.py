@@ -7,8 +7,8 @@ from modules.team import Team
 from modules.perf import clock_to_perf
 
 
-def update_elasticsearch(games: list[Game], posts: list[Post], teams: list[Team]):
-    es = http.client.HTTPConnection("localhost", 9200)
+def update_elasticsearch(host: str, port: int, games: list[Game], posts: list[Post], teams: list[Team]):
+    es = http.client.HTTPConnection(host, port)
     try:
         ngames = _make_indices(es, "game", _game_mapping, games, _game_to_index)
         nposts = _make_indices(es, "forum", _forum_mapping, posts, _post_to_index)

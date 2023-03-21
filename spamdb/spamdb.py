@@ -27,7 +27,7 @@ def main():
         blog.update_blog_colls()
         event.update_event_colls()
         if env.args.es:
-            search.update_elasticsearch(games, posts, teams)
+            search.update_elasticsearch(env.args.es_host, env.args.es_port, games, posts, teams)
 
 
 class _MongoContextMgr:
@@ -66,9 +66,22 @@ def _get_args() -> argparse.Namespace:
         action="store_true",
         help="""
             create elasticsearch indices for games, posts, and teams to allow
-            search functionality in lila.  elasticsearch is assumed to be running at
-            localhost:9200, otherwise change the code in search.py.
+            search functionality in lila.
         """,
+    )
+    parser.add_argument(
+        "--es-host",
+        help="""
+            elasticsearch host (default: localhost)
+        """,
+        default="localhost",
+    )
+    parser.add_argument(
+        "--es-port",
+        help="""
+            elasticsearch port (default: 9200)
+        """,
+        default=9200,
     )
     parser.add_argument(
         "--password",
