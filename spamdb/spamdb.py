@@ -27,7 +27,7 @@ def main():
         blog.update_blog_colls()
         event.update_event_colls()
         if env.args.es:
-            search.update_elasticsearch(env.args.es_host, env.args.es_port, games, posts, teams)
+            search.update_elasticsearch(env.args.es_host, games, posts, teams)
 
 
 class _MongoContextMgr:
@@ -72,16 +72,9 @@ def _get_args() -> argparse.Namespace:
     parser.add_argument(
         "--es-host",
         help="""
-            elasticsearch host (default: localhost)
+            elasticsearch host and port (default: localhost:9200)
         """,
-        default="localhost",
-    )
-    parser.add_argument(
-        "--es-port",
-        help="""
-            elasticsearch port (default: 9200)
-        """,
-        default=9200,
+        default="localhost:9200",
     )
     parser.add_argument(
         "--password",
