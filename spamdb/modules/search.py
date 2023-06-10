@@ -7,8 +7,9 @@ from modules.team import Team
 from modules.perf import clock_to_perf
 
 
-def update_elasticsearch(games: list[Game], posts: list[Post], teams: list[Team]):
-    es = http.client.HTTPConnection("localhost", 9200)
+def update_elasticsearch(hostport: str, games: list[Game], posts: list[Post], teams: list[Team]):
+    host, port = hostport.split(":")
+    es = http.client.HTTPConnection(host, port)
     try:
         ngames = _make_indices(es, "game", _game_mapping, games, _game_to_index)
         nposts = _make_indices(es, "forum", _forum_mapping, posts, _post_to_index)
@@ -17,7 +18,7 @@ def update_elasticsearch(games: list[Game], posts: list[Post], teams: list[Team]
 
         print(f"elasticsearch: {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
     except:
-        print("elasticsearch: {Failed}")
+        print("elasticsearch: {Failed: is_elasticsearch_even_running?}")
 
 
 def _make_indices(
