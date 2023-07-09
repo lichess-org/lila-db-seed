@@ -5,6 +5,7 @@ from modules.seed import env
 from modules.event import events
 import modules.perf as perf
 import modules.util as util
+from typing import Tuple
 
 
 def update_user_colls() -> None:
@@ -13,6 +14,7 @@ def update_user_colls() -> None:
 
     if args.drop:
         db.perf_stat.drop()
+        db.user_perf.drop()
         db.pref.drop()
         db.ranking.drop()
         db.history4.drop()
@@ -20,15 +22,18 @@ def update_user_colls() -> None:
 
     users: list[User] = []
     rankings: list[perf.Ranking] = []
-    perfs: list[perf.Perf] = []
+    perfstats: list[perf.PerfStat] = []
+    userperfs: list[perf.UserPerfs] = []
     history: list[History] = []
 
     follow_factor = args.follow
 
     for uid in env.uids:
         users.append(User(uid))
-        for stat in users[-1].detach_perfs():
-            perfs.append(stat)
+        perfs, stats = users[-1].detach_perfs()
+        userperfs.append(perf.UserPerfs(uid, perfs))
+        for stat in stats:
+            perfstats.append(stat)
             rankings.append(stat.get_ranking())
         env.fide_map[uid] = users[-1].profile["fideRating"]
         history.append(History(users[-1]))
@@ -36,6 +41,7 @@ def update_user_colls() -> None:
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
             events.follow(u._id, util.time_since(u.createdAt), f)
+        
 
     users.extend(_create_special_users())
 
@@ -45,7 +51,8 @@ def update_user_colls() -> None:
     util.bulk_write(db.pref, [Pref(u._id) for u in users])
     util.bulk_write(db.user4, users)
     util.bulk_write(db.ranking, rankings)
-    util.bulk_write(db.perf_stat, perfs)
+    util.bulk_write(db.perf_stat, perfstats)
+    util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
 
 
@@ -93,15 +100,16 @@ class User:
         }
         total_games = util.rrange(2000, 10000)
         total_wins = total_losses = total_draws = 0
-        if with_perfs:
-            self.perfStats = {}  # we'll detach this later
+
+        if with_perfs: # TODO: move this into perfstat.py
+            self.perfStats = {}
             self.perfs = {}
             perf_games: list[int] = util.random_partition(total_games, len(perf.types), 0)
 
             for [index, perf_name, draw_ratio], num_games in zip(perf.types, perf_games):
                 if num_games == 0:
                     continue
-                p = perf.Perf(self._id, index, num_games, draw_ratio, rating)
+                p = perf.PerfStat(self._id, index, num_games, draw_ratio, rating)
 
                 total_wins = total_wins + p.count["win"]
                 total_losses = total_losses + p.count["loss"]
@@ -134,10 +142,12 @@ class User:
 
     def detach_perfs(
         self,
-    ) -> list[perf.Perf]:
-        detached_list: list[perf.Perf] = list(self.perfStats.values())
+    ) ->Tuple[dict, list[perf.PerfStat]]:
+        detached_list = list(self.perfStats.values())
+        detached_perfs = self.perfs
         delattr(self, "perfStats")
-        return detached_list
+        delattr(self, "perfs")
+        return (detached_perfs, detached_list)
 
 
 class Pref:
