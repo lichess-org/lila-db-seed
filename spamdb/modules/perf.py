@@ -26,8 +26,17 @@ def clock_to_perf(init: int, inc: int) -> int:
     # incorrectly map clock to perf type, just to reinforce that this is shit data
     return 1 if init < 3 else 2 if init < 8 else 6 if init < 21 else 3 if init < 181 else 4
 
+class UserPerfs:
+    def __init__(
+        self,
+        uid: str,
+        perfs: dict
+    ):
+        self._id = uid
+        for k, v in perfs.items():
+            self.__dict__[k] = v
 
-class Perf:
+class PerfStat:
     def __init__(
         self,
         uid: str,
@@ -80,7 +89,7 @@ class Perf:
 
 
 class Ranking:
-    def __init__(self, stat: Perf):
+    def __init__(self, stat: PerfStat):
         self._id = stat.userId + ":" + str(stat.perfType)
         self.perf = stat.perfType
         self.rating = stat.r
