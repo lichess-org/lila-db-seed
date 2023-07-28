@@ -32,11 +32,11 @@ def update_user_colls() -> None:
         users.append(User(uid))
         perfs, stats = users[-1].detach_perfs()
         userperfs.append(perf.UserPerfs(uid, perfs))
+        history.append(History(userperfs[-1], users[-1].createdAt))
         for stat in stats:
             perfstats.append(stat)
             rankings.append(stat.get_ranking())
         env.fide_map[uid] = users[-1].profile["fideRating"]
-        history.append(History(users[-1]))
 
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
@@ -161,19 +161,19 @@ class Pref:
 
 
 class History:
-    def __init__(self, u: User):
-        self._id = u._id
-        if not hasattr(u, "perfs"):
-            return
-        for (name, perf) in u.perfs.items():
-            newR = u.perfs[name]["gl"]["r"]
+    def __init__(self, ups: perf.UserPerfs, since: datetime):
+        self._id = ups._id
+        for (name, perf) in vars(ups).items():
+            if name.startswith("_"):
+                continue
+            newR = perf["gl"]["r"]
             origR = min(3000, max(400, util.rrange(newR - 500, newR + 500)))
-
-            self.__dict__[name] = {}
-            days: int = (datetime.now() - u.createdAt).days
+            ratingHistory = {}
+            days: int = (datetime.now() - since).days
             for x in range(0, days, util.rrange(2, 10)):
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
-                self.__dict__[name][str(x)] = util.rrange(intermediateR - 100, intermediateR + 100)
+                ratingHistory[str(x)] = util.rrange(intermediateR - 100, intermediateR + 100)
+            setattr(self, name, ratingHistory)
 
 
 def _create_special_users():
