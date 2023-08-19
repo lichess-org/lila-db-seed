@@ -198,8 +198,8 @@ def _create_special_users():
     for i in range(10):
         users.append(User(f"bot{i}", [], [], False))
         users[-1].title = "BOT"
-    users.append(User("wide", [], [], False))
-    users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
+    users.append(User("w"*20, [], [], False))
+    users[-1].username = "W"*20  # widest possible i think
     users[-1].title = "WGM"
     users[-1].plan["active"] = True  # patron
     users[-1].plan["months"] = 12
