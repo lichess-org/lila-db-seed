@@ -29,8 +29,11 @@ def update_team_colls() -> list:
 
         team_members = t.create_members(args.membership)
         for m in team_members:
-            if m.user != t.createdBy:
-                events.join_team(m.user, util.time_since(t.createdAt), t._id, t.name)
+            events.join_team(m.user, util.time_since(t.createdAt), t._id, t.name)
+            if m.user == t.createdBy:
+                setattr(m, 'perms', _leader_perms)
+            elif m.user in t.leaders:
+                setattr(m, 'perms', random.sample(_leader_perms, util.rrange(1, len(_leader_perms))))
         all_members.extend(team_members)
         remaining_topics = env.topics.copy()
         random.shuffle(remaining_topics)
@@ -100,3 +103,14 @@ class Team:
         )
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]
+
+_leader_perms: list[str] = [
+    "public",
+    "settings",
+    "tour",
+    "comm",
+    "request",
+    "pmall",
+    "kick",
+    "admin"
+]
