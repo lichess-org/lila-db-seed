@@ -195,6 +195,7 @@ class History:
 
 def _create_special_users():
     users: list[User] = []
+    users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
     users.append(User("superadmin", [], ["ROLE_SUPER_ADMIN"], False))
     users[-1].title = "LM"
     users.append(User("admin", [], ["ROLE_ADMIN"], False))
