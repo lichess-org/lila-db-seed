@@ -4,7 +4,7 @@
 #
 # gregory/password123456
 #
-# you could specify passwords for the 6 admin users (lichess, admin,
+# you could specify passwords for the 6 admin users (superadmin, admin,
 # shusher, hunter, puzzler, api) here but it's recommended to use the
 # --su-password command line argument (or just change them from default
 # later). important credentials should never be in plaintext files.

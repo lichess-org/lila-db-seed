@@ -66,7 +66,7 @@ class User:
     ):
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
-        self.email = f"lichess.waste.basket+{name}@gmail.com"
+        self.email = f"lichess.waste.basket+{name}@gmail.com" # sorry google
         self.bpass = bson.binary.Binary(env.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago(365)
@@ -178,7 +178,7 @@ class History:
 
 def _create_special_users():
     users: list[User] = []
-    users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
+    users.append(User("superadmin", [], ["ROLE_SUPER_ADMIN"], False))
     users[-1].title = "LM"
     users.append(User("admin", [], ["ROLE_ADMIN"], False))
     users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
@@ -198,7 +198,7 @@ def _create_special_users():
     for i in range(10):
         users.append(User(f"bot{i}", [], [], False))
         users[-1].title = "BOT"
-    users.append(User("wide", [], [], False))
+    users.append(User("wwwwwwwwwwwwwwwwwwww", [], [], False))
     users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
     users[-1].title = "WGM"
     users[-1].plan["active"] = True  # patron
