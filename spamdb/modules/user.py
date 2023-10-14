@@ -1,6 +1,6 @@
 import bson
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from modules.seed import env
 from modules.event import events
 import modules.perf as perf
@@ -21,6 +21,7 @@ def update_user_colls() -> None:
         db.user4.drop()
 
     users: list[User] = []
+    patrons: list[Patron] = []
     rankings: list[perf.Ranking] = []
     perfstats: list[perf.PerfStat] = []
     userperfs: list[perf.UserPerfs] = []
@@ -41,7 +42,8 @@ def update_user_colls() -> None:
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
             events.follow(u._id, util.time_since(u.createdAt), f)
-        
+        if u.plan["active"]:
+            patrons.append(Patron(u._id))
 
     users.extend(_create_special_users())
 
@@ -50,6 +52,7 @@ def update_user_colls() -> None:
 
     util.bulk_write(db.pref, [Pref(u._id) for u in users])
     util.bulk_write(db.user4, users)
+    util.bulk_write(db.plan_patron, patrons)
     util.bulk_write(db.ranking, rankings)
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
@@ -150,6 +153,20 @@ class User:
         return (detached_perfs, detached_list)
 
 
+class Patron:
+    def __init__(self, uid: str):
+        patronedAt = util.time_since_days_ago(30)
+        lifetime = util.chance(0.5)
+
+        self._id = uid
+        self.expiresAt = patronedAt + timedelta(days=30) if not lifetime else None
+        self.free = {
+            "at": patronedAt,
+        }
+        self.lastLevelUp = patronedAt
+        self.lifetime = lifetime
+
+
 class Pref:
     def __init__(self, uid: str):
         self._id = uid
@@ -198,8 +215,8 @@ def _create_special_users():
     for i in range(10):
         users.append(User(f"bot{i}", [], [], False))
         users[-1].title = "BOT"
-    users.append(User("wwwwwwwwwwwwwwwwwwww", [], [], False))
-    users[-1].username = "WWWWWWWWWWWWWWWWWWWW"  # widest possible i think
+    users.append(User("w"*20, [], [], False))
+    users[-1].username = "W"*20  # widest possible i think
     users[-1].title = "WGM"
     users[-1].plan["active"] = True  # patron
     users[-1].plan["months"] = 12

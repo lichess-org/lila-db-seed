@@ -44,7 +44,7 @@ Usually, the script will generate a new set of data from inputs in the provided 
 - troll - marked as troll
 - bot0 thru bot9 - marked as bot
 - kid - they're just children, how could you checkmate children?
-- wide - 20 W's in visible username, WGM title, and a patron to test ui for extremely wide usernames.
+- wwwwwwwwwwwwwwwwwwww - 20 W's in visible username, WGM title, and a patron to test ui for extremely wide usernames.
 - and assorted others, see spamdb/modules/user.py for the full list
 
 ## Normal users:
