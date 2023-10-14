@@ -36,6 +36,7 @@ class Seed:
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
         self.hash_cache: dict[str, int] = {
+            # keep in sync with hash in conf/application.conf
             "password": base64.b64decode("E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"),
         }
 
@@ -123,7 +124,7 @@ class Seed:
             return bson.decode_all(f.read())
 
     _special_users: list[str] = [
-        "lichess",
+        "superadmin",
         "admin",
         "shusher",
         "hunter",

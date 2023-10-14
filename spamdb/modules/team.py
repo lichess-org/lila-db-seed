@@ -56,7 +56,7 @@ def update_team_colls() -> list:
                 )
             categs[-1].add_topic(t)
     teams.append(Team("Lichess Swiss"))
-    teams[-1].leaders = ["lichess"]
+    teams[-1].leaders = ["superadmin"]
     teams[-1].nbMembers = len(env.uids)
     teams[-1].open = True
     all_members.extend([TeamMember(user, teams[-1]._id) for user in env.uids])
