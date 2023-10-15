@@ -22,7 +22,7 @@ class Seed:
         self.topics: list[str] = self._read_strings("topics.txt")
         self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
         self.social_media_links: list[str] = self._read_strings("social_media_links.txt")
-        self.image_links: list[str] = self._read_strings("image_links.txt")
+        self.bg_image_links: list[str] = self._read_strings("bg_image_links.txt")
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
@@ -32,13 +32,10 @@ class Seed:
         self.user_bg_mode: int = 200
         self.fide_map: dict[str, int] = {}
         self.default_password = "password"
+        self.hash_cache: dict[str, int] = {}
         self.lila_crypt_path = os.path.join(
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
-        self.hash_cache: dict[str, int] = {
-            # keep in sync with hash in conf/application.conf
-            "password": base64.b64decode("E11iacfUn7SA1X4pFDRi+KkX8kT2XnckW6kx+w5AY7uJet8q9mGv"),
-        }
 
     def set_args(self, args: argparse.Namespace):
         self.args = args
@@ -66,7 +63,7 @@ class Seed:
             return self.hash_cache[password]
 
         result = subprocess.run(
-            ["java", "-jar", self.lila_crypt_path],
+            ["java", "-jar", self.lila_crypt_path, self.args.secret],
             stdout=subprocess.PIPE,
             input=password.encode("utf-8"),
         ).stdout
@@ -94,8 +91,8 @@ class Seed:
     def random_social_media_links(self) -> list[str]:
         return random.sample(self.social_media_links, util.rrange(0, 6))
 
-    def random_image_link(self) -> str:
-        return random.choice(self.image_links)
+    def random_bg_image_link(self) -> str:
+        return random.choice(self.bg_image_links)
 
     # ids only unique per collection
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
@@ -124,6 +121,7 @@ class Seed:
             return bson.decode_all(f.read())
 
     _special_users: list[str] = [
+        "lichess",
         "superadmin",
         "admin",
         "shusher",

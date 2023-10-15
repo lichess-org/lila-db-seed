@@ -80,9 +80,7 @@ class UBlogPost:
         self.title = env.random_topic()
         self.intro = env.random_topic()
         self.markdown = (
-            f"![image]({env.random_image_link()})\n{env.random_paragraph()}\n"
-            f"![image]({env.random_image_link()})\n{env.random_paragraph()}\n"
-            f"![image]({env.random_image_link()})\n{env.random_paragraph()}"
+            f"{env.random_paragraph()}\n{env.random_paragraph()}\n{env.random_paragraph()}"
         )
         self.language = "en-US"
         self.live = True

@@ -7,34 +7,36 @@ import javax.crypto.spec.SecretKeySpec;
 import org.mindrot.BCrypt;
 
 public class App {
-    public static void main(String[] args) throws Exception {
+  static String secret;
 
-        var in = System.in.readAllBytes();
+  public static void main(String[] args) throws Exception {
 
-        byte[] salt = new byte[16];
-        SecureRandom.getInstanceStrong().nextBytes(salt);
+    secret = args[0];
 
-        byte[] digest = MessageDigest.getInstance("SHA-512").digest(in);
+    var in = System.in.readAllBytes();
 
-        byte[] hash = BCrypt.hashpwRaw(digest, 'a', 10, salt);
+    byte[] salt = new byte[16];
+    SecureRandom.getInstanceStrong().nextBytes(salt);
 
-        byte[] aesHash = aesCtsEncrypt(salt, hash);
+    byte[] digest = MessageDigest.getInstance("SHA-512").digest(in);
 
-        System.out.write(68);
-        System.out.write(68); // 6868 indicates success to spamdb.py
+    byte[] hash = BCrypt.hashpwRaw(digest, 'a', 10, salt);
 
-        System.out.write(salt);
-        System.out.write(aesHash);
-    }
+    byte[] aesHash = aesCtsEncrypt(salt, hash);
 
-    static byte[] aesCtsEncrypt(byte[] iv, byte[] buf) throws Exception {
-        var c = Cipher.getInstance("AES/CTS/NoPadding");
+    System.out.write(68);
+    System.out.write(68); // 6868 indicates success to spamdb.py
 
-        c.init(
-                Cipher.ENCRYPT_MODE,
-                new SecretKeySpec(Base64.getDecoder().decode("9qEYN0ThHer1KWLNekA76Q=="), "AES"),
-                new IvParameterSpec(iv));
+    System.out.write(salt);
+    System.out.write(aesHash);
+  }
 
-        return c.doFinal(buf);
-    }
+  static byte[] aesCtsEncrypt(byte[] iv, byte[] buf) throws Exception {
+    var c = Cipher.getInstance("AES/CTS/NoPadding");
+
+    c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(Base64.getDecoder().decode(secret), "AES"),
+        new IvParameterSpec(iv));
+
+    return c.doFinal(buf);
+  }
 }

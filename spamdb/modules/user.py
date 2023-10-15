@@ -172,7 +172,7 @@ class Pref:
         self._id = uid
         self.is3d = False  # completely mandatory
         self.bg = env.user_bg_mode
-        self.bgImg = env.random_image_link()
+        self.bgImg = env.random_bg_image_link()
         self.agreement = 2
         self.submitMove = 0
 

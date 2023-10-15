@@ -98,13 +98,18 @@ def _get_args() -> argparse.Namespace:
         """,
     )
     parser.add_argument(
+        "--secret",
+        help="shhh!",
+        default="9qEYN0ThHer1KWLNekA76Q=="
+    )
+    parser.add_argument(
         "--user-bg",
         "-b",
         type=int,
         help="""
             generated users will have this background set in their associated
             Pref object, 100 = light mode, 200 = dark mode, 400 = transparent
-            with random image from data/image_links.txt. (default: 200)
+            with random image from lifat backgrounds. (default: 200)
         """,
         default=200,
         choices=[100, 200, 400],

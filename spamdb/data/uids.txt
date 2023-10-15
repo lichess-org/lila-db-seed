@@ -4,10 +4,12 @@
 #
 # gregory/password123456
 #
-# you could specify passwords for the 6 admin users (superadmin, admin,
-# shusher, hunter, puzzler, api) here but it's recommended to use the
-# --su-password command line argument (or just change them from default
-# later). important credentials should never be in plaintext files.
+# if your instance will be exposed, use the --su-password command line
+# argument for the 6 special users: superadmin, admin, shusher, hunter,
+# puzzler, & api.  setting them here will also work.
+#
+# take care not to accidentally include this modified file with your
+# passwords in a PR because I will merge it immediately
 
 li
 ana
