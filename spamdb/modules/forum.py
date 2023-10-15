@@ -14,7 +14,7 @@ def update_forum_colls() -> list:
         db.f_topic.drop()
         db.f_post.drop()
 
-    if args.posts < 1:
+    if args.forum_posts < 1:
         return []
 
     categs: dict[str, Categ] = {}
@@ -29,7 +29,7 @@ def update_forum_colls() -> list:
     for topic_name in env.topics:
         topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
 
-    for _ in range(args.posts):
+    for _ in range(args.forum_posts):
         p = Post(env.random_uid())
         posts.append(p)
         t = random.choice(topics)

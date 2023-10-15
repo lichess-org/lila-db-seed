@@ -20,7 +20,7 @@ def update_team_colls() -> list:
     all_members: list[TeamMember] = []
 
     for (team_name, num_team_posts) in zip(
-        env.teams, util.random_partition(args.posts, len(env.teams))
+        env.teams, util.random_partition(args.forum_posts, len(env.teams))
     ):
         t = Team(team_name)
         teams.append(t)
