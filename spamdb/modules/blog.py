@@ -1,4 +1,5 @@
 import random
+import math
 from datetime import datetime
 from datetime import timedelta
 from modules.event import events
@@ -15,7 +16,7 @@ def update_blog_colls() -> None:
         db.ublog_blog.drop()
         db.ublog_post.drop()
 
-    if args.blogs < 1:
+    if args.ublog_posts < 1:
         return
 
     ublogs: list = []
@@ -26,13 +27,14 @@ def update_blog_colls() -> None:
     categ = forum.Categ("Community Blog Discussions")
     categ.hidden = True
 
-    for (num_posts, uid) in zip(util.random_partition(args.blogs, len(env.uids), 0), env.uids):
+    for num_posts, uid in zip(util.random_partition(args.ublog_posts, len(env.uids), 0), env.uids):
         if num_posts == 0:
             continue
         ublogs.append(UBlog(uid))
+        tier = ublogs[-1].tier
 
         for _ in range(num_posts):
-            up = UBlogPost(uid)
+            up = UBlogPost(uid, tier)
             uposts.append(up)
             up.slug = util.normalize_id(up.title)
             ft = forum.Topic(up.title, categ._id)
@@ -68,11 +70,11 @@ def update_blog_colls() -> None:
 class UBlog:
     def __init__(self, uid: str):
         self._id = f"user:{uid}"
-        self.tier = 2
+        self.tier = random.choices(range(len(_tier_distributions)), _tier_distributions, k=1)[0]
 
 
 class UBlogPost:
-    def __init__(self, uid: str):
+    def __init__(self, uid: str, tier: int):
         self._id = env.next_id(UBlogPost)
         self.blog = f"user:{uid}"
         self.title = env.random_topic()
@@ -89,11 +91,17 @@ class UBlogPost:
         self.created = {"by": uid, "at": util.time_since_days_ago(365)}
         self.lived = self.created
         self.updated = self.created
-        self.rank = self.created["at"] - timedelta(days=30)  # wtf is this?
         self.views = util.rrange(10, 100)
         self.likes = util.rrange(0, len(env.uids))
         self.likers = random.sample(env.uids, self.likes)
+        self.rank = self.created["at"] + timedelta(
+            days=_tier_rank_day_bonus[tier], hours=math.sqrt(self.likes) + self.likes / 100
+        )
 
+
+_tier_distributions: list[float] = [0.0, 0.05, 0.5, 0.2, 0.1, 0.05]
+
+_tier_rank_day_bonus: list[int] = [-9999, -90, -30, 0, 10, 15]
 
 _blog_topics: list[str] = [
     "Chess",

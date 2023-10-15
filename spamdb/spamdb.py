@@ -121,7 +121,7 @@ def _get_args() -> argparse.Namespace:
         """,
     )
     parser.add_argument(
-        "--posts",
+        "--forum-posts",
         type=int,
         help="""
             approximate number of POSTS generated for teams and regular forums
@@ -130,7 +130,7 @@ def _get_args() -> argparse.Namespace:
         default=200,
     )
     parser.add_argument(
-        "--blogs",
+        "--ublog-posts",
         type=int,
         help="(default: 20)",
         default=20,
