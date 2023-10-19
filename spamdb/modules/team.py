@@ -79,7 +79,7 @@ class TeamMember:
         self._id = uid + "@" + teamId
         self.team = teamId
         self.user = uid
-        self.date = util.time_since_days_ago(720)
+        self.date = util.time_since_days_ago()
 
 
 class Team:
@@ -91,7 +91,7 @@ class Team:
         self.nbMembers = 1
         self.enabled = True
         self.open = util.chance(0.5)
-        self.createdAt = util.time_since_days_ago(1440)
+        self.createdAt = util.time_since_days_ago()
         self.leaders = random.sample(env.uids, util.rrange(1, min(len(env.uids), 4)))
         self.createdBy = self.leaders[0]
         self.chat = 20  # of course chat and forum are equal to 20.

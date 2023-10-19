@@ -26,8 +26,15 @@ def update_forum_colls() -> list:
         categ = Categ(cat_name)
         categs[categ._id] = categ
 
-    for topic_name in env.topics:
-        topics.append(Topic(topic_name, random.choice(list(categs.keys()))))
+    while len(topics) < args.forum_posts / 8:
+        for topic_name in env.topics:
+            iter = int(len(topics) / len(env.topics))
+            topics.append(
+                Topic(
+                    topic_name if iter == 0 else f"{topic_name} {iter}",
+                    random.choice(list(categs.keys())),
+                )
+            )
 
     for _ in range(args.forum_posts):
         p = Post(env.random_uid())
@@ -63,7 +70,7 @@ class Topic:
         self.name = name
         self.slug = util.normalize_id(name)
         self.categId = categ_id
-        self.createdAt = util.time_since_days_ago(180) - timedelta(days=2)
+        self.createdAt = util.time_since_days_ago() - timedelta(days=2)
         self.updatedAt = self.updatedAtTroll = self.createdAt
         self.nbPosts = self.nbPostsTroll = 0
         self.troll = False

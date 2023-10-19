@@ -86,7 +86,7 @@ class UBlogPost:
         self.live = True
         self.discuss = True
         self.topics = random.sample(_blog_topics, 3)
-        self.created = {"by": uid, "at": util.time_since_days_ago(365)}
+        self.created = {"by": uid, "at": util.time_since_days_ago()}
         self.lived = self.created
         self.updated = self.created
         self.views = util.rrange(10, 100)

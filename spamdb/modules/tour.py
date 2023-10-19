@@ -66,7 +66,7 @@ class Tournament:
         self.minutes = random.choice([20, 30, 40, 60, 90, 120])
         self.schedule = {"freq": freq, "speed": speed}
         self.nbPlayers = min(len(env.uids), util.rrange(4, 32))
-        self.createdAt = util.time_since_days_ago(365)
+        self.createdAt = util.time_since_days_ago()
         self.startsAt = util.time_shortly_after(self.createdAt)
         # self.featured
 
@@ -116,7 +116,7 @@ class Trophy:
         self._id = env.next_id(Trophy)
         self.user = uid
         self.kind = random.choice(_trophyKind)
-        self.date = util.time_since_days_ago(720)
+        self.date = util.time_since_days_ago()
 
 
 # class TrophyKind: use bin/mongodb/create-trophy-kinds.js for now

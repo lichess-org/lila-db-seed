@@ -103,7 +103,7 @@ def time_since(then: datetime) -> datetime:
 
 
 # time_since_days_ago returns a date between (now - days_ago) and now
-def time_since_days_ago(days_ago: int) -> datetime:
+def time_since_days_ago(days_ago = env.args.days) -> datetime:
     return datetime.now() - timedelta(days=random.uniform(0, days_ago))
 
 

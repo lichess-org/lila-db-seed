@@ -58,7 +58,7 @@ class Game:
         self.t = game["t"]
         self.v = 1
         self.ra = game["ra"]
-        self.ca = util.time_since_days_ago(1460)
+        self.ca = util.time_since_days_ago()
         self.ua = util.time_shortly_after(self.ca)
         self.so = game["so"]
         self.hp = bson.binary.Binary(game["hp"])

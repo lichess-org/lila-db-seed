@@ -19,7 +19,7 @@ def update_msg_colls() -> None:
         for u2 in random.sample(env.uids, int(0.25 * len(env.uids))):
             if u1 == u2 or threads.get(_tid(u1, u2)) != None:
                 continue
-            msgs.append(Msg(u1, u2, util.time_since_days_ago(365)))
+            msgs.append(Msg(u1, u2, util.time_since_days_ago()))
             while util.chance(0.85):
                 msgs.append(Msg(u1, u2, util.time_shortly_after(msgs[-1].date)))
 

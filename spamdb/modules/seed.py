@@ -5,11 +5,14 @@ import base64
 import bson
 import argparse
 import modules.util as util
+from modules.args import parse_args
 
 # files used in seed.__init__ are found in spamdb/data folder
 class Seed:
     def __init__(self):
-        self.args = None  # will be argparse.Namespace
+        args = self.args = parse_args()
+        self.user_bg_mode = args.user_bg
+        self.default_password = args.password
         parent_path = os.path.dirname(os.path.dirname(__file__))
         self.data_path: str = os.path.join(parent_path, "data")
         self.uids: list[str] = []
@@ -29,18 +32,11 @@ class Seed:
         self.seeds = dict[str, int]()
         self.dump_dir: str = None
         self.bson_mode: bool = True  # False means json mode
-        self.user_bg_mode: int = 200
         self.fide_map: dict[str, int] = {}
-        self.default_password = "password"
         self.hash_cache: dict[str, int] = {}
         self.lila_crypt_path = os.path.join(
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
-
-    def set_args(self, args: argparse.Namespace):
-        self.args = args
-        self.user_bg_mode = args.user_bg
-        self.default_password = args.password
         if args.su_password is not None:
             for admin in self._special_users:
                 self.custom_passwords[admin] = args.su_password
@@ -50,12 +46,12 @@ class Seed:
             self.teams = self._genN(args.teams, self.teams, "team")
         if args.games is not None and args.games > -1:
             self.games = self.games[: args.games]
-            # can't have more than 3000 currently
         if args.dump_bson:
             self.dump_dir = args.dump_bson
         elif args.dump_json:
             self.dump_dir = args.dump_json
             self.bson_mode = False
+
 
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_passwords.get(uid, self.default_password)
