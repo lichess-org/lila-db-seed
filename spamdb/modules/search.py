@@ -33,7 +33,7 @@ def _make_indices(
         {"content-type": "application/json; charset=UTF-8"},
     )
     rsp = es.getresponse()
-    if rsp.status / 100 != 2:
+    if rsp.status // 100 != 2:
         print(f"elasticsearch: PUT /{index} failed:")
         print(rsp.read(77) + "...")
         return 0
@@ -50,7 +50,7 @@ def _make_indices(
         {"content-type": "application/x-ndjson; charset=UTF-8"},
     )
     rsp = es.getresponse()
-    if rsp.status / 100 != 2:
+    if rsp.status // 100 != 2:
         print(f"elasticsearch: POST /{index}/_bulk failed:")
         print(rsp.read(77) + "...")
         return 0
