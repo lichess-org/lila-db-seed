@@ -27,7 +27,7 @@ class Seed:
         self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
         self.social_media_links: list[str] = self._read_strings("social_media_links.txt")
         self.bg_image_links: list[str] = self._read_strings("bg_image_links.txt")
-        self.flairs: list[str] = self._http_get_list("https://raw.githubusercontent.com/lichess-org/lifat/master/flair/list.txt")
+        self.flairs: list[str] = self._http_get_list("https://raw.githubusercontent.com/lichess-org/lila/master/public/flair/list.txt")
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
