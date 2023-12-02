@@ -90,7 +90,7 @@ class User:
         self.profile = {
             "country": env.random_country(),
             "location": self.username + " City",
-            "bio": env.random_paragraph(),
+            "bio": env.random_paragraph()[:400],
             "firstName": self.username,
             "lastName": self.username + "bertson",
             "fideRating": rating,
