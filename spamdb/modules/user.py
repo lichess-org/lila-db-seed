@@ -22,6 +22,7 @@ def update_user_colls() -> None:
 
     users: list[User] = []
     patrons: list[Patron] = []
+    streamers: list[Streamer] = []
     rankings: list[perf.Ranking] = []
     perfstats: list[perf.PerfStat] = []
     userperfs: list[perf.UserPerfs] = []
@@ -44,6 +45,8 @@ def update_user_colls() -> None:
             events.follow(u._id, util.time_since(u.createdAt), f)
         if u.plan["active"]:
             patrons.append(Patron(u._id))
+        if util.chance(0.2):
+            streamers.append(Streamer(u))
 
     users.extend(_create_special_users())
 
@@ -53,6 +56,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.pref, [Pref(u._id) for u in users])
     util.bulk_write(db.user4, users)
     util.bulk_write(db.plan_patron, patrons)
+    util.bulk_write(db.streamer, streamers)
     util.bulk_write(db.ranking, rankings)
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
@@ -151,6 +155,32 @@ class User:
         delattr(self, "perfStats")
         delattr(self, "perfs")
         return (detached_perfs, detached_list)
+
+
+class Streamer:
+    def __init__(self, u: User):
+        self._id = u._id
+        self.listed = True
+        self.approval = {
+            "requested": False,
+            "granted": True,
+            "ignored": False,
+            "tier": 2,
+            "chatEnabled": True,
+            "lastGrantedAt": util.time_since_days_ago(30)
+        }
+        self.name = u.profile["firstName"]
+        self.seenAt = util.time_since_days_ago(30)
+        self.createdAt = util.time_since_days_ago(30)
+        self.updatedAt = util.time_since_days_ago(30)
+        self.liveAt = util.time_since_days_ago(5)
+        self.lastStreamLang = "en"
+        self.picture = "streamer.png"
+        self.headline = random.choice(env.msgs)
+        self.description = random.choice(env.paragraphs)
+        self.twitch = {
+            "userId": "lichessdotorg",
+        }
 
 
 class Patron:
