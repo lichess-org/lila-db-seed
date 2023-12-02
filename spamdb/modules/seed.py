@@ -5,6 +5,7 @@ import base64
 import bson
 import argparse
 import modules.util as util
+import requests
 from modules.args import parse_args
 
 # files used in seed.__init__ are found in spamdb/data folder
@@ -26,6 +27,7 @@ class Seed:
         self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
         self.social_media_links: list[str] = self._read_strings("social_media_links.txt")
         self.bg_image_links: list[str] = self._read_strings("bg_image_links.txt")
+        self.flairs: list[str] = self._http_get_list("https://raw.githubusercontent.com/lichess-org/lila/master/public/flair/list.txt")
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
@@ -90,6 +92,9 @@ class Seed:
     def random_bg_image_link(self) -> str:
         return random.choice(self.bg_image_links)
 
+    def random_flair(self) -> str:
+        return random.choice(self.flairs)
+
     # ids only unique per collection
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
         seed = self.seeds.setdefault(key_obj.__name__, 1)
@@ -111,6 +116,9 @@ class Seed:
             return [
                 s.strip() for s in f.read().splitlines() if s and not s.lstrip().startswith("#")
             ]
+
+    def _http_get_list(self, url: str) -> list[str]:
+        return requests.get(url).text.splitlines()
 
     def _read_bson(self, filename: str) -> list[dict]:
         with open(os.path.join(self.data_path, filename), "rb") as f:

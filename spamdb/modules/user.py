@@ -94,7 +94,7 @@ class User:
         self.profile = {
             "country": env.random_country(),
             "location": self.username + " City",
-            "bio": env.random_paragraph(),
+            "bio": env.random_paragraph()[:350],
             "firstName": self.username,
             "lastName": self.username + "bertson",
             "fideRating": rating,
@@ -105,6 +105,8 @@ class User:
             "dsbRating": util.rrange(rating - 200, rating + 200),
             "links": "\n".join(env.random_social_media_links()),
         }
+        if util.chance(0.6):
+            self.flair = env.random_flair()
         total_games = util.rrange(2000, 10000)
         total_wins = total_losses = total_draws = 0
 
