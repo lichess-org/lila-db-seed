@@ -121,6 +121,14 @@ def parse_args() -> argparse.Namespace:
         help="(default/max = # of objects in data/game5.bson (around 3000))",
     )
     parser.add_argument(
+        "--streamers",
+        action="store_true",
+        help="""
+            if --streamers is present then 20% of users created will also be
+            streamers. by default no streamers are created.
+        """,
+    )
+    parser.add_argument(
         "--follow",
         type=float,
         default=0.16,

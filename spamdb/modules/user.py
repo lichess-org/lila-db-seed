@@ -45,7 +45,7 @@ def update_user_colls() -> None:
             events.follow(u._id, util.time_since(u.createdAt), f)
         if u.plan["active"]:
             patrons.append(Patron(u._id))
-        if util.chance(0.2):
+        if args.streamers and util.chance(0.2):
             streamers.append(Streamer(u))
 
     users.extend(_create_special_users())
