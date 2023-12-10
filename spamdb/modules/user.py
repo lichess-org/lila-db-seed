@@ -73,7 +73,7 @@ class User:
     ):
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
-        self.email = f"lichess.waste.basket+{name}@gmail.com" # sorry google
+        self.email = f"{name}@localhost"
         self.bpass = bson.binary.Binary(env.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago()
