@@ -70,6 +70,13 @@ def parse_args() -> argparse.Namespace:
         choices=[100, 200, 400],
     )
     parser.add_argument(
+        "--no-flair",
+        action="store_true",
+        help="""
+            if present, set Show player flairs preference to No for all users.
+        """,
+    )
+    parser.add_argument(
         "--users",
         type=int,
         help="""
