@@ -231,9 +231,10 @@ class History:
 
 class Token:
     def __init__(self, uid: str):
-        self.plain = uid
+        token = "lip_" + uid
+        self.plain = token
         self.userId = uid
-        self._id = hashlib.sha256(uid.encode("utf-8")).hexdigest()
+        self._id = hashlib.sha256(token.encode("utf-8")).hexdigest()
         self.created = util.time_since_days_ago(30)
         self.description = "all access"
         self.scopes = _scopes
