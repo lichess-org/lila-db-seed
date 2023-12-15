@@ -1,5 +1,6 @@
 import bson
 import random
+import hashlib
 from datetime import datetime, timedelta
 from modules.seed import env
 from modules.event import events
@@ -19,6 +20,7 @@ def update_user_colls() -> None:
         db.ranking.drop()
         db.history4.drop()
         db.user4.drop()
+        db.oauth2_access_token.drop()
 
     users: list[User] = []
     patrons: list[Patron] = []
@@ -27,6 +29,7 @@ def update_user_colls() -> None:
     perfstats: list[perf.PerfStat] = []
     userperfs: list[perf.UserPerfs] = []
     history: list[History] = []
+    tokens: list[Token] = []
 
     follow_factor = args.follow
 
@@ -39,6 +42,7 @@ def update_user_colls() -> None:
             perfstats.append(stat)
             rankings.append(stat.get_ranking())
         env.fide_map[uid] = users[-1].profile["fideRating"]
+        tokens.append(Token(uid))
 
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
@@ -61,6 +65,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
+    util.bulk_write(db.oauth2_access_token, tokens)
 
 
 class User:
@@ -73,7 +78,7 @@ class User:
     ):
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
-        self.email = f"lichess.waste.basket+{name}@gmail.com" # sorry google
+        self.email = f"{name}@localhost"
         self.bpass = bson.binary.Binary(env.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago()
@@ -110,7 +115,7 @@ class User:
         total_games = util.rrange(2000, 10000)
         total_wins = total_losses = total_draws = 0
 
-        if with_perfs: # TODO: move this into perfstat.py
+        if with_perfs:  # TODO: move this into perfstat.py
             self.perfStats = {}
             self.perfs = {}
             perf_games: list[int] = util.random_partition(total_games, len(perf.types), 0)
@@ -151,7 +156,7 @@ class User:
 
     def detach_perfs(
         self,
-    ) ->Tuple[dict, list[perf.PerfStat]]:
+    ) -> Tuple[dict, list[perf.PerfStat]]:
         detached_list = list(self.perfStats.values())
         detached_perfs = self.perfs
         delattr(self, "perfStats")
@@ -169,7 +174,7 @@ class Streamer:
             "ignored": False,
             "tier": 2,
             "chatEnabled": True,
-            "lastGrantedAt": util.time_since_days_ago(30)
+            "lastGrantedAt": util.time_since_days_ago(30),
         }
         self.name = u.profile["firstName"]
         self.seenAt = util.time_since_days_ago(30)
@@ -203,6 +208,7 @@ class Pref:
     def __init__(self, uid: str):
         self._id = uid
         self.is3d = False  # completely mandatory
+        self.showFlairs = not env.args.no_flair
         self.bg = env.user_bg_mode
         self.bgImg = env.random_bg_image_link()
         self.agreement = 2
@@ -212,7 +218,7 @@ class Pref:
 class History:
     def __init__(self, ups: perf.UserPerfs, since: datetime):
         self._id = ups._id
-        for (name, perf) in vars(ups).items():
+        for name, perf in vars(ups).items():
             if name.startswith("_"):
                 continue
             newR = perf["gl"]["r"]
@@ -223,6 +229,16 @@ class History:
                 intermediateR = int(origR + (newR - origR) * x / max(days, 1))
                 ratingHistory[str(x)] = util.rrange(intermediateR - 100, intermediateR + 100)
             setattr(self, name, ratingHistory)
+
+
+class Token:
+    def __init__(self, uid: str):
+        self.plain = uid
+        self.userId = uid
+        self._id = hashlib.sha256(uid.encode("utf-8")).hexdigest()
+        self.created = util.time_since_days_ago(30)
+        self.description = "all access"
+        self.scopes = _scopes
 
 
 def _create_special_users():
@@ -248,8 +264,8 @@ def _create_special_users():
     for i in range(10):
         users.append(User(f"bot{i}", [], [], False))
         users[-1].title = "BOT"
-    users.append(User("w"*20, [], [], False))
-    users[-1].username = "W"*20  # widest possible i think
+    users.append(User("w" * 20, [], [], False))
+    users[-1].username = "W" * 20  # widest possible i think
     users[-1].title = "WGM"
     users[-1].plan["active"] = True  # patron
     users[-1].plan["months"] = 12
@@ -269,4 +285,30 @@ _titles: list[str] = [
     "WNM",
     # "BOT",
     # "LM",
+]
+
+_scopes: list[str] = [
+    "preference:read",
+    "preference:write",
+    "email:read",
+    "challenge:read",
+    "challenge:write",
+    "challenge:bulk",
+    "study:read",
+    "study:write",
+    "tournament:write",
+    "racer:write",
+    "puzzle:read",
+    "puzzle:write",
+    "team:read",
+    "team:write",
+    "team:lead",
+    "follow:read",
+    "follow:write",
+    "msg:write",
+    "board:play",
+    "engine:read",
+    "engine:write",
+    "web:login",
+    "web:mod",
 ]
