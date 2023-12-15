@@ -62,6 +62,7 @@ def update_team_colls() -> list:
     teams[-1].leaders = ["superadmin"]
     teams[-1].nbMembers = len(env.uids)
     teams[-1].open = True
+    teams[-1].flair = "food-drink.cheese-wedge"
     all_members.extend([TeamMember(user, teams[-1]._id) for user in env.uids])
 
     if not args.no_create:
@@ -96,6 +97,8 @@ class Team:
         self.createdBy = self.leaders[0]
         self.chat = 20  # of course chat and forum are equal to 20.
         self.forum = 20  # wtf else would they possibly be??
+        if util.chance(0.6):
+            self.flair = env.random_flair()
 
     def create_members(self, membership: float) -> list[TeamMember]:
         users: set[str] = set(self.leaders).union(
