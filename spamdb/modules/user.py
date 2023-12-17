@@ -15,6 +15,8 @@ def update_user_colls() -> None:
 
     if args.drop:
         db.perf_stat.drop()
+        db.plan_patron.drop()
+        db.streamer.drop()
         db.user_perf.drop()
         db.pref.drop()
         db.ranking.drop()
@@ -65,7 +67,8 @@ def update_user_colls() -> None:
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
-    util.bulk_write(db.oauth2_access_token, tokens)
+    if args.tokens:
+        util.bulk_write(db.oauth2_access_token, tokens)
 
 
 class User:
