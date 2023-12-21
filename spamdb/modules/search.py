@@ -16,10 +16,9 @@ def update_elasticsearch(hostport: str, games: list[Game], posts: list[Post], te
         nteams = _make_indices(es, "team", _team_mapping, teams, _team_to_index)
         es.close()
 
-        print(f"elasticsearch: {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
+        print(f"elasticsearch........... {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
     except:
-        print("elasticsearch: {Failed: is_elasticsearch_even_running?}")
-
+        print("elasticsearch........... skipped, not running")
 
 def _make_indices(
     es: http.client.HTTPConnection, index: str, mapping: dict, objects: list, builder
