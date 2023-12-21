@@ -44,7 +44,6 @@ def update_user_colls() -> None:
             perfstats.append(stat)
             rankings.append(stat.get_ranking())
         env.fide_map[uid] = users[-1].profile["fideRating"]
-        tokens.append(Token(uid))
 
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
@@ -68,6 +67,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
     if args.tokens:
+        tokens = [Token(u._id) for u in users]
         util.bulk_write(db.oauth2_access_token, tokens)
 
 
