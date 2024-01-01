@@ -264,7 +264,7 @@ def _create_special_users():
     users.append(User("kid", [], [], False))
     users[-1].kid = True
     for i in range(10):
-        users.append(User(f"bot{i}", [], [], False))
+        users.append(User(f"bot{i}", [], ['ROLE_VERIFIED'] if i < 3 else [], False))
         users[-1].title = "BOT"
     users.append(User("w" * 20, [], [], False))
     users[-1].username = "W" * 20  # widest possible i think
