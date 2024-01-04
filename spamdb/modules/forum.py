@@ -20,7 +20,6 @@ def update_forum_colls() -> list:
     categs: dict[str, Categ] = {}
     topics: list[Topic] = []
     posts: list[Post] = []
-    emptyCategs: list[Categ] = []
 
     for cat_name in env.categs:
         categ = Categ(cat_name)
@@ -46,6 +45,14 @@ def update_forum_colls() -> list:
     for t in topics:
         if hasattr(t, "lastPostId"):
             categs[t.categId].add_topic(t)
+
+    diagnostics = Categ("Diagnostics")
+    categs[diagnostics._id] = diagnostics
+    headerPost = Post("admin")
+    headerPost.text = "none"
+    headerTopic = Topic("none", diagnostics._id)
+    headerTopic.correlate_post(headerPost)
+    diagnostics.add_topic(headerTopic)
 
     if not args.no_create:
         util.bulk_write(db.f_categ, categs.values())
