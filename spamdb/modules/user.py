@@ -15,6 +15,8 @@ def update_user_colls() -> None:
 
     if args.drop:
         db.perf_stat.drop()
+        db.plan_patron.drop()
+        db.streamer.drop()
         db.user_perf.drop()
         db.pref.drop()
         db.ranking.drop()
@@ -65,7 +67,9 @@ def update_user_colls() -> None:
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
-    util.bulk_write(db.oauth2_access_token, tokens)
+    if args.tokens:
+        tokens = [Token(u._id) for u in users]
+        util.bulk_write(db.oauth2_access_token, tokens)
 
 
 class User:
@@ -154,9 +158,7 @@ class User:
             "drawH": total_draws,
         }
 
-    def detach_perfs(
-        self,
-    ) -> Tuple[dict, list[perf.PerfStat]]:
+    def detach_perfs(self) -> Tuple[dict, list[perf.PerfStat]]:
         detached_list = list(self.perfStats.values())
         detached_perfs = self.perfs
         delattr(self, "perfStats")
@@ -233,9 +235,10 @@ class History:
 
 class Token:
     def __init__(self, uid: str):
-        self.plain = uid
+        token = "lip_" + uid
+        self.plain = token
         self.userId = uid
-        self._id = hashlib.sha256(uid.encode("utf-8")).hexdigest()
+        self._id = hashlib.sha256(token.encode("utf-8")).hexdigest()
         self.created = util.time_since_days_ago(30)
         self.description = "all access"
         self.scopes = _scopes
@@ -262,7 +265,7 @@ def _create_special_users():
     users.append(User("kid", [], [], False))
     users[-1].kid = True
     for i in range(10):
-        users.append(User(f"bot{i}", [], [], False))
+        users.append(User(f"bot{i}", [], ['ROLE_VERIFIED'] if i < 3 else [], False))
         users[-1].title = "BOT"
     users.append(User("w" * 20, [], [], False))
     users[-1].username = "W" * 20  # widest possible i think

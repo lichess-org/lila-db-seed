@@ -125,14 +125,13 @@ def _dict(o: object) -> dict:
 
 
 def _report(coll: str, res: pymongo.results.BulkWriteResult) -> str:
-    report = f"{coll}: {{"
+    report = f"{coll.ljust(24, '.')} "
     if env.args.drop or env.args.drop_db:
         report += f"Inserted: {res['nInserted']}"
     else:
-        report += (
-            f"Upserted: {res['nUpserted']}, Matched: {res['nMatched']}, "
-            f"Modified: {res['nModified']}"
-        )
+        report += f"Upserted: {str(res['nUpserted']).ljust(6, ' ')}"
+        report += f"Matched: {str(res['nMatched']).ljust(7, ' ')}"
+        report += f"Modified: {res['nModified']}"
     if res["writeErrors"]:
         report += f", Errors: {res['writeErrors']}"
-    return report + "}"
+    return report

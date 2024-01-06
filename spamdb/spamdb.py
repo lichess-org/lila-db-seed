@@ -4,6 +4,7 @@ import modules.forum as forum
 import modules.event as event
 import modules.user as user
 import modules.blog as blog
+import modules.feed as feed
 import modules.game as game
 import modules.team as team
 import modules.tour as tour
@@ -21,6 +22,7 @@ def main():
         teams = team.update_team_colls()
         msg.update_msg_colls()
         blog.update_blog_colls()
+        feed.update_feed_colls()
         event.update_event_colls()
         if env.args.es:
             search.update_elasticsearch(env.args.es_host, games, posts, teams)
