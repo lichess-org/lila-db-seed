@@ -46,13 +46,15 @@ def update_forum_colls() -> list:
         if hasattr(t, "lastPostId"):
             categs[t.categId].add_topic(t)
 
-    diagnostics = Categ("Diagnostics")
-    categs[diagnostics._id] = diagnostics
+    diagnostic = Categ("Diagnostic", False, "User diagnostic reports")
+    diagnostic.hidden = True
+    diagnostic.quiet = True
+    categs[diagnostic._id] = diagnostic
     headerPost = Post("admin")
     headerPost.text = "none"
-    headerTopic = Topic("none", diagnostics._id)
+    headerTopic = Topic("none", diagnostic._id)
     headerTopic.correlate_post(headerPost)
-    diagnostics.add_topic(headerTopic)
+    diagnostic.add_topic(headerTopic)
 
     if not args.no_create:
         util.bulk_write(db.f_categ, categs.values())
@@ -97,10 +99,10 @@ class Topic:
 
 
 class Categ:
-    def __init__(self, name: str, team: bool = False):
+    def __init__(self, name: str, team: bool = False, desc: str = env.random_topic()):
         self._id = ("team-" if team else "") + util.normalize_id(name)
         self.name = name
-        self.desc = env.random_topic()
+        self.desc = desc
         self.nbTopics = 0
         self.nbPosts = 0
         self.nbTopicsTroll = 0
