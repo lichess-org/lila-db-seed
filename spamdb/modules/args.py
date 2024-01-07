@@ -145,6 +145,13 @@ def parse_args() -> argparse.Namespace:
         """,
     )
     parser.add_argument(
+        "--coaches",
+        action="store_true",
+        help="""
+            if --coaches is present then 10% of users created will also be coaches, by  default no coaches are created.
+        """,
+    )
+    parser.add_argument(
         "--follow",
         type=float,
         default=0.16,

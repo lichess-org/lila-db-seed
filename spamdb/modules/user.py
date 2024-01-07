@@ -53,7 +53,7 @@ def update_user_colls() -> None:
             patrons.append(Patron(u._id))
         if args.streamers and util.chance(0.2):
             streamers.append(Streamer(u))
-        if args.coaches and util.chance(0.2):
+        if args.coaches and util.chance(0.1):
             coaches.append(Coach(u))
 
     users.extend(_create_special_users())
@@ -202,22 +202,24 @@ class Coach:
         self.profile = {
             "headline": random.choice(env.msgs),
             "hourlyRate": random.choice(env.msgs),
-            "description": random.choice(env.paragraphs),
-            "playingExperience": random.choice(env.paragraphs),
-            "teachingExperience": random.choice(env.paragraphs),
-            "otherExperience": random.choice(env.paragraphs),
-            "skills": random.choice(env.paragraphs),
-            "methodology": random.choice(env.paragraphs),
-            "youtubeVideos": env.random_social_media_links(),
-            "youtubeChannel": env.random_social_media_links()[0]
+            "description": random.choice(env.msgs),
+            "playingExperience": random.choice(env.msgs),
+            "teachingExperience": random.choice(env.msgs),
+            "otherExperience": random.choice(env.msgs),
+            "skills": random.choice(env.msgs),
+            "methodology": random.choice(env.msgs),
+            "youtubeVideos": random.choice(env.msgs),
+            "youtubeChannel": random.choice(env.msgs),
+            "publicStudies": random.choice(env.msgs),
         }
         self.picture = "coach.png"
         self.user = {
             "rating": u.profile["fideRating"],
-            "seenAt": util.time_since_days_ago(30),
+            "seenAt": u.seenAt,
         }
         self.nbReviews = 0
-        self.languages = ["en"]
+        u.roles.append("ROLE_COACH")
+        self.languages = ["en-US"]
         self.createdAt = util.time_since_days_ago(30)
         self.updatedAt = util.time_since_days_ago(30)
 
