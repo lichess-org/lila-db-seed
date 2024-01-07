@@ -27,6 +27,7 @@ def update_user_colls() -> None:
     users: list[User] = []
     patrons: list[Patron] = []
     streamers: list[Streamer] = []
+    coaches: list[Coach] = []
     rankings: list[perf.Ranking] = []
     perfstats: list[perf.PerfStat] = []
     userperfs: list[perf.UserPerfs] = []
@@ -52,6 +53,8 @@ def update_user_colls() -> None:
             patrons.append(Patron(u._id))
         if args.streamers and util.chance(0.2):
             streamers.append(Streamer(u))
+        if args.coaches and util.chance(0.1):
+            coaches.append(Coach(u))
 
     users.extend(_create_special_users())
 
@@ -62,6 +65,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.user4, users)
     util.bulk_write(db.plan_patron, patrons)
     util.bulk_write(db.streamer, streamers)
+    util.bulk_write(db.coach, coaches)
     util.bulk_write(db.ranking, rankings)
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
@@ -190,6 +194,34 @@ class Streamer:
             "userId": "lichessdotorg",
         }
 
+class Coach:
+    def __init__(self, u: User):
+        self._id = u._id
+        self.listed = True
+        self.available = True
+        self.profile = {
+            "headline": random.choice(env.msgs),
+            "hourlyRate": random.choice(env.msgs),
+            "description": random.choice(env.msgs),
+            "playingExperience": random.choice(env.msgs),
+            "teachingExperience": random.choice(env.msgs),
+            "otherExperience": random.choice(env.msgs),
+            "skills": random.choice(env.msgs),
+            "methodology": random.choice(env.msgs),
+            "youtubeVideos": random.choice(env.msgs),
+            "youtubeChannel": random.choice(env.msgs),
+            "publicStudies": random.choice(env.msgs),
+        }
+        self.picture = "coach.png"
+        self.user = {
+            "rating": u.profile["fideRating"],
+            "seenAt": u.seenAt,
+        }
+        self.nbReviews = 0
+        u.roles.append("ROLE_COACH")
+        self.languages = ["en-US"]
+        self.createdAt = util.time_since_days_ago(30)
+        self.updatedAt = util.time_since_days_ago(30)
 
 class Patron:
     def __init__(self, uid: str):
