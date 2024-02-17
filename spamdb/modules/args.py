@@ -140,8 +140,16 @@ def parse_args() -> argparse.Namespace:
         "--streamers",
         action="store_true",
         help="""
-            if --streamers is present then 20% of users created will also be
+            if --streamers is present then 20%% of users created will also be
             streamers. by default no streamers are created.
+        """,
+    )
+    parser.add_argument(
+        "--coaches",
+        action="store_true",
+        help="""
+            if --coaches is present then 10%% of users created will also be
+            coaches, by  default no coaches are created.
         """,
     )
     parser.add_argument(
@@ -158,7 +166,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--days",
         type=int,
-        default="120",
+        default=120,
         help="""
             number of days to generate data for. (default: 120)
             all events will be compressed into this time frame.
