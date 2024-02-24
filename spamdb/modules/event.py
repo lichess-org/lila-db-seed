@@ -2,7 +2,7 @@ import enum
 import bson
 from datetime import datetime
 import modules.util as util
-from modules.seed import env
+from modules.env import env
 
 
 def update_event_colls() -> None:

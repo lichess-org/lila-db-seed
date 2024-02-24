@@ -1,4 +1,4 @@
-from modules.seed import env
+from modules.env import env
 import modules.util as util
 
 

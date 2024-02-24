@@ -8,8 +8,8 @@ import modules.util as util
 import requests
 from modules.args import parse_args
 
-# files used in seed.__init__ are found in spamdb/data folder
-class Seed:
+# files used in Env.__init__ are found in spamdb/data folder
+class Env:
     def __init__(self):
         args = self.args = parse_args()
         self.user_bg_mode = args.user_bg
@@ -31,6 +31,7 @@ class Seed:
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
+        self.videos: list[dict] = self._read_bson("video.bson")
         self.seeds = dict[str, int]()
         self.dump_dir: str = None
         self.bson_mode: bool = True  # False means json mode
@@ -148,4 +149,4 @@ class Seed:
                     self.custom_passwords[uid] = fields[1].lstrip()
 
 
-env = Seed()  # used by other modules
+env = Env()  # used by other modules

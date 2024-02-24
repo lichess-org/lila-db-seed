@@ -10,7 +10,8 @@ import modules.team as team
 import modules.tour as tour
 import modules.msg as msg
 import modules.search as search
-from modules.seed import env
+import modules.video as video
+from modules.env import env
 
 def main():
     with _MongoContextMgr(env.args.uri, env.args.drop_db) as db:
@@ -24,6 +25,7 @@ def main():
         blog.update_blog_colls()
         feed.update_feed_colls()
         event.update_event_colls()
+        video.update_video_colls()
         if env.args.es:
             search.update_elasticsearch(env.args.es_host, games, posts, teams)
 

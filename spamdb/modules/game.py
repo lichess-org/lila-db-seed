@@ -2,7 +2,7 @@ import random
 import bson
 import base64
 from modules.event import events
-from modules.seed import env
+from modules.env import env
 import modules.util as util
 
 

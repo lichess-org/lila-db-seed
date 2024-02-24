@@ -1,6 +1,6 @@
 import json
 import http.client
-from modules.seed import env
+from modules.env import env
 from modules.game import Game
 from modules.forum import Post
 from modules.team import Team

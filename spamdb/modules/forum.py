@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 from modules.event import events
-from modules.seed import env
+from modules.env import env
 import modules.util as util
 
 

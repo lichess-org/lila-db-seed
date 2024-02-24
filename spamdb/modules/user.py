@@ -2,7 +2,7 @@ import bson
 import random
 import hashlib
 from datetime import datetime, timedelta
-from modules.seed import env
+from modules.env import env
 from modules.event import events
 import modules.perf as perf
 import modules.util as util

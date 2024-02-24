@@ -1,6 +1,6 @@
 import random
 import modules.util as util
-from modules.seed import env
+from modules.env import env
 
 
 def update_tour_colls() -> None:

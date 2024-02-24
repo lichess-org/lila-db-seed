@@ -1,6 +1,6 @@
 import random
 from modules.event import events
-from modules.seed import env
+from modules.env import env
 import modules.forum as forum
 import modules.util as util
 
