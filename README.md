@@ -5,11 +5,14 @@ mongorestore dump
 ```
 # Or...
 ###  Use spamdb to fully populate your database:
-[python3.9+](https://www.python.org/) and the pymongo module are both required. If you don't have python3, use your package manager or the [downloads page](https://www.python.org/downloads/) to install it, then get pip3 and pymongo with command line:
+[python3.9+](https://www.python.org/) is required. If you don't have python3, use your package manager or the [downloads page](https://www.python.org/downloads/) to install it, then install the necessary packages: 
 
-```
+```sh
 python -m ensurepip --upgrade
-pip3 install pymongo
+# not strictly necessary but recommended, use a virtual environment
+python3 -m venv venv --upgrade-deps && source venv/bin/activate
+# install required packages
+pip3 install -r spamdb/requirements.txt
 ```
 
 The `lila-db-seed/spamdb/spamdb.py` script will generate semi-realistic dummy data that is useful for testing and makes your dev instance a lot more colorful.  Usage help:
