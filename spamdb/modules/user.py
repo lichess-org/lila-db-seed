@@ -292,6 +292,7 @@ def _create_special_users():
     users.append(User("alt", ["alt"], [], False))
     users.append(User("boost", ["boost"], [], False))
     users.append(User("engine", ["engine"], [], False))
+    users.append(User('zerogames', [], [], False))
     users.append(User("coach", [], ["ROLE_COACH"], False))
     users.append(User("teacher", [], ["ROLE_TEACHER"], False))
     users.append(User("kid", [], [], False))
@@ -342,6 +343,7 @@ _scopes: list[str] = [
     "follow:write",
     "msg:write",
     "board:play",
+    "bot:play",
     "engine:read",
     "engine:write",
     "web:login",
