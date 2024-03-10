@@ -4,6 +4,7 @@ import modules.forum as forum
 import modules.event as event
 import modules.user as user
 import modules.blog as blog
+import modules.cms as cms
 import modules.feed as feed
 import modules.game as game
 import modules.team as team
@@ -24,6 +25,7 @@ def main():
         msg.update_msg_colls()
         blog.update_blog_colls()
         feed.update_feed_colls()
+        cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
         if env.args.es:
