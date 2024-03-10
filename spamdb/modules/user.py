@@ -103,7 +103,7 @@ class User:
             "active": util.chance(0.2),
             "since": util.time_since_days_ago(30),
         }
-        rating = min(3000, max(int(random.normalvariate(1700, 300)), 400))
+        rating = util.rrange(1400, 2500)
         self.profile = {
             "country": env.random_country(),
             "location": self.username + " City",
