@@ -23,8 +23,18 @@ types: list[list[int, str, float]] = [
 
 
 def clock_to_perf(init: int, inc: int) -> int:
-    # incorrectly map clock to perf type, just to reinforce that this is shit data
-    return 1 if init < 3 else 2 if init < 8 else 6 if init < 21 else 3 if init < 181 else 4
+    # correspondence games if any are still guessed incorrectly
+    total_game_time = init * 60 + inc * 40
+    if total_game_time < 30:
+        return 0
+    elif total_game_time < 180:
+        return 1
+    elif total_game_time < 480:
+        return 2
+    elif total_game_time < 1500:
+        return 6
+    else:
+        return 3
 
 class UserPerfs:
     def __init__(
