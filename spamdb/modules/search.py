@@ -114,7 +114,6 @@ _game_mapping = {
         }
     },
     "mappings": {
-        "_source": {"enabled": False},
         "properties": {
             "s": {"type": "keyword", "doc_values": False},
             "t": {"type": "short", "doc_values": True},
@@ -147,7 +146,6 @@ _team_mapping = {
         }
     },
     "mappings": {
-        "_source": {"enabled": False},
         "properties": {
             "na": {"type": "text", "analyzer": "english", "boost": 10.0},
             "de": {"type": "text", "analyzer": "english", "boost": 2.0},
@@ -165,7 +163,6 @@ _forum_mapping = {
         }
     },
     "mappings": {
-        "_source": {"enabled": False},
         "properties": {
             "bo": {"type": "text", "analyzer": "english", "boost": 2.0},
             "to": {"type": "text", "analyzer": "english", "boost": 5.0},
