@@ -2,15 +2,20 @@ from modules.env import env
 import modules.util as util
 
 default_pages = [
-    ('about', 'About'),
-    ('tos', 'Terms of Service'),
-    ('privacy', 'Privacy'),
-    ('master', 'Title Verification'),
-    ('source', 'Source Code'),
-    ('help', 'Contribute'),
-    ('changelog', 'Changelog'),
-    ('thanks', 'Thank you!'),
-    ('ads', 'Ads'),
+    ['About', 'about'],
+    ['Terms of Service', 'tos'],
+    ['Privacy', 'privacy'],
+    ['Title Verification', 'master'],
+    ['Source Code', 'source'],
+    ['Contribute', 'help'],
+    ['Changelog', 'changelog'],
+    ['Thank you!', 'thanks'],
+    ['Ads', 'ads'],
+    ['Chess Calendar', 'broadcast-calendar', '/broadcast/calendar'],
+    ['About broadcasts', 'broadcasts', '/broadcast/help'],
+    ['Puzzle Racer', 'racer'],
+    ['Puzzle Storm', 'storm'],
+    ['Studies: Staff Picks', 'studies-staff-picks'],
 ]
 
 
@@ -23,8 +28,8 @@ def update_cms_colls() -> None:
 
     pages: list[CmsPage] = []
 
-    for slug, title in default_pages:
-        pages.append(CmsPage(slug, title))
+    for page in default_pages:
+        pages.append(CmsPage(page))
 
     if args.no_create:
         return
@@ -33,13 +38,15 @@ def update_cms_colls() -> None:
 
 
 class CmsPage:
-    def __init__(self, slug: str, title: str):
+    def __init__(self, page: list):
         self._id = env.next_id(CmsPage)
-        self.key = slug
-        self.canonicalPath = f'/{slug}'
-        self.title = title
+        self.key = page[1]
+        self.title = page[0]
         self.markdown = env.random_paragraph()
         self.language = 'en'
         self.live = True
         self.by = 'admin'
         self.at = util.time_since_days_ago(30)
+
+        if len(page) > 2:
+            self.canonicalPath = page[2]
