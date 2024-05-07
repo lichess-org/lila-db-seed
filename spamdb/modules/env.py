@@ -31,6 +31,10 @@ class Env:
         self.games: list[dict] = self._read_bson("game5.bson")
         self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
+        self.practice_studies: list[dict] = self._read_bson("study.bson")
+        self.practice_chapters: list[dict] = self._read_bson("study_chapter_flat.bson")
+        with open(os.path.join(self.data_path, "practice-config.txt"), encoding='utf-8') as f:
+            self.practice_config = f.read()
         self.videos: list[dict] = self._read_bson("video.bson")
         self.seeds = dict[str, int]()
         self.dump_dir: str = None

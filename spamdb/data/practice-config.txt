@@ -1,0 +1,119 @@
+sections = [
+{
+  name = Checkmates # Arbitrary
+  id = checkmates # Arbitrary, for URL, no spaces
+  studies = [{
+    name = Piece Checkmates I
+    id = BJy6fEDf
+    desc = Basic checkmates
+  },{
+    name = Checkmate Patterns I
+    id = fE4k21MW
+    desc = Recognize the patterns
+  },{
+    name = Checkmate Patterns II
+    id = 8yadFPpU
+    desc = Recognize the patterns
+  },{
+    name = Checkmate Patterns III
+    id = PDkQDt6u
+    desc = Recognize the patterns
+  },{
+    name = Checkmate Patterns IV
+    id = 96Lij7wH
+    desc = Recognize the patterns
+  },{
+    name = Piece Checkmates II
+    id = Rg2cMBZ6
+    desc = Challenging checkmates
+  },{
+    name = Knight and Bishop mate
+    id = ByhlXnmM
+    desc = A lesson
+  },{
+    name = test
+    id = BeuBIQrR
+    desc = test
+  }]
+},
+{
+  name = Basic Tactics
+  id = basic-tactics
+  studies = [{
+    name = The Pin
+    id = 9ogFv8Ac
+    desc = Pin it to win it
+  },{
+    name = The Skewer
+    id = tuoBxVE5
+    desc = "Yum - skewers!"
+  },{
+    name = The Fork
+    id = Qj281y1p
+    desc = "Use the fork, Luke"
+  },{
+    name = Discovered Attacks
+    id = MnsJEWnI
+    desc = Including discovered checks
+  },{
+    name = Double Check
+    id = RUQASaZm
+    desc = A very powerful tactic
+  },{
+    name = Overloaded Pieces
+    id = o734CNqp
+    desc = They have too much work
+  },{
+    name = Zwischenzug
+    id = ITWY4GN2
+    desc = In-between moves
+  }]
+},
+{
+  name = Intermediate Tactics
+  id = intermediate-tactics
+  studies = [{
+    name = Zugzwang
+    id = 9cKgYrHb
+    desc = Being forced to move
+  },{
+    name = Interference
+    id = g1fxVZu9
+    desc = Also known as obstruction
+  },{
+    name = Greek Gift
+    id = s5pLU7Of
+    desc = Study the greek gift sacrifice
+  }]
+},
+{
+  name = Pawn Endgames
+  id = pawn-endgames
+  studies = [{
+    name = Key Squares
+    id = xebrDvFe
+    desc = Reach a key square
+  },{
+    name = 7th-Rank Rook Pawn 
+    id = MkDViieT
+    desc = With a Passive Rook
+  },{
+    name = 7th-Rank Pawn
+    id = pt20yRkT
+    desc = Versus a Queen
+  }]
+},
+{
+  name = Rook Endgames
+  id = rook-endgames
+  studies = [{
+    name = Basic Rook Endings
+    id = 9c6GrCTk
+    desc = "Lucena, Philidor"
+  },{
+    name = Practical Rook Endings
+    id = Z1DKk4Rl
+    desc = Rook endings with several pawns
+  }]
+}
+]

@@ -24,6 +24,7 @@ def update_msg_colls() -> None:
                 msgs.append(Msg(u1, u2, util.time_shortly_after(msgs[-1].date)))
 
             threads[_tid(u1, u2)] = MsgThread(u1, u2, msgs[-1])
+    if args.no_create: return
 
     util.bulk_write(db.msg_msg, msgs)
     util.bulk_write(db.msg_thread, threads.values())
