@@ -29,9 +29,9 @@ def main():
         cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
-        study.update_study_colls()
+        studies = study.update_study_colls()
         if env.args.es:
-            search.update_elasticsearch(env.args.es_host, games, posts, teams)
+            search.update_elasticsearch(env.args.es_host, games, posts, teams, studies)
 
 class _MongoContextMgr:
     def __init__(self, uri, drop_db=False):
