@@ -5,20 +5,24 @@ from modules.game import Game
 from modules.forum import Post
 from modules.team import Team
 from modules.perf import clock_to_perf
+from modules.study import Study
 
-
-def update_elasticsearch(hostport: str, games: list[Game], posts: list[Post], teams: list[Team]):
+def update_elasticsearch(hostport: str, games: list[Game], posts: list[Post], teams: list[Team], studies: list[Study]) -> None:
     host, port = hostport.split(":")
     es = http.client.HTTPConnection(host, port)
     try:
         ngames = _make_indices(es, "game", _game_mapping, games, _game_to_index)
         nposts = _make_indices(es, "forum", _forum_mapping, posts, _post_to_index)
         nteams = _make_indices(es, "team", _team_mapping, teams, _team_to_index)
+        nstudy = _make_indices(es, "study", _study_mapping, studies, study_to_index)
         es.close()
 
-        print(f"elasticsearch........... {{game: {ngames}, forum: {nposts}, team: {nteams}}}")
-    except:
-        print("elasticsearch........... skipped, not running")
+        print(f"elasticsearch........... {{game: {ngames}, forum: {nposts}, team: {nteams}, study: {nstudy}}}")
+    except Exception as e:
+        if es.sock:
+            print(f"elasticsearch........... failed: {e}")
+        else:
+            print("elasticsearch........... skipped, not running")
 
 def _make_indices(
     es: http.client.HTTPConnection, index: str, mapping: dict, objects: list, builder
@@ -104,6 +108,19 @@ def _team_to_index(t: Team) -> str:
     op = {"index": {"_index": "team", "_id": t._id, "_type": "_doc"}}
     return json.dumps(op, indent=None) + "\n" + json.dumps(ti, indent=None) + "\n"
 
+def study_to_index(s: Study) -> str:
+    si = {
+        "name": s.name,
+        "owner": s.ownerId,
+        "members": list(s.members.keys()),
+        "chapterNames": " ",
+        "chapterTexts": " ",
+        "topics": s.topics if s.topics else " ",
+        "likes": s.likes,
+        "public": s.visibility == "public",
+    }
+    op = {"index": {"_index": "study", "_id": s._id, "_type": "_doc"}}
+    return json.dumps(op, indent=None) + "\n" + json.dumps(si, indent=None) + "\n"
 
 _game_mapping = {
     "settings": {
@@ -170,6 +187,28 @@ _forum_mapping = {
             "ti": {"type": "keyword", "doc_values": False},
             "tr": {"type": "boolean", "doc_values": False},
             "da": {"type": "date"},
+        },
+    },
+}
+
+_study_mapping = {
+    "settings": {
+        "index": {
+            "refresh_interval": "10s",
+            "number_of_shards": 1,
+            "number_of_replicas": 0,
+        }
+    },
+    "mappings": {
+        "properties": {
+            "name": {"type": "text", "analyzer": "english", "boost": 10.0},
+            "owner": {"type": "keyword", "doc_values": False, "boost": 2.0},
+            "members": {"type": "keyword", "doc_values": False, "boost": 1.0},
+            "chapterNames": {"type": "text", "analyzer": "english", "boost": 4.0},
+            "chapterTexts": {"type": "text", "analyzer": "english", "boost": 1.0},
+            "topics": {"type": "text", "analyzer": "english", "boost": 5.0},
+            "likes": {"type": "short", "doc_values": True},
+            "public": {"type": "boolean", "doc_values": False},
         },
     },
 }
