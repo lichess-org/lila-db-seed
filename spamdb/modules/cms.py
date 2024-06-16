@@ -5,7 +5,7 @@ default_pages = [
     ['About', 'about'],
     ['Terms of Service', 'tos'],
     ['Privacy', 'privacy'],
-    ['Title Verification', 'master'],
+    ['Title Verification', 'title-verify-index', '/verify-title'],
     ['Source Code', 'source'],
     ['Contribute', 'help'],
     ['Changelog', 'changelog'],
