@@ -39,7 +39,7 @@ def update_cms_colls() -> None:
     for page in default_pages:
         pages.append(CmsPage(page))
 
-    pages.append(CmsPage(['Mobile', 'mobile-apk'], body=''))
+    pages.append(CmsPage(['Mobile', 'mobile-apk'], empty=True))
 
     if args.no_create:
         return
@@ -48,7 +48,19 @@ def update_cms_colls() -> None:
 
 
 class CmsPage:
-    def __init__(self, page: list, body: str = env.random_paragraph()):
+    def __init__(self, page: list, empty=False):
+        if empty:
+            body = ''
+        else:
+            body = "\n\n".join([
+                f'## {env.random_topic()}',
+                f'{env.random_paragraph()}',
+                f'### {env.random_topic()}',
+                f'{env.random_paragraph()}',
+                f'#### {env.random_topic()}',
+                f'{env.random_paragraph()}',
+            ])
+
         self._id = env.next_id(CmsPage)
         self.key = page[1]
         self.title = page[0]
