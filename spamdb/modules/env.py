@@ -137,6 +137,7 @@ class Env:
         "hunter",
         "puzzler",
         "api",
+        "broadcaster",
     ]
 
     def _read_users(self) -> None:

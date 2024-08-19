@@ -5,7 +5,7 @@ default_pages = [
     ['About', 'about'],
     ['Terms of Service', 'tos'],
     ['Privacy', 'privacy'],
-    ['Title Verification', 'master'],
+    ['Title Verification', 'title-verify-index', '/verify-title'],
     ['Source Code', 'source'],
     ['Contribute', 'help'],
     ['Changelog', 'changelog'],
@@ -16,6 +16,14 @@ default_pages = [
     ['Puzzle Racer', 'racer'],
     ['Puzzle Storm', 'storm'],
     ['Studies: Staff Picks', 'studies-staff-picks'],
+    ['Crazyhouse', 'variant-crazyhouse', '/variant/crazyhouse'],
+    ['Chess960', 'variant-chess960', '/variant/chess960'],
+    ['KingOfTheHill', 'variant-kingOfTheHill', '/variant/kingOfTheHill'],
+    ['ThreeCheck', 'variant-threeCheck', '/variant/threeCheck'],
+    ['Antichess', 'variant-antichess', '/variant/antichess'],
+    ['Atomic', 'variant-atomic', '/variant/atomic'],
+    ['Horde', 'variant-horde', '/variant/horde'],
+    ['RacingKings', 'variant-racingKings', '/variant/racingKings'],
 ]
 
 
@@ -31,6 +39,8 @@ def update_cms_colls() -> None:
     for page in default_pages:
         pages.append(CmsPage(page))
 
+    pages.append(CmsPage(['Mobile', 'mobile-apk'], empty=True))
+
     if args.no_create:
         return
 
@@ -38,11 +48,23 @@ def update_cms_colls() -> None:
 
 
 class CmsPage:
-    def __init__(self, page: list):
+    def __init__(self, page: list, empty=False):
+        if empty:
+            body = ''
+        else:
+            body = "\n\n".join([
+                f'## {env.random_topic()}',
+                f'{env.random_paragraph()}',
+                f'### {env.random_topic()}',
+                f'{env.random_paragraph()}',
+                f'#### {env.random_topic()}',
+                f'{env.random_paragraph()}',
+            ])
+
         self._id = env.next_id(CmsPage)
         self.key = page[1]
         self.title = page[0]
-        self.markdown = env.random_paragraph()
+        self.markdown = body
         self.language = 'en'
         self.live = True
         self.by = 'admin'

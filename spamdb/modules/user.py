@@ -285,6 +285,7 @@ def _create_special_users():
     users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
     users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
     users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
+    users.append(User("broadcaster", [], [], False))
     users.append(User("api", [], ["ROLE_API_HOG"], False))
     users.append(User("troll", ["troll"], [], False))
     users.append(User("rankban", ["rankban"], [], False))
