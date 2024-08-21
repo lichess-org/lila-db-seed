@@ -10,20 +10,20 @@ def update_puzzle_colls() -> None:
     if args.drop:
         db.puzzle2_round.drop()
 
-    puzzles: list[PuzzleItem] = []
+    puzzles: list[PuzzleRound] = []
 
     for uid in env.uids:
-        for _ in range(10):
-            puzzle = random.choice(env.puzzles)
-            pid = f"{uid}:{puzzle.get("_id")}"
-            puzzles.append(PuzzleItem(uid, pid))
+        puzzles = random.sample(env.puzzles, 10)
+        for i in range(10):
+            pid = f"{uid}:{puzzles[i].get("_id")}"
+            puzzles.append(PuzzleRound(uid, pid))
 
     if args.no_create:
         return
     
     util.bulk_write(db.puzzle2_round, puzzles)
 
-class PuzzleItem:
+class PuzzleRound:
     def __init__(self, uid: str, pid: str):
         self._id = pid
         self.w = random.choice([True, False])
