@@ -27,5 +27,5 @@ class PuzzleRound:
     def __init__(self, uid: str, pid: str):
         self._id = pid
         self.w = random.choice([True, False])
-        self.d = util.time_since_days_ago()
+        self.d = util.time_since_days_ago(10)
         self.u = uid
