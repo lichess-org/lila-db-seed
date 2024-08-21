@@ -15,8 +15,7 @@ def update_puzzle_colls() -> None:
     for uid in env.uids:
         for _ in range(10):
             puzzle = random.choice(env.puzzles)
-            print(puzzle)
-            pid = f"{uid}:{puzzle._id}"
+            pid = f"{uid}:{puzzle.get("_id")}"
             puzzles.append(PuzzleItem(uid, pid))
 
     if args.no_create:
