@@ -24,6 +24,7 @@ def main():
     import modules.blog as blog
     import modules.cms as cms
     import modules.feed as feed
+    import modules.puzzle as puzzle
     import modules.game as game
     import modules.team as team
     import modules.tour as tour
@@ -57,6 +58,7 @@ def main():
         msg.update_msg_colls()
         blog.update_blog_colls()
         feed.update_feed_colls()
+        puzzle.update_puzzle_colls()
         cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
