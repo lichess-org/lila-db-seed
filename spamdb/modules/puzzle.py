@@ -12,9 +12,11 @@ def update_puzzle_colls() -> None:
 
     puzzles: list[PuzzleItem] = []
 
-    for (uid, pid) in (env.uids, env.puzzles):
+    for uid in env.uids:
         for _ in range(10):
-            puzzles.append(PuzzleItem(uid, pid._id))
+            puzzle = random.choice(env.puzzles)
+            pid = f"{uid}:{puzzle._id}"
+            puzzles.append(PuzzleItem(uid, pid))
 
     if args.no_create:
         return
