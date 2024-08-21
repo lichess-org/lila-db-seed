@@ -13,9 +13,9 @@ def update_puzzle_colls() -> None:
     puzzles: list[PuzzleRound] = []
 
     for uid in env.uids:
-        puzzles = random.sample(env.puzzles, 10)
+        sample_puzzles = random.sample(env.puzzles, 10)
         for i in range(10):
-            pid = f"{uid}:{puzzles[i].get("_id")}"
+            pid = f"{uid}:{sample_puzzles[i].get("_id")}"
             puzzles.append(PuzzleRound(uid, pid))
 
     if args.no_create:
