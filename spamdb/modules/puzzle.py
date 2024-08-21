@@ -12,8 +12,9 @@ def update_puzzle_colls() -> None:
 
     puzzles: list[PuzzleItem] = []
 
-    for uid in env.uids:
-        puzzles.append(PuzzleItem(uid))
+    for (uid, pid) in (env.uids, env.puzzles):
+        for _ in range(10):
+            puzzles.append(PuzzleItem(uid, pid._id))
 
     if args.no_create:
         return
@@ -21,8 +22,8 @@ def update_puzzle_colls() -> None:
     util.bulk_write(db.puzzle2_round, puzzles)
 
 class PuzzleItem:
-    def __init__(self, uid: str):
-        self._id = env.next_id(PuzzleItem)
+    def __init__(self, uid: str, pid: str):
+        self._id = pid
         self.w = random.choice([True, False])
         self.d = util.time_since_days_ago()
         self.u = uid
