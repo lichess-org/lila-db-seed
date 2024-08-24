@@ -10,7 +10,7 @@
     "ratings": {
       "classical": 700
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "e55a27d8c06d.pb"
@@ -21,7 +21,7 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -30,7 +30,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66bf3b9766a9c42a118485f5",
@@ -43,7 +43,7 @@
     "ratings": {
       "classical": 1300
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "4b8689f61fa9.pb"
@@ -54,7 +54,7 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -63,7 +63,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66be3ea366a9c42a11790fa6",
@@ -76,19 +76,19 @@
     "ratings": {
       "classical": 1200
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 5,
       "net": "67c57f99ae55.pb"
     },
-    "sounds": {},
+    "sounds": { },
     "filters": {
       "moveDecay": {
         "range": {
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -109,8 +109,8 @@
     "ratings": {
       "classical": 1900
     },
-    "books": [],
-    "sounds": {},
+    "books": [ ],
+    "sounds": { },
     "fish": {
       "multipv": 12,
       "by": {
@@ -123,7 +123,7 @@
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -140,7 +140,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "move",
+        "by": "move",
         "data": [
           [
             30,
@@ -171,15 +171,15 @@
         "depth": 1
       }
     },
-    "books": [],
-    "sounds": {},
+    "books": [ ],
+    "sounds": { },
     "filters": {
       "cplTarget": {
         "range": {
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -196,8 +196,8 @@
           "min": 0,
           "max": 100
         },
-        "from": "score",
-        "data": []
+        "by": "score",
+        "data": [ ]
       }
     }
   },
@@ -212,7 +212,7 @@
     "ratings": {
       "classical": 2100
     },
-    "books": [],
+    "books": [ ],
     "sounds": {
       "greeting": [
         {
@@ -235,7 +235,7 @@
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -252,7 +252,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "score",
+        "by": "score",
         "data": [
           [
             0.5,
@@ -277,7 +277,7 @@
     "ratings": {
       "classical": 800
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 4,
       "net": "e55a27d8c06d.pb"
@@ -288,7 +288,7 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -297,7 +297,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66bf528f66a9c42a11859031",
@@ -316,15 +316,15 @@
         "depth": 2
       }
     },
-    "books": [],
-    "sounds": {},
+    "books": [ ],
+    "sounds": { },
     "filters": {
       "cplTarget": {
         "range": {
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -341,7 +341,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "score",
+        "by": "score",
         "data": [
           [
             0.5,
@@ -362,8 +362,8 @@
     "ratings": {
       "classical": 2000
     },
-    "books": [],
-    "sounds": {},
+    "books": [ ],
+    "sounds": { },
     "fish": {
       "multipv": 12,
       "by": {
@@ -376,7 +376,7 @@
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -393,7 +393,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "move",
+        "by": "move",
         "data": [
           [
             30,
@@ -418,8 +418,8 @@
     "ratings": {
       "classical": 1800
     },
-    "books": [],
-    "sounds": {},
+    "books": [ ],
+    "sounds": { },
     "fish": {
       "multipv": 12,
       "by": {
@@ -432,7 +432,7 @@
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -449,7 +449,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "move",
+        "by": "move",
         "data": [
           [
             25,
@@ -474,19 +474,19 @@
     "ratings": {
       "classical": 1400
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "851bf7ab180c.pb"
     },
-    "sounds": {},
+    "sounds": { },
     "filters": {
       "moveDecay": {
         "range": {
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -507,7 +507,7 @@
     "ratings": {
       "classical": 1000
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "1a36a309ccd5.pb"
@@ -518,7 +518,7 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -527,7 +527,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66bf52bf66a9c42a11859283",
@@ -546,14 +546,14 @@
         "depth": 3
       }
     },
-    "books": [],
+    "books": [ ],
     "filters": {
       "cplTarget": {
         "range": {
           "min": 0,
           "max": 150
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             -2,
@@ -570,7 +570,7 @@
           "min": 0,
           "max": 100
         },
-        "from": "score",
+        "by": "score",
         "data": [
           [
             0.5,
@@ -579,7 +579,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66be0aa766a9c42a1176b3ba",
@@ -592,7 +592,7 @@
     "ratings": {
       "classical": 1100
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "1a36a309ccd5.pb"
@@ -603,7 +603,7 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
+        "by": "time",
         "data": [
           [
             3,
@@ -612,7 +612,7 @@
         ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   },
   {
     "_id": "66be11da66a9c42a1177088d",
@@ -625,7 +625,7 @@
     "ratings": {
       "classical": 900
     },
-    "books": [],
+    "books": [ ],
     "zero": {
       "multipv": 8,
       "net": "e55a27d8c06d.pb"
@@ -636,10 +636,10 @@
           "min": 0,
           "max": 1
         },
-        "from": "time",
-        "data": []
+        "by": "time",
+        "data": [ ]
       }
     },
-    "sounds": {}
+    "sounds": { }
   }
 ]
