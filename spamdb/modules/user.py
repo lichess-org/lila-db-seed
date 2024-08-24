@@ -278,13 +278,15 @@ class Token:
 
 def _create_special_users():
     users: list[User] = []
-    users.append(User("lichess", [], ["ROLE_SUPER_ADMIN"], False))
-    users.append(User("superadmin", [], ["ROLE_SUPER_ADMIN"], False))
-    users[-1].title = "LM"
-    users.append(User("admin", [], ["ROLE_ADMIN"], False))
-    users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
-    users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
-    users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
+    users.append(User("lichess", [], [], False))
+    if env.args.su is not None:
+        users.append(User(env.args.su, [], ["ROLE_SUPER_ADMIN"], False))
+    else:
+        users.append(User("superadmin", [], ["ROLE_SUPER_ADMIN"], False))
+        users.append(User("admin", [], ["ROLE_ADMIN"], False))
+        users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
+        users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
+        users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
     users.append(User("broadcaster", [], [], False))
     users.append(User("api", [], ["ROLE_API_HOG"], False))
     users.append(User("troll", ["troll"], [], False))

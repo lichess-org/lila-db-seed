@@ -32,6 +32,7 @@ def main():
     import modules.search as search
     import modules.video as video
     import modules.study as study
+    import modules.local as local
     from modules.env import env
 
     class _MongoContextMgr:
@@ -63,6 +64,7 @@ def main():
         event.update_event_colls()
         video.update_video_colls()
         studies = study.update_study_colls()
+        local.update_local_colls()
         if env.args.es:
             search.update_elasticsearch(env.args.es_host, games, posts, teams, studies)
 

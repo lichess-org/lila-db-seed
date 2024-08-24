@@ -53,6 +53,14 @@ def parse_args() -> argparse.Namespace:
         """,
     )
     parser.add_argument(
+        "--su",
+        type=str,
+        help="""
+            create the specified user as the sole super admin. suppress generation
+            of all other privileged users (no superadmin, admin, shusher, etc).
+        """
+    )
+    parser.add_argument(
         "--tokens",
         action="store_true",
         help="""
@@ -184,6 +192,11 @@ def parse_args() -> argparse.Namespace:
             from accumulating by including the --no-timeline argument. this will
             suppress their generation for this run.
         """,
+    )
+    parser.add_argument(
+        "--local-bots",
+        action="store_true",
+        help="create local bots & assets for private play",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(

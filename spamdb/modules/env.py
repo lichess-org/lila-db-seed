@@ -3,9 +3,8 @@ import os
 import subprocess
 import base64
 import bson
-import argparse
-import modules.util as util
 import requests
+import modules.util as util
 from modules.args import parse_args
 
 # files used in Env.__init__ are found in spamdb/data folder
@@ -45,7 +44,7 @@ class Env:
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
         )
         if args.su_password is not None:
-            for admin in self._special_users:
+            for admin in self._get_special_users():
                 self.custom_passwords[admin] = args.su_password
         if args.users is not None and args.users > -1:
             self.uids = self._genN(max(args.users, 2), self.uids, "user")
@@ -129,16 +128,15 @@ class Env:
         with open(os.path.join(self.data_path, filename), "rb") as f:
             return bson.decode_all(f.read())
 
-    _special_users: list[str] = [
-        "lichess",
-        "superadmin",
-        "admin",
-        "shusher",
-        "hunter",
-        "puzzler",
-        "api",
-        "broadcaster",
-    ]
+    def _get_special_users(self) -> list[str]:
+        return [self.args.su] if self.args.su else [
+            "lichess",
+            "superadmin",
+            "admin",
+            "shusher",
+            "hunter",
+            "puzzler",
+        ]
 
     def _read_users(self) -> None:
         with open(os.path.join(self.data_path, "uids.txt"), "r") as f:
@@ -148,7 +146,7 @@ class Env:
                     continue
                 fields = entry.split("/", 1)
                 uid = fields[0].lower().rstrip()
-                if uid not in self._special_users:
+                if uid not in self._get_special_users():
                     self.uids.append(uid)
                 if len(fields) > 1:
                     self.custom_passwords[uid] = fields[1].lstrip()
