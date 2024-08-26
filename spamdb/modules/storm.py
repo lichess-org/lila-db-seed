@@ -11,17 +11,17 @@ def update_storm_colls() -> None:
     if args.drop:
         db.storm_day.drop()
 
-    storms: list[StormRound] = []
+    storms: list[StormDay] = []
 
     for uid in env.uids:
-        storms.append(StormRound(uid))
+        storms.append(StormDay(uid))
 
     if args.no_create:
         return
 
     util.bulk_write(db.storm_day, storms)
 
-class StormRound:
+class StormDay:
     def __init__(self, uid: str):
         self._id = f'{uid}:{(datetime.today() - datetime(2010, 1, 1)).days}' # Get the correct day integer that represents the current date
         self.score = randint(1, 100)
