@@ -17,21 +17,6 @@ def parse_args() -> argparse.Namespace:
         default="mongodb://127.0.0.1/lichess",
     )
     parser.add_argument(
-        "--es",
-        action="store_true",
-        help="""
-            create elasticsearch indices for games, posts, and teams to allow
-            search functionality in lila.
-        """,
-    )
-    parser.add_argument(
-        "--es-host",
-        help="""
-            elasticsearch host and port (default: localhost:9200)
-        """,
-        default="localhost:9200",
-    )
-    parser.add_argument(
         "--password",
         "-p",
         type=str,
