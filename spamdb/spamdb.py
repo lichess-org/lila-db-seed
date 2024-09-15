@@ -30,7 +30,6 @@ def main():
     import modules.team as team
     import modules.tour as tour
     import modules.msg as msg
-    import modules.search as search
     import modules.video as video
     import modules.study as study
     import modules.local as local
@@ -53,10 +52,10 @@ def main():
     with _MongoContextMgr(env.args.uri, env.args.drop_db) as db:
         env.db = db
         user.update_user_colls()
-        games = game.update_game_colls()
+        game.update_game_colls()
         tour.update_tour_colls()
-        posts = forum.update_forum_colls()
-        teams = team.update_team_colls()
+        forum.update_forum_colls()
+        team.update_team_colls()
         msg.update_msg_colls()
         blog.update_blog_colls()
         feed.update_feed_colls()
@@ -65,10 +64,8 @@ def main():
         cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
-        studies = study.update_study_colls()
+        study.update_study_colls()
         local.update_local_colls()
-        if env.args.es:
-            search.update_elasticsearch(env.args.es_host, games, posts, teams, studies)
 
 if __name__ == "__main__":
     main()
