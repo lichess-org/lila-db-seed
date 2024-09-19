@@ -10,7 +10,7 @@ def main():
 
     if not os.path.isdir(venv_dir):
         venv.create(venv_dir, with_pip=True)
-        subprocess.check_call([os.path.join(venv_dir, "bin", "pip"), "install", "pymongo", "requests"])
+        subprocess.check_call([os.path.join(venv_dir, "bin", "pip"), "install", "pymongo==4.8", "requests"])
 
     if sys.prefix != os.path.abspath(venv_dir):
         python_executable = os.path.join(venv_dir, "bin", "python")
