@@ -6,11 +6,12 @@ import subprocess
 import venv
 
 def main():
-    venv_dir = os.path.join(os.path.dirname(__file__), "venv")
+    cur_path = os.path.dirname(__file__)
+    venv_dir = os.path.join(cur_path, "venv")
 
     if not os.path.isdir(venv_dir):
         venv.create(venv_dir, with_pip=True)
-        subprocess.check_call([os.path.join(venv_dir, "bin", "pip"), "install", "pymongo==4.8", "requests"])
+        subprocess.check_call([os.path.join(venv_dir, "bin", "pip"), "install", "-r", os.path.join(cur_path, "requirements.txt")])
 
     if sys.prefix != os.path.abspath(venv_dir):
         python_executable = os.path.join(venv_dir, "bin", "python")
