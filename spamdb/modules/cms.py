@@ -13,6 +13,7 @@ default_pages = [
     ['Ads', 'ads'],
     ['Chess Calendar', 'broadcast-calendar', '/broadcast/calendar'],
     ['About broadcasts', 'broadcasts', '/broadcast/help'],
+    ['Lichess Broadcaster App', 'broadcaster-app', '/broadcast/app'],
     ['Puzzle Racer', 'racer'],
     ['Puzzle Storm', 'storm'],
     ['Studies: Staff Picks', 'studies-staff-picks'],
