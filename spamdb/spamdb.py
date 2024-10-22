@@ -27,6 +27,7 @@ def main():
     import modules.feed as feed
     import modules.puzzle as puzzle
     import modules.storm as storm
+    import modules.simul as simul
     import modules.game as game
     import modules.team as team
     import modules.tour as tour
@@ -62,6 +63,7 @@ def main():
         feed.update_feed_colls()
         puzzle.update_puzzle_colls()
         storm.update_storm_colls()
+        simul.update_simul_colls()
         cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
