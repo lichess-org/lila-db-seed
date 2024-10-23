@@ -1,4 +1,5 @@
 import random
+from string import ascii_letters
 from modules.env import env
 import modules.util as util
 
@@ -21,7 +22,7 @@ def update_simul_colls() -> None:
 
 class Simul:
     def __init__(self, uid: str) -> None:
-        self._id = env.next_id(Simul, 8)
+        self._id = ''.join(random.sample(ascii_letters, 8))
         self.name = uid
         self.status = 10
         self.clock = {'config': {'limitSeconds': 1200, 'incrementSeconds': 60}, 'hostExtraTime': 0, 'hostExtraTimePerPlayer': 0}
@@ -31,7 +32,7 @@ class Simul:
         self.createdAt = util.time_since_days_ago(1)
         self.hostId = uid.lower()
         self.hostRating = random.randint(1000, 2500)
-        self.text = random.choice([env.topics])
+        self.text = random.choice(env.topics)
         self.conditions = {}
         self.hostProvisional = random.choice([True, False])
         self.hostSeenAt = util.time_since_days_ago(1)
