@@ -109,7 +109,7 @@ class EventApi:
                 "w": 0,
                 "l": 0,
                 "d": 0,
-                "r": [env.fide_map[uid], env.fide_map[uid]],
+                "r": [env.stable_rating(uid), env.stable_rating(uid)],
             },
         )
         if outcome == self.Outcome.DRAW:

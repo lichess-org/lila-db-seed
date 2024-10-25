@@ -4,6 +4,7 @@ import subprocess
 import base64
 import bson
 import requests
+import hashlib
 import modules.util as util
 from modules.args import parse_args
 
@@ -38,7 +39,6 @@ class Env:
         self.seeds = dict[str, int]()
         self.dump_dir: str = None
         self.bson_mode: bool = True  # False means json mode
-        self.fide_map: dict[str, int] = {}
         self.hash_cache: dict[str, int] = {}
         self.lila_crypt_path = os.path.join(
             os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
@@ -59,6 +59,9 @@ class Env:
             self.bson_mode = False
 
 
+    def stable_rating(self, uid: str) -> int:
+        return 1000 + int.from_bytes(hashlib.md5(uid.encode()).digest()) % 1500
+    
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_passwords.get(uid, self.default_password)
         if password in self.hash_cache:

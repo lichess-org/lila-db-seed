@@ -76,7 +76,7 @@ class TournamentPlayer:
         self._id = env.next_id(TournamentPlayer)
         self.uid = uid
         self.tid = tid
-        self.r = env.fide_map[uid]
+        self.r = env.stable_rating(uid)
         self.s = util.rrange(0, 35)
         self.m = self.s * 10000
         self.f = util.chance(self.s / 64)

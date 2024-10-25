@@ -18,6 +18,7 @@ def update_simul_colls() -> None:
     if args.no_create:
         return
 
+    db.simul.create_index([("hostSeenAt", -1)])
     util.bulk_write(db.simul, simuls)
 
 class Simul:
@@ -41,7 +42,7 @@ class Simul:
         self.hostRating = random.randint(1000, 2500)
         self.text = random.choice(env.topics)
         self.conditions = {}
-        self.hostProvisional = random.choice([True, False])
+        self.hostProvisional = False
         self.hostSeenAt = util.time_since_days_ago(1)
         self.color = random.choice(['white', 'black'])
         self.featurable = random.choice([True, False])

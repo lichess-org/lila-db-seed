@@ -44,7 +44,6 @@ def update_user_colls() -> None:
         for stat in stats:
             perfstats.append(stat)
             rankings.append(stat.get_ranking())
-        env.fide_map[uid] = users[-1].profile["fideRating"]
         tokens.append(Token(uid))
 
     for u in users:
@@ -96,14 +95,16 @@ class User:
         self.roles = []
         self.roles.extend(roles)
         self.marks = marks
-        if util.chance(0.1):
-            self.title = random.choice(_titles)
+        
         self.plan = {
             "months": 1,
             "active": util.chance(0.2),
             "since": util.time_since_days_ago(30),
         }
-        rating = util.rrange(1400, 2500)
+        rating = env.stable_rating(self._id)
+        if rating > 2100:
+            self.title = random.choice(_titles)
+        
         self.profile = {
             "country": env.random_country(),
             "location": self.username + " City",
