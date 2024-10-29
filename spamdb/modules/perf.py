@@ -61,9 +61,9 @@ class PerfStat:
         self.bestWins = self._results()
         self.worstLosses = self._results()
 
-        variant_variance = random.uniform(-0.03, 0.03)  # best variable name ever
+        variant_variance = random.uniform(-0.03, 0.03)
         win_ratio = 0.5 + variant_variance
-        r = rating + int(8000 * variant_variance)  # ass math at its best
+        r = rating + int(4000 * variant_variance)
         draw = int(num_games * random.uniform(draw_ratio / 5, draw_ratio))
         win = int(num_games * win_ratio - draw / 2)
 

@@ -37,6 +37,11 @@ def main():
     import modules.local as local
     from modules.env import env
 
+    if env.args.list_ratings:
+        for u in env.uids:
+            print(f"{u} {env.stable_rating(u)}")
+        return
+    
     class _MongoContextMgr:
         def __init__(self, uri, drop_db=False):
             self.client = pymongo.MongoClient(uri)

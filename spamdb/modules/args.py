@@ -183,6 +183,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="create local bots & assets for private play",
     )
+    parser.add_argument(
+        "--list-ratings",
+        action="store_true",
+        help="list all spamdb users along with their ratings then exit",
+    )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--dump-bson",
@@ -215,7 +220,7 @@ def parse_args() -> argparse.Namespace:
         "--drop-db",
         action="store_true",
         help="""
-        drop lichess database prior to any object creation.
+            drop lichess database prior to any object creation.
         """,
     )
     return parser.parse_args()

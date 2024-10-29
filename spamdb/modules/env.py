@@ -60,7 +60,10 @@ class Env:
 
 
     def stable_rating(self, uid: str) -> int:
-        return 1000 + int.from_bytes(hashlib.md5(uid.encode()).digest()) % 1500
+        try:
+            return 2400 - int(1800 * self.uids.index(uid) / len(self.uids))
+        except ValueError:
+            return 1500
     
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_passwords.get(uid, self.default_password)
