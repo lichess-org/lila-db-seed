@@ -18,7 +18,7 @@ def update_simul_colls() -> None:
     if args.no_create:
         return
 
-    db.simul.create_index([("hostSeenAt", -1)])
+    db.simul.create_index([("hostSeenAt", -1)], name="spamdb_hostSeenAt")
     util.bulk_write(db.simul, simuls)
 
 class Simul:
