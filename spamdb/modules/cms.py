@@ -25,6 +25,7 @@ default_pages = [
     ['Atomic', 'variant-atomic', '/variant/atomic'],
     ['Horde', 'variant-horde', '/variant/horde'],
     ['RacingKings', 'variant-racingKings', '/variant/racingKings'],
+    ['Your account has been closed', 'appeal-landing'],
 ]
 
 
