@@ -26,6 +26,7 @@ default_pages = [
     ['Horde', 'variant-horde', '/variant/horde'],
     ['RacingKings', 'variant-racingKings', '/variant/racingKings'],
     ['Your account has been closed', 'appeal-landing'],
+    ['Your account has been closed by your teacher', 'account-closed-by-teacher'],
 ]
 
 
