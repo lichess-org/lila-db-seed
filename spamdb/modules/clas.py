@@ -22,7 +22,7 @@ def update_clas_colls() -> None:
         return
 
     for clas_index in range(args.classes):
-        clas_name = "Class " + str(clas_index)
+        clas_name = "Class " + str(clas_index + 1)
         clas_id = ''.join(random.sample(ascii_letters + digits, 8))
         classes.append({
             "_id": clas_id,
