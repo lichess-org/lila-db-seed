@@ -4,7 +4,7 @@ from modules.env import env
 import modules.util as util
 from modules.user import User
 
-def update_clas_colls() -> list:
+def update_clas_colls() -> None:
     args = env.args
     db = env.db
 
@@ -17,8 +17,12 @@ def update_clas_colls() -> list:
     students: list[Student] = []
     users: list[User] = []
     student_index = 0
+    
+    if args.classes < 1:
+        return
 
-    for clas_name in ["CE1 A", "CE1 B", "CE1 C", "CM1 A", "CM1 B", "CM1 C"]:
+    for clas_index in range(args.classes):
+        clas_name = "Class " + str(clas_index)
         clas_id = ''.join(random.sample(ascii_letters + digits, 8))
         classes.append({
             "_id": clas_id,
@@ -33,7 +37,9 @@ def update_clas_colls() -> list:
             "viewedAt": util.time_since_days_ago(1)
         })
 
-        for _ in range(15):
+        if args.students < 1:
+            continue
+        for _ in range(args.students):
             student_index += 1
             students.append({
                 "_id": "student" + str(student_index) + ":" + clas_id,
