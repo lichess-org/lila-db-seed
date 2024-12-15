@@ -9,7 +9,7 @@ def update_clas_colls() -> None:
     db = env.db
 
     if args.drop:
-        db.clas.drop()
+        db.clas_clas.drop()
         db.clas_student.drop()
         db.clas_invite.drop()
 
