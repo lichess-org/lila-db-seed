@@ -125,6 +125,21 @@ def parse_args() -> argparse.Namespace:
         help="(default: 80)",
     )
     parser.add_argument(
+        "--classes",
+        type=int,
+        default=3,
+        help="""
+           (default: 3)
+           Classes are managed by special user teacher.
+        """
+    )
+    parser.add_argument(
+        "--students",
+        type=int,
+        default=10,
+        help="(default: 10)"
+    )
+    parser.add_argument(
         "--games",
         type=int,
         help="(default/max = # of objects in data/game5.bson (around 3000))",

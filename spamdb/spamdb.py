@@ -35,6 +35,7 @@ def main():
     import modules.video as video
     import modules.study as study
     import modules.local as local
+    import modules.clas as clas
     from modules.env import env
 
     if env.args.list_ratings:
@@ -74,6 +75,7 @@ def main():
         video.update_video_colls()
         study.update_study_colls()
         local.update_local_colls()
+        clas.update_clas_colls()
 
 if __name__ == "__main__":
     main()
