@@ -33,6 +33,7 @@ class Env:
         self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
         self.practice_studies: list[dict] = self._read_bson("study.bson")
         self.practice_chapters: list[dict] = self._read_bson("study_chapter_flat.bson")
+        self.eval_cache: list[dict] = self._read_bson("eval_cache2.bson")
         with open(os.path.join(self.data_path, "practice-config.txt"), encoding='utf-8') as f:
             self.practice_config = f.read()
         self.videos: list[dict] = self._read_bson("video.bson")
@@ -64,7 +65,7 @@ class Env:
             return 2400 - int(1800 * self.uids.index(uid) / len(self.uids))
         except ValueError:
             return 1500
-    
+
     def get_password_hash(self, uid: str) -> bytes:
         password = self.custom_passwords.get(uid, self.default_password)
         if password in self.hash_cache:
