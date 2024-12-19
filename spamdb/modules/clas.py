@@ -1,5 +1,6 @@
 import random
 from string import ascii_letters, digits
+from faker import Faker
 from modules.env import env
 import modules.util as util
 from modules.user import User
@@ -7,6 +8,7 @@ from modules.user import User
 def update_clas_colls() -> None:
     args = env.args
     db = env.db
+    fake = Faker()
 
     if args.drop:
         db.clas_clas.drop()
@@ -45,7 +47,7 @@ def update_clas_colls() -> None:
                 "_id": "student" + str(student_index) + ":" + clas_id,
                 "userId": "student" + str(student_index),
                 "clasId": clas_id,
-                "realName": "Student " + str(student_index) + " in class " + clas_name,
+                "realName": fake.name(),
                 "notes": "",
                 "managed": True,
                 "created": {
