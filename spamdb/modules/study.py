@@ -18,6 +18,7 @@ def update_study_colls() -> list:
 
     if not args.no_create:
         util.bulk_write(db.study, study)
+        util.create_index(db.study, { "uids": 1,"rank": -1 } )
         util.bulk_write(db.study_chapter_flat, env.practice_chapters)
         util.bulk_write(db.flag, [{"_id": "practice", "config": env.practice_config}]);
     return study

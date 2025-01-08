@@ -8,6 +8,13 @@ from datetime import timedelta, datetime
 from modules.env import env
 
 
+
+def create_index(
+    coll: pymongo.collection.Collection,
+    index: object
+) -> None:
+    coll.create_index(index)
+
 def bulk_write(
     coll: pymongo.collection.Collection,
     objs: list,
