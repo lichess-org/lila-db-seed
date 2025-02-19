@@ -21,8 +21,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             1
@@ -54,8 +54,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             0.19559361924686192
@@ -71,7 +71,7 @@
     "uid": "#maia",
     "author": "schlawg",
     "name": "Maia",
-    "description": "Maia was a famous author before she began modeling for Elle (c0).",
+    "description": "Maia was a famous author before she began modeling for lc0.",
     "image": "77363e67dd47.webp",
     "ratings": {
       "classical": 1200
@@ -88,8 +88,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             0.19559361924686192
@@ -123,8 +123,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             39.97907949790795
@@ -140,8 +140,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "move",
-        "data": [
+        "by": "max",
+        "move": [
           [
             30,
             19.53974895397489
@@ -160,7 +160,7 @@
     "uid": "#mitsoko",
     "author": "schlawg",
     "name": "Mitsoko",
-    "description": "Mitsoko, like most anime women, is an inexplicably powerful warrior.",
+    "description": "Mitsoko is an inexplicably powerful warrior.",
     "image": "317b669cc800.webp",
     "ratings": {
       "classical": 1500
@@ -179,8 +179,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             99.60251046025104
@@ -196,8 +196,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "score",
-        "data": [ ]
+        "by": "max",
+        "score": [ ]
       }
     }
   },
@@ -235,8 +235,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             29.93723849372385
@@ -252,8 +252,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "score",
-        "data": [
+        "by": "max",
+        "score": [
           [
             0.5,
             9.517520920502086
@@ -288,8 +288,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             1
@@ -324,8 +324,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             78.89121338912135
@@ -341,8 +341,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "score",
-        "data": [
+        "by": "max",
+        "score": [
           [
             0.5,
             40.0418410041841
@@ -376,8 +376,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             38.723849372384926
@@ -393,8 +393,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "move",
-        "data": [
+        "by": "max",
+        "move": [
           [
             30,
             19.12133891213389
@@ -432,8 +432,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             51.27615062761505
@@ -449,8 +449,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "move",
-        "data": [
+        "by": "max",
+        "move": [
           [
             25,
             29.163179916317983
@@ -486,8 +486,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             0.199581589958159
@@ -518,8 +518,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             0.7353425732217573
@@ -553,8 +553,8 @@
           "min": 0,
           "max": 150
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             -2,
             58.80753138075313
@@ -570,8 +570,8 @@
           "min": 0,
           "max": 100
         },
-        "by": "score",
-        "data": [
+        "by": "max",
+        "score": [
           [
             0.5,
             34.18410041841003
@@ -603,8 +603,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [
+        "by": "max",
+        "time": [
           [
             3,
             0.29182792887029285
@@ -636,8 +636,8 @@
           "min": 0,
           "max": 1
         },
-        "by": "time",
-        "data": [ ]
+        "by": "max",
+        "time": [ ]
       }
     },
     "sounds": { }
