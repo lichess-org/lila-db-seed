@@ -33,6 +33,14 @@ Usually, the script will generate a new set of data from inputs in the provided 
 
 ### Use `--su-password` to give the special (admin) users different passwords than the default if your dev instance will be exposed to others.
 
+### Creating lichess database indexes
+
+`lila-db-seed/spamdb/spamdb.py` does not create the indexes in lichess database. In case you need them, you can use https://github.com/lichess-org/lila/blob/master/bin/mongodb/indexes.js
+
+```bash
+mongosh --quiet lichess indexes.js
+```
+
 ## Seed Elasticsearch
 
 To push this data to elasticsearch, you can use the CLI tools from [lila-search](https://github.com/lichess-org/lila-search). See the CLI commands in the [lila-search README](https://github.com/lichess-org/lila-search?tab=readme-ov-file#cli-tool).

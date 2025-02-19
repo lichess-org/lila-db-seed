@@ -28,6 +28,7 @@ def main():
     import modules.puzzle as puzzle
     import modules.storm as storm
     import modules.simul as simul
+    import modules.analysis as analysis
     import modules.game as game
     import modules.team as team
     import modules.tour as tour
@@ -35,13 +36,14 @@ def main():
     import modules.video as video
     import modules.study as study
     import modules.local as local
+    import modules.clas as clas
     from modules.env import env
 
     if env.args.list_ratings:
         for u in env.uids:
             print(f"{u} {env.stable_rating(u)}")
         return
-    
+
     class _MongoContextMgr:
         def __init__(self, uri, drop_db=False):
             self.client = pymongo.MongoClient(uri)
@@ -69,11 +71,13 @@ def main():
         puzzle.update_puzzle_colls()
         storm.update_storm_colls()
         simul.update_simul_colls()
+        analysis.update_analysis_colls()
         cms.update_cms_colls()
         event.update_event_colls()
         video.update_video_colls()
         study.update_study_colls()
         local.update_local_colls()
+        clas.update_clas_colls()
 
 if __name__ == "__main__":
     main()

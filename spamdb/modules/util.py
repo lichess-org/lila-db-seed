@@ -8,6 +8,7 @@ from datetime import timedelta, datetime
 from modules.env import env
 
 
+
 def bulk_write(
     coll: pymongo.collection.Collection,
     objs: list,

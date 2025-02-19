@@ -5,3 +5,4 @@ idna==3.6
 pymongo==4.8.0
 requests==2.31.0
 urllib3==2.2.1
+faker==33.1.0
