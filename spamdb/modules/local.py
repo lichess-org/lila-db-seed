@@ -8,14 +8,14 @@ def update_local_colls() -> None:
     db = env.db
 
     if args.drop:
-        db.local_bots.drop()
-        db.local_assets.drop()
+        db.local_bot.drop()
+        db.local_asset.drop()
 
     if args.no_create:
         return
 
-    util.bulk_write(db.local_bots, _read_json("local.bots.json"))
-    util.bulk_write(db.local_assets, _read_json("local.assets.json"))
+    util.bulk_write(db.local_bot, _read_json("local.bots.json"))
+    util.bulk_write(db.local_asset, _read_json("local.assets.json"))
 
 def _read_json(file: str) -> list:
     with open(f"{env.data_path}/{file}", encoding='utf-8') as f:
