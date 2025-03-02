@@ -11,7 +11,13 @@ def main():
 
     if not os.path.isdir(venv_dir):
         venv.create(venv_dir, with_pip=True)
-        subprocess.check_call([os.path.join(venv_dir, "bin", "pip"), "install", "-r", os.path.join(cur_path, "requirements.txt")])
+    pip = os.path.join(venv_dir, "bin", "pip")
+    reqs = os.path.join(cur_path, "requirements.txt")
+    installed = {x.lower() for x in subprocess.check_output([pip, "freeze"], text=True).splitlines()}
+    with open(reqs, "r") as f:
+        if not {x.strip().lower() for x in f if x.strip() and not x.startswith('#')}.issubset(installed):
+            subprocess.check_call([pip,"install","--upgrade", "pip"])
+            subprocess.check_call([pip,"install","--upgrade", "-r", os.path.join(cur_path, "requirements.txt")])
 
     if sys.prefix != os.path.abspath(venv_dir):
         python_executable = os.path.join(venv_dir, "bin", "python")
