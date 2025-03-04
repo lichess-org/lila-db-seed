@@ -33,6 +33,7 @@ def update_user_colls() -> None:
     userperfs: list[perf.UserPerfs] = []
     history: list[History] = []
     tokens: list[Token] = []
+    playbans: list[Playban] = []
 
     follow_factor = args.follow
 
@@ -58,6 +59,8 @@ def update_user_colls() -> None:
 
     users.extend(_create_special_users())
 
+    playbans = [Playban("playban")]
+
     if args.no_create:
         return
 
@@ -70,6 +73,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.perf_stat, perfstats)
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
+    util.bulk_write(db.playban, playbans)
     if args.tokens:
         tokens = [Token(u._id) for u in users]
         util.bulk_write(db.oauth2_access_token, tokens)
@@ -277,6 +281,13 @@ class Token:
         self.scopes = _scopes
 
 
+class Playban:
+    def __init__(self, uid: str):
+        self._id = uid
+        self.c = -20
+        self.b = [{"date": util.time_since_days_ago(30), "mins": 999_999}]
+
+
 def _create_special_users():
     users: list[User] = []
     users.append(User("lichess", [], [], False))
@@ -295,6 +306,7 @@ def _create_special_users():
     users.append(User("troll", ["troll"], [], False))
     users.append(User("rankban", ["rankban"], [], False))
     users.append(User("reportban", ["reportban"], [], False))
+    users.append(User("playban", [], [], False))
     users.append(User("alt", ["alt"], [], False))
     users.append(User("boost", ["boost"], [], False))
     users.append(User("engine", ["engine"], [], False))
