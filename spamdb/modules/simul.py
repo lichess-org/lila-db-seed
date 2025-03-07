@@ -27,11 +27,11 @@ class Simul:
         self.status = 10
         self.clock = {
             'config': {
-                'limitSeconds': random.randint(300, 1800),
-                'incrementSeconds': random.randint(30, 180)
+                'limitSeconds': random.choice([10, 20, 60, 90]) * 60,
+                'incrementSeconds': random.choice([0, 5, 10, 15, 20]) * 10,
             },
-            'hostExtraTime': random.randint(0, 60),
-            'hostExtraTimePerPlayer': random.randint(0, 3)
+            'hostExtraTime': random.choice([0, 5, 10, 15, 20]),
+            'hostExtraTimePerPlayer': random.choice([0, 10, 20, 30, 40]),
         }
         self.applicants = []
         self.pairings = []
