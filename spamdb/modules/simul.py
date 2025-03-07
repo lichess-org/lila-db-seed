@@ -28,7 +28,7 @@ class Simul:
         self.clock = {
             'config': {
                 'limitSeconds': random.choice([10, 20, 60, 90]) * 60,
-                'incrementSeconds': random.choice([0, 5, 10, 15, 20]) * 10,
+                'incrementSeconds': random.choice([0, 5, 10, 15, 20]),
             },
             'hostExtraTime': random.choice([0, 5, 10, 15, 20]),
             'hostExtraTimePerPlayer': random.choice([0, 10, 20, 30, 40]),
