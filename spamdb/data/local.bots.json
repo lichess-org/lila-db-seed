@@ -113,9 +113,7 @@
     "sounds": { },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 5
-      }
+      "depth": 5
     },
     "filters": {
       "cplTarget": {
@@ -167,9 +165,7 @@
     },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 1
-      }
+      "depth": 1
     },
     "books": [ ],
     "sounds": { },
@@ -225,9 +221,7 @@
     },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 12
-      }
+      "depth": 12
     },
     "filters": {
       "cplTarget": {
@@ -312,9 +306,7 @@
     },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 2
-      }
+      "depth": 2
     },
     "books": [ ],
     "sounds": { },
@@ -366,9 +358,7 @@
     "sounds": { },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 6
-      }
+      "depth": 6
     },
     "filters": {
       "cplTarget": {
@@ -422,9 +412,7 @@
     "sounds": { },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 4
-      }
+      "depth": 4
     },
     "filters": {
       "cplTarget": {
@@ -542,9 +530,7 @@
     },
     "fish": {
       "multipv": 12,
-      "by": {
-        "depth": 3
-      }
+      "depth": 3
     },
     "books": [ ],
     "filters": {
