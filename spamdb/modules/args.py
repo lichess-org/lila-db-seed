@@ -193,11 +193,11 @@ def parse_args() -> argparse.Namespace:
             suppress their generation for this run.
         """,
     )
-    parser.add_argument(
-        "--local-bots",
-        action="store_true",
-        help="create local bots & assets for private play",
-    )
+    # parser.add_argument(
+    #     "--bots",
+    #     action="store_true",
+    #     help="create js bots & assets for private play",
+    # )
     parser.add_argument(
         "--list-ratings",
         action="store_true",

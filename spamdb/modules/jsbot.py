@@ -3,19 +3,19 @@ import modules.util as util
 import json
 
 
-def update_local_colls() -> None:
+def update_jsbot_colls() -> None:
     args = env.args
     db = env.db
 
     if args.drop:
-        db.local_bot.drop()
-        db.local_asset.drop()
+        db.jsbot.drop()
+        db.jsbot_asset.drop()
 
     if args.no_create:
         return
 
-    util.bulk_write(db.local_bot, _read_json("local.bots.json"))
-    util.bulk_write(db.local_asset, _read_json("local.assets.json"))
+    util.bulk_write(db.jsbot, _read_json("jsbot.json"))
+    util.bulk_write(db.jsbot_asset, _read_json("jsbot.asset.json"))
 
 def _read_json(file: str) -> list:
     with open(f"{env.data_path}/{file}", encoding='utf-8') as f:

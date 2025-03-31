@@ -41,7 +41,7 @@ def main():
     import modules.msg as msg
     import modules.video as video
     import modules.study as study
-    import modules.local as local
+    import modules.jsbot as jsbot
     import modules.clas as clas
     from modules.env import env
 
@@ -82,7 +82,7 @@ def main():
         event.update_event_colls()
         video.update_video_colls()
         study.update_study_colls()
-        local.update_local_colls()
+        jsbot.update_jsbot_colls()
         clas.update_clas_colls()
 
 if __name__ == "__main__":
