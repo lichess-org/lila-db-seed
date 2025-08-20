@@ -291,6 +291,7 @@ class Playban:
 def _create_special_users():
     users: list[User] = []
     users.append(User("lichess", [], [], False))
+    users.append(User("ai", [], [], False))
     if env.args.su is not None:
         users.append(User(env.args.su, [], ["ROLE_SUPER_ADMIN"], False))
     else:
