@@ -47,6 +47,8 @@ def update_user_colls() -> None:
             rankings.append(stat.get_ranking())
         tokens.append(Token(uid))
 
+    users.extend(_create_special_users())
+
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
             events.follow(u._id, util.time_since(u.createdAt), f)
@@ -56,8 +58,6 @@ def update_user_colls() -> None:
             streamers.append(Streamer(u))
         if args.coaches and util.chance(0.1):
             coaches.append(Coach(u))
-
-    users.extend(_create_special_users())
 
     playbans = [Playban("playban")]
 
@@ -324,6 +324,21 @@ def _create_special_users():
     users[-1].title = "WGM"
     users[-1].plan["active"] = True  # patron
     users[-1].plan["months"] = 12
+
+    for i in list(range(1, 13)) + [24, 36, 48, 60]:
+        patron = User(f"patron{i}", [], [], False)
+        patron.plan["active"] = True
+        patron.plan["months"] = i
+        patron.plan["since"] = datetime.now() - timedelta(days=30 * i)
+        users.append(patron)
+
+    lifetime = User("lifetime", [], [], False)
+    lifetime.plan["active"] = True
+    lifetime.plan["months"] = 12
+    lifetime.plan["since"] = datetime.now() - timedelta(days=30 * 12)
+    lifetime.plan["lifetime"] = True
+    users.append(lifetime)
+
     return users
 
 
