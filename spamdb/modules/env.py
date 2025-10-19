@@ -4,53 +4,57 @@ import subprocess
 import base64
 import bson
 import requests
-import hashlib
 import modules.util as util
 from modules.args import parse_args
+from pymongo.database import Database
+from typing import Any
+
 
 # files used in Env.__init__ are found in spamdb/data folder
 class Env:
+    db: Database[Any]
+
     def __init__(self):
         args = self.args = parse_args()
         self.user_bg_mode = args.user_bg
-        self.default_password = args.password
+        self.default_password = str(args.password)
         parent_path = os.path.dirname(os.path.dirname(__file__))
-        self.data_path: str = os.path.join(parent_path, "data")
+        self.data_path: str = os.path.join(parent_path, 'data')
         self.uids: list[str] = []
         self.custom_passwords: dict[str, str] = {}
         self._read_users()
-        self.countries: list[str] = self._read_strings("countries.txt")
-        self.teams: list[str] = self._read_strings("teams.txt")
-        self.msgs: list[str] = self._read_strings("msgs.txt")
-        self.categs: list[str] = self._read_strings("categs.txt")
-        self.topics: list[str] = self._read_strings("topics.txt")
-        self.paragraphs: list[str] = self._read_strings("paragraphs.txt")
-        self.social_media_links: list[str] = self._read_strings("social_media_links.txt")
-        self.bg_image_links: list[str] = self._read_strings("bg_image_links.txt")
-        self.flairs: list[str] = self._http_get_list("https://raw.githubusercontent.com/lichess-org/lila/master/public/flair/list.txt")
-        self.games: list[dict] = self._read_bson("game5.bson")
-        self.puzzles: list[dict] = self._read_bson("puzzle2_puzzle.bson")
-        self.puzzle_paths: list[dict] = self._read_bson("puzzle2_path.bson")
-        self.practice_studies: list[dict] = self._read_bson("study.bson")
-        self.practice_chapters: list[dict] = self._read_bson("study_chapter_flat.bson")
-        self.eval_cache: list[dict] = self._read_bson("eval_cache2.bson")
-        with open(os.path.join(self.data_path, "practice-config.txt"), encoding='utf-8') as f:
-            self.practice_config = f.read()
-        self.videos: list[dict] = self._read_bson("video.bson")
-        self.seeds = dict[str, int]()
-        self.dump_dir: str = None
-        self.bson_mode: bool = True  # False means json mode
-        self.hash_cache: dict[str, int] = {}
-        self.lila_crypt_path = os.path.join(
-            os.path.join(parent_path, "lila_crypt"), "lila_crypt.jar"
+        self.countries: list[str] = self._read_strings('countries.txt')
+        self.teams: list[str] = self._read_strings('teams.txt')
+        self.msgs: list[str] = self._read_strings('msgs.txt')
+        self.categs: list[str] = self._read_strings('categs.txt')
+        self.topics: list[str] = self._read_strings('topics.txt')
+        self.paragraphs: list[str] = self._read_strings('paragraphs.txt')
+        self.social_media_links: list[str] = self._read_strings('social_media_links.txt')
+        self.bg_image_links: list[str] = self._read_strings('bg_image_links.txt')
+        self.flairs: list[str] = self._http_get_list(
+            'https://raw.githubusercontent.com/lichess-org/lila/master/public/flair/list.txt'
         )
+        self.games: list[dict] = self._read_bson('game5.bson')
+        self.puzzles: list[dict] = self._read_bson('puzzle2_puzzle.bson')
+        self.puzzle_paths: list[dict] = self._read_bson('puzzle2_path.bson')
+        self.practice_studies: list[dict] = self._read_bson('study.bson')
+        self.practice_chapters: list[dict] = self._read_bson('study_chapter_flat.bson')
+        self.eval_cache: list[dict] = self._read_bson('eval_cache2.bson')
+        with open(os.path.join(self.data_path, 'practice-config.txt'), encoding='utf-8') as f:
+            self.practice_config = f.read()
+        self.videos: list[dict] = self._read_bson('video.bson')
+        self.seeds = dict[str, int]()
+        self.dump_dir: str | None = None
+        self.bson_mode: bool = True  # False means json mode
+        self.hash_cache: dict[str, bytes] = {}
+        self.lila_crypt_path = os.path.join(os.path.join(parent_path, 'lila_crypt'), 'lila_crypt.jar')
         if args.su_password is not None:
             for admin in self._get_special_users():
                 self.custom_passwords[admin] = args.su_password
         if args.users is not None and args.users > -1:
-            self.uids = self._genN(max(args.users, 2), self.uids, "user")
+            self.uids = self._genN(max(args.users, 2), self.uids, 'user')
         if args.teams is not None and args.teams > -1:
-            self.teams = self._genN(args.teams, self.teams, "team")
+            self.teams = self._genN(args.teams, self.teams, 'team')
         if args.games is not None and args.games > -1:
             self.games = self.games[: args.games]
         if args.dump_bson:
@@ -58,7 +62,6 @@ class Env:
         elif args.dump_json:
             self.dump_dir = args.dump_json
             self.bson_mode = False
-
 
     def stable_rating(self, uid: str) -> int:
         try:
@@ -72,12 +75,12 @@ class Env:
             return self.hash_cache[password]
 
         result = subprocess.run(
-            ["java", "-jar", self.lila_crypt_path, self.args.secret],
+            ['java', '-jar', self.lila_crypt_path, self.args.secret],
             stdout=subprocess.PIPE,
-            input=password.encode("utf-8"),
+            input=password.encode('utf-8'),
         ).stdout
         if result[0] != 68 or result[1] != 68:
-            raise Exception(f"bad output from {self.lila_crypt_path}")
+            raise Exception(f'bad output from {self.lila_crypt_path}')
         hash = result[2:]
         self.hash_cache[password] = hash
         return hash
@@ -110,7 +113,7 @@ class Env:
     def next_id(self, key_obj, num_bytes: int = 6) -> str:
         seed = self.seeds.setdefault(key_obj.__name__, 1)
         self.seeds[key_obj.__name__] = seed + 1
-        return base64.b64encode(seed.to_bytes(num_bytes, "big")).decode("ascii")
+        return base64.b64encode(seed.to_bytes(num_bytes, 'big')).decode('ascii')
 
     def _genN(self, n: int, orig_list: list[str], default: str) -> list[str]:
         if not orig_list:
@@ -123,35 +126,37 @@ class Env:
         return new_list[0:n]
 
     def _read_strings(self, name: str) -> list[str]:
-        with open(os.path.join(self.data_path, name), "r") as f:
-            return [
-                s.strip() for s in f.read().splitlines() if s and not s.lstrip().startswith("#")
-            ]
+        with open(os.path.join(self.data_path, name), 'r') as f:
+            return [s.strip() for s in f.read().splitlines() if s and not s.lstrip().startswith('#')]
 
     def _http_get_list(self, url: str) -> list[str]:
         return requests.get(url).text.splitlines()
 
     def _read_bson(self, filename: str) -> list[dict]:
-        with open(os.path.join(self.data_path, filename), "rb") as f:
+        with open(os.path.join(self.data_path, filename), 'rb') as f:
             return bson.decode_all(f.read())
 
     def _get_special_users(self) -> list[str]:
-        return [self.args.su] if self.args.su else [
-            "lichess",
-            "superadmin",
-            "admin",
-            "shusher",
-            "hunter",
-            "puzzler",
-        ]
+        return (
+            [self.args.su]
+            if self.args.su
+            else [
+                'lichess',
+                'superadmin',
+                'admin',
+                'shusher',
+                'hunter',
+                'puzzler',
+            ]
+        )
 
     def _read_users(self) -> None:
-        with open(os.path.join(self.data_path, "uids.txt"), "r") as f:
+        with open(os.path.join(self.data_path, 'uids.txt'), 'r') as f:
             for line in f.read().splitlines():
                 entry = line.strip()
-                if not entry or entry.startswith("#"):
+                if not entry or entry.startswith('#'):
                     continue
-                fields = entry.split("/", 1)
+                fields = entry.split('/', 1)
                 uid = fields[0].lower().rstrip()
                 if uid not in self._get_special_users():
                     self.uids.append(uid)

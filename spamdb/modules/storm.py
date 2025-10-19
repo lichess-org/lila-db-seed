@@ -21,9 +21,10 @@ def update_storm_colls() -> None:
 
     util.bulk_write(db.storm_day, storms)
 
+
 class StormDay:
     def __init__(self, uid: str):
-        self._id = f'{uid}:{(datetime.today() - datetime(2010, 1, 1)).days}' # Get the correct day integer that represents the current date
+        self._id = f'{uid}:{(datetime.today() - datetime(2010, 1, 1)).days}'  # Get the correct day integer that represents the current date
         self.score = random.randint(1, 100)
         self.moves = self.score + random.randint(0, 50)
         self.errors = random.randint(0, self.score)

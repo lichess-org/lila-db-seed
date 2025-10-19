@@ -31,7 +31,7 @@ def update_tour_colls() -> None:
         random.shuffle(pids)
         t.winner = pids[0]
         trophies.append(Trophy(t.winner))
-        for (pid, index) in zip(pids, range(t.nbPlayers)):
+        for pid, index in zip(pids, range(t.nbPlayers)):
             tp = TournamentPlayer(pid, t._id)
             players.append(tp)
 
@@ -56,15 +56,17 @@ def update_tour_colls() -> None:
 
 
 class Tournament:
+    winner: str
+
     def __init__(self):
         self._id = env.next_id(Tournament)
         freq = random.choice(list(_frequency.keys()))
         speed = random.choice(list(_speed.keys()))
-        self.name = f"{freq.capitalize()} {speed.capitalize()}"
+        self.name = f'{freq.capitalize()} {speed.capitalize()}'
         self.status = 30
-        self.clock = {"limit": 30, "increment": 0}
+        self.clock = {'limit': 30, 'increment': 0}
         self.minutes = random.choice([20, 30, 40, 60, 90, 120])
-        self.schedule = {"freq": freq, "speed": speed}
+        self.schedule = {'freq': freq, 'speed': speed}
         self.nbPlayers = min(len(env.uids), util.rrange(4, 32))
         self.createdAt = util.time_since_days_ago()
         self.startsAt = util.time_shortly_after(self.createdAt)
@@ -105,8 +107,8 @@ class TournamentLeaderboard:
         self.d = t.startsAt
         self.r = place
         self.w = self.r * 25000
-        self.f = t.schedule["freq"]
-        self.p = t.schedule["speed"]
+        self.f = t.schedule['freq']
+        self.p = t.schedule['speed']
         self.v = 1
 
 
@@ -122,26 +124,26 @@ class Trophy:
 # class TrophyKind: use bin/mongodb/create-trophy-kinds.js for now
 
 _speed: dict[str, int] = {
-    "ultrabullet": 5,
-    "hyperbullet": 10,
-    "bullet": 20,
-    "hippobullet": 25,
-    "superblitz": 30,
-    "blitz": 40,
-    "rapid": 50,
-    "casual": 60,
+    'ultrabullet': 5,
+    'hyperbullet': 10,
+    'bullet': 20,
+    'hippobullet': 25,
+    'superblitz': 30,
+    'blitz': 40,
+    'rapid': 50,
+    'casual': 60,
 }
 
 _frequency: dict[str, int] = {
-    "hourly": 10,
-    "daily": 20,
-    "eastern": 30,
-    "weekly": 40,
-    "monthly": 50,
-    "shield": 51,
-    "marathon": 60,
-    "yearly": 70,
-    "unique": 90,
+    'hourly': 10,
+    'daily': 20,
+    'eastern': 30,
+    'weekly': 40,
+    'monthly': 50,
+    'shield': 51,
+    'marathon': 60,
+    'yearly': 70,
+    'unique': 90,
 }
 
 _status: list[int] = [
@@ -152,14 +154,14 @@ _status: list[int] = [
 
 
 _trophyKind: list[str] = [
-    "marathonWinner",
-    "marathonTopTen",
-    "marathonTopFifty",
-    "marathonTopHundred",
-    "marathonTopFiveHundred",
-    "moderator",
-    "developer",
-    "verified",
-    "contentTeam",
-    "zugMiracle",
+    'marathonWinner',
+    'marathonTopTen',
+    'marathonTopFifty',
+    'marathonTopHundred',
+    'marathonTopFiveHundred',
+    'moderator',
+    'developer',
+    'verified',
+    'contentTeam',
+    'zugMiracle',
 ]

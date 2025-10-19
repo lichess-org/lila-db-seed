@@ -3,6 +3,7 @@ from string import ascii_letters, digits
 from modules.env import env
 import modules.util as util
 
+
 def update_simul_colls() -> None:
     args = env.args
     db = env.db
@@ -19,6 +20,7 @@ def update_simul_colls() -> None:
         return
 
     util.bulk_write(db.simul, simuls)
+
 
 class Simul:
     def __init__(self, uid: str) -> None:

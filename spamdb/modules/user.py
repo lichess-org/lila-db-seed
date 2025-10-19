@@ -1,4 +1,4 @@
-import bson
+from bson import binary
 import random
 import hashlib
 from datetime import datetime, timedelta
@@ -52,14 +52,14 @@ def update_user_colls() -> None:
     for u in users:
         for f in random.sample(env.uids, int(follow_factor * len(env.uids))):
             events.follow(u._id, util.time_since(u.createdAt), f)
-        if u.plan["active"]:
+        if u.plan['active']:
             patrons.append(Patron(u._id))
         if args.streamers and util.chance(0.2):
             streamers.append(Streamer(u))
         if args.coaches and util.chance(0.1):
             coaches.append(Coach(u))
 
-    playbans = [Playban("playban")]
+    playbans = [Playban('playban')]
 
     if args.no_create:
         return
@@ -89,39 +89,40 @@ class User:
     ):
         self._id = util.normalize_id(name)
         self.username = name.capitalize()
-        self.email = f"{name}@localhost"
-        self.bpass = bson.binary.Binary(env.get_password_hash(name))
+        self.email = f'{name}@localhost'
+        self.bpass = binary.Binary(env.get_password_hash(name))
         self.enabled = True
         self.createdAt = util.time_since_days_ago()
         self.seenAt = util.time_since(self.createdAt)
-        self.lang = "en-US"
-        self.time = {"total": util.rrange(10000, 20000), "tv": 0}
+        self.lang = 'en-US'
+        self.time = {'total': util.rrange(10000, 20000), 'tv': 0}
         self.roles = []
         self.roles.extend(roles)
         self.marks = marks
-        
+        self.kid = False
+
         self.plan = {
-            "months": 1,
-            "active": util.chance(0.2),
-            "since": util.time_since_days_ago(30),
+            'months': 1,
+            'active': util.chance(0.2),
+            'since': util.time_since_days_ago(30),
         }
         rating = env.stable_rating(self._id)
         if rating > 2100:
             self.title = random.choice(_titles)
-        
+
         self.profile = {
-            "country": env.random_country(),
-            "location": self.username + " City",
-            "bio": env.random_paragraph()[:350],
-            "firstName": self.username,
-            "lastName": self.username + "bertson",
-            "fideRating": rating,
-            "uscfRating": util.rrange(rating - 200, rating + 200),
-            "ecfRating": util.rrange(rating - 200, rating + 200),
-            "rcfRating": util.rrange(rating - 200, rating + 200),
-            "cfcRating": util.rrange(rating - 200, rating + 200),
-            "dsbRating": util.rrange(rating - 200, rating + 200),
-            "links": "\n".join(env.random_social_media_links()),
+            'country': env.random_country(),
+            'location': self.username + ' City',
+            'bio': env.random_paragraph()[:350],
+            'firstName': self.username,
+            'lastName': self.username + 'bertson',
+            'fideRating': rating,
+            'uscfRating': util.rrange(rating - 200, rating + 200),
+            'ecfRating': util.rrange(rating - 200, rating + 200),
+            'rcfRating': util.rrange(rating - 200, rating + 200),
+            'cfcRating': util.rrange(rating - 200, rating + 200),
+            'dsbRating': util.rrange(rating - 200, rating + 200),
+            'links': '\n'.join(env.random_social_media_links()),
         }
         if util.chance(0.6):
             self.flair = env.random_flair()
@@ -138,40 +139,40 @@ class User:
                     continue
                 p = perf.PerfStat(self._id, index, num_games, draw_ratio, rating)
 
-                total_wins = total_wins + p.count["win"]
-                total_losses = total_losses + p.count["loss"]
-                total_draws = total_draws + p.count["draw"]
+                total_wins = total_wins + p.count['win']
+                total_losses = total_losses + p.count['loss']
+                total_draws = total_draws + p.count['draw']
                 self.perfStats[perf_name] = p
                 self.perfs[perf_name] = {
-                    "nb": p.count["all"],
-                    "la": util.time_since_days_ago(30),
-                    "re": [util.rrange(-32, 32) for _ in range(12)],
-                    "gl": {
-                        "r": p.r,
-                        "d": random.uniform(0.5, 120),
-                        "v": random.uniform(0.001, 0.1),
+                    'nb': p.count['all'],
+                    'la': util.time_since_days_ago(30),
+                    're': [util.rrange(-32, 32) for _ in range(12)],
+                    'gl': {
+                        'r': p.r,
+                        'd': random.uniform(0.5, 120),
+                        'v': random.uniform(0.001, 0.1),
                     },
                 }
         else:
             total_games = 0
 
         self.count = {
-            "game": total_games,
-            "ai": 0,
-            "rated": int(total_games * 0.8),
-            "win": total_wins,
-            "winH": total_wins,
-            "loss": total_losses,
-            "lossH": total_losses,
-            "draw": total_draws,
-            "drawH": total_draws,
+            'game': total_games,
+            'ai': 0,
+            'rated': int(total_games * 0.8),
+            'win': total_wins,
+            'winH': total_wins,
+            'loss': total_losses,
+            'lossH': total_losses,
+            'draw': total_draws,
+            'drawH': total_draws,
         }
 
     def detach_perfs(self) -> Tuple[dict, list[perf.PerfStat]]:
         detached_list = list(self.perfStats.values())
         detached_perfs = self.perfs
-        delattr(self, "perfStats")
-        delattr(self, "perfs")
+        delattr(self, 'perfStats')
+        delattr(self, 'perfs')
         return (detached_perfs, detached_list)
 
 
@@ -180,25 +181,26 @@ class Streamer:
         self._id = u._id
         self.listed = True
         self.approval = {
-            "requested": False,
-            "granted": True,
-            "ignored": False,
-            "tier": 2,
-            "chatEnabled": True,
-            "lastGrantedAt": util.time_since_days_ago(30),
+            'requested': False,
+            'granted': True,
+            'ignored': False,
+            'tier': 2,
+            'chatEnabled': True,
+            'lastGrantedAt': util.time_since_days_ago(30),
         }
-        self.name = u.profile["firstName"]
+        self.name = u.profile['firstName']
         self.seenAt = util.time_since_days_ago(30)
         self.createdAt = util.time_since_days_ago(30)
         self.updatedAt = util.time_since_days_ago(30)
         self.liveAt = util.time_since_days_ago(5)
-        self.lastStreamLang = "en"
-        self.picture = "streamer.png"
+        self.lastStreamLang = 'en'
+        self.picture = 'streamer.png'
         self.headline = random.choice(env.msgs)
         self.description = random.choice(env.paragraphs)
         self.twitch = {
-            "userId": "lichessdotorg",
+            'userId': 'lichessdotorg',
         }
+
 
 class Coach:
     def __init__(self, u: User):
@@ -206,28 +208,29 @@ class Coach:
         self.listed = True
         self.available = True
         self.profile = {
-            "headline": random.choice(env.msgs),
-            "hourlyRate": random.choice(env.msgs),
-            "description": random.choice(env.msgs),
-            "playingExperience": random.choice(env.msgs),
-            "teachingExperience": random.choice(env.msgs),
-            "otherExperience": random.choice(env.msgs),
-            "skills": random.choice(env.msgs),
-            "methodology": random.choice(env.msgs),
-            "youtubeVideos": random.choice(env.msgs),
-            "youtubeChannel": random.choice(env.msgs),
-            "publicStudies": random.choice(env.msgs),
+            'headline': random.choice(env.msgs),
+            'hourlyRate': random.choice(env.msgs),
+            'description': random.choice(env.msgs),
+            'playingExperience': random.choice(env.msgs),
+            'teachingExperience': random.choice(env.msgs),
+            'otherExperience': random.choice(env.msgs),
+            'skills': random.choice(env.msgs),
+            'methodology': random.choice(env.msgs),
+            'youtubeVideos': random.choice(env.msgs),
+            'youtubeChannel': random.choice(env.msgs),
+            'publicStudies': random.choice(env.msgs),
         }
-        self.picture = "coach.png"
+        self.picture = 'coach.png'
         self.user = {
-            "rating": u.profile["fideRating"],
-            "seenAt": u.seenAt,
+            'rating': u.profile['fideRating'],
+            'seenAt': u.seenAt,
         }
         self.nbReviews = 0
-        u.roles.append("ROLE_COACH")
-        self.languages = ["en-US"]
+        u.roles.append('ROLE_COACH')
+        self.languages = ['en-US']
         self.createdAt = util.time_since_days_ago(30)
         self.updatedAt = util.time_since_days_ago(30)
+
 
 class Patron:
     def __init__(self, uid: str):
@@ -237,7 +240,7 @@ class Patron:
         self._id = uid
         self.expiresAt = patronedAt + timedelta(days=30) if not lifetime else None
         self.free = {
-            "at": patronedAt,
+            'at': patronedAt,
         }
         self.lastLevelUp = patronedAt
         self.lifetime = lifetime
@@ -257,10 +260,10 @@ class Pref:
 class History:
     def __init__(self, ups: perf.UserPerfs, since: datetime):
         self._id = ups._id
-        for name, perf in vars(ups).items():
-            if name.startswith("_"):
+        for name, user_perf in vars(ups).items():
+            if name.startswith('_'):
                 continue
-            newR = perf["gl"]["r"]
+            newR = user_perf['gl']['r']
             origR = min(3000, max(400, util.rrange(newR - 500, newR + 500)))
             ratingHistory = {}
             days: int = (datetime.now() - since).days
@@ -272,12 +275,12 @@ class History:
 
 class Token:
     def __init__(self, uid: str):
-        token = "lip_" + uid
+        token = 'lip_' + uid
         self.plain = token
         self.userId = uid
-        self._id = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        self._id = hashlib.sha256(token.encode('utf-8')).hexdigest()
         self.created = util.time_since_days_ago(30)
-        self.description = "all access"
+        self.description = 'all access'
         self.scopes = _scopes
 
 
@@ -285,101 +288,101 @@ class Playban:
     def __init__(self, uid: str):
         self._id = uid
         self.c = -20
-        self.b = [{"date": util.time_since_days_ago(30), "mins": 999_999}]
+        self.b = [{'date': util.time_since_days_ago(30), 'mins': 999_999}]
 
 
 def _create_special_users():
     users: list[User] = []
-    users.append(User("lichess", [], [], False))
-    users.append(User("ai", [], [], False))
+    users.append(User('lichess', [], [], False))
+    users.append(User('ai', [], [], False))
     if env.args.su is not None:
-        users.append(User(env.args.su, [], ["ROLE_SUPER_ADMIN"], False))
+        users.append(User(env.args.su, [], ['ROLE_SUPER_ADMIN'], False))
     else:
-        users.append(User("superadmin", [], ["ROLE_SUPER_ADMIN"], False))
-        users.append(User("admin", [], ["ROLE_ADMIN"], False))
-        users.append(User("shusher", [], ["ROLE_SHUSHER"], False))
-        users.append(User("hunter", [], ["ROLE_CHEAT_HUNTER"], False))
-        users.append(User("puzzler", [], ["ROLE_PUZZLE_CURATOR"], False))
-        users.append(User("editor", [], ["ROLE_PAGES"], False))
-        users.append(User("events", [], ["ROLE_MANAGE_EVENT"], False))
-    users.append(User("broadcaster", [], [], False))
-    users.append(User("api", [], ["ROLE_API_HOG"], False))
-    users.append(User("troll", ["troll"], [], False))
-    users.append(User("rankban", ["rankban"], [], False))
-    users.append(User("reportban", ["reportban"], [], False))
-    users.append(User("playban", [], [], False))
-    users.append(User("alt", ["alt"], [], False))
-    users.append(User("boost", ["boost"], [], False))
-    users.append(User("engine", ["engine"], [], False))
+        users.append(User('superadmin', [], ['ROLE_SUPER_ADMIN'], False))
+        users.append(User('admin', [], ['ROLE_ADMIN'], False))
+        users.append(User('shusher', [], ['ROLE_SHUSHER'], False))
+        users.append(User('hunter', [], ['ROLE_CHEAT_HUNTER'], False))
+        users.append(User('puzzler', [], ['ROLE_PUZZLE_CURATOR'], False))
+        users.append(User('editor', [], ['ROLE_PAGES'], False))
+        users.append(User('events', [], ['ROLE_MANAGE_EVENT'], False))
+    users.append(User('broadcaster', [], [], False))
+    users.append(User('api', [], ['ROLE_API_HOG'], False))
+    users.append(User('troll', ['troll'], [], False))
+    users.append(User('rankban', ['rankban'], [], False))
+    users.append(User('reportban', ['reportban'], [], False))
+    users.append(User('playban', [], [], False))
+    users.append(User('alt', ['alt'], [], False))
+    users.append(User('boost', ['boost'], [], False))
+    users.append(User('engine', ['engine'], [], False))
     users.append(User('zerogames', [], [], False))
-    users.append(User("coach", [], ["ROLE_COACH"], False))
-    users.append(User("teacher", [], ["ROLE_TEACHER"], False))
-    users.append(User("kid", [], [], False))
+    users.append(User('coach', [], ['ROLE_COACH'], False))
+    users.append(User('teacher', [], ['ROLE_TEACHER'], False))
+    users.append(User('kid', [], [], False))
     users[-1].kid = True
     for i in range(10):
-        users.append(User(f"bot{i}", [], ['ROLE_VERIFIED'] if i < 3 else [], False))
-        users[-1].title = "BOT"
-    users.append(User("w" * 20, [], [], False))
-    users[-1].username = "W" * 20  # widest possible i think
-    users[-1].title = "WGM"
-    users[-1].plan["active"] = True  # patron
-    users[-1].plan["months"] = 12
+        users.append(User(f'bot{i}', [], ['ROLE_VERIFIED'] if i < 3 else [], False))
+        users[-1].title = 'BOT'
+    users.append(User('w' * 20, [], [], False))
+    users[-1].username = 'W' * 20  # widest possible i think
+    users[-1].title = 'WGM'
+    users[-1].plan['active'] = True  # patron
+    users[-1].plan['months'] = 12
 
     for i in list(range(1, 13)) + [24, 36, 48, 60]:
-        patron = User(f"patron{i}", [], [], False)
-        patron.plan["active"] = True
-        patron.plan["months"] = i
-        patron.plan["since"] = datetime.now() - timedelta(days=30 * i)
+        patron = User(f'patron{i}', [], [], False)
+        patron.plan['active'] = True
+        patron.plan['months'] = i
+        patron.plan['since'] = datetime.now() - timedelta(days=30 * i)
         users.append(patron)
 
-    lifetime = User("lifetime", [], [], False)
-    lifetime.plan["active"] = True
-    lifetime.plan["months"] = 12
-    lifetime.plan["since"] = datetime.now() - timedelta(days=30 * 12)
-    lifetime.plan["lifetime"] = True
+    lifetime = User('lifetime', [], [], False)
+    lifetime.plan['active'] = True
+    lifetime.plan['months'] = 12
+    lifetime.plan['since'] = datetime.now() - timedelta(days=30 * 12)
+    lifetime.plan['lifetime'] = True
     users.append(lifetime)
 
     return users
 
 
 _titles: list[str] = [
-    "GM",
-    "WGM",
-    "IM",
-    "WIM",
-    "FM",
-    "WFM",
-    "NM",
-    "CM",
-    "WCM",
-    "WNM",
+    'GM',
+    'WGM',
+    'IM',
+    'WIM',
+    'FM',
+    'WFM',
+    'NM',
+    'CM',
+    'WCM',
+    'WNM',
     # "BOT",
     # "LM",
 ]
 
 _scopes: list[str] = [
-    "preference:read",
-    "preference:write",
-    "email:read",
-    "challenge:read",
-    "challenge:write",
-    "challenge:bulk",
-    "study:read",
-    "study:write",
-    "tournament:write",
-    "racer:write",
-    "puzzle:read",
-    "puzzle:write",
-    "team:read",
-    "team:write",
-    "team:lead",
-    "follow:read",
-    "follow:write",
-    "msg:write",
-    "board:play",
-    "bot:play",
-    "engine:read",
-    "engine:write",
-    "web:login",
-    "web:mod",
+    'preference:read',
+    'preference:write',
+    'email:read',
+    'challenge:read',
+    'challenge:write',
+    'challenge:bulk',
+    'study:read',
+    'study:write',
+    'tournament:write',
+    'racer:write',
+    'puzzle:read',
+    'puzzle:write',
+    'team:read',
+    'team:write',
+    'team:lead',
+    'follow:read',
+    'follow:write',
+    'msg:write',
+    'board:play',
+    'bot:play',
+    'engine:read',
+    'engine:write',
+    'web:login',
+    'web:mod',
 ]
