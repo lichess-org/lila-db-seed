@@ -17,21 +17,22 @@ def update_msg_colls() -> None:
 
     for u1 in env.uids:
         for u2 in random.sample(env.uids, int(0.25 * len(env.uids))):
-            if u1 == u2 or threads.get(_tid(u1, u2)) != None:
+            if u1 == u2 or threads.get(_tid(u1, u2)) is not None:
                 continue
             msgs.append(Msg(u1, u2, util.time_since_days_ago()))
             while util.chance(0.85):
                 msgs.append(Msg(u1, u2, util.time_shortly_after(msgs[-1].date)))
 
             threads[_tid(u1, u2)] = MsgThread(u1, u2, msgs[-1])
-    if args.no_create: return
+    if args.no_create:
+        return
 
     util.bulk_write(db.msg_msg, msgs)
-    util.bulk_write(db.msg_thread, threads.values())
+    util.bulk_write(db.msg_thread, list(threads.values()))
 
 
 def _tid(u1: str, u2: str):
-    return f"{u1}/{u2}" if u1 < u2 else f"{u2}/{u1}"
+    return f'{u1}/{u2}' if u1 < u2 else f'{u2}/{u1}'
 
 
 class Msg:
@@ -47,10 +48,10 @@ class MsgThread:
     def __init__(self, u1: str, u2: str, lastMsg: Msg):
         self._id = _tid(u1, u2)
         self.users = [u1, u2]
-        self.__dict__["del"] = []
+        self.__dict__['del'] = []
         self.lastMsg = {
-            "text": lastMsg.text,
-            "date": lastMsg.date,
-            "user": lastMsg.user,
-            "read": True,
+            'text': lastMsg.text,
+            'date': lastMsg.date,
+            'user': lastMsg.user,
+            'read': True,
         }

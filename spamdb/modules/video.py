@@ -2,7 +2,7 @@ from modules.env import env
 import modules.util as util
 
 
-def update_video_colls() -> list:
+def update_video_colls():
     args = env.args
     db = env.db
 

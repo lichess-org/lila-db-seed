@@ -1,6 +1,7 @@
 from modules.env import env
 import modules.util as util
 
+
 def update_analysis_colls() -> None:
     args = env.args
     db = env.db

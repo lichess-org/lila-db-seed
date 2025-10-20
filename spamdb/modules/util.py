@@ -1,4 +1,4 @@
-import pymongo
+from pymongo import collection, results, InsertOne, UpdateOne
 import re
 import os
 import random
@@ -6,23 +6,23 @@ import json
 import bson
 from datetime import timedelta, datetime
 from modules.env import env
-
+from typing import Any, Mapping
 
 
 def bulk_write(
-    coll: pymongo.collection.Collection,
-    objs: list,
+    coll: collection.Collection,
+    objs: list[Any],
     append: bool = False,
 ) -> None:
     # append parameter is for bson/json export to forum collections
-    if len(objs) < 1:
+    if len(objs) == 0:
         return
-    if env.dump_dir == None:
+    if env.dump_dir is None:
         # database mode
         ledger = []
         for o in objs:
             ledger.append(_inupsert(_dict(o)))
-        res = coll.bulk_write(ledger).bulk_api_result
+        res = coll.bulk_write(ledger)
 
         print(_report(coll.name, res))
     else:
@@ -31,22 +31,22 @@ def bulk_write(
             os.makedirs(env.dump_dir, exist_ok=True)
         if not os.path.isdir(env.dump_dir):
             raise FileNotFoundError(env.dump_dir)
-        ext: str = "bson" if env.bson_mode else "json"
-        outpath: str = os.path.join(env.dump_dir, f"{coll.name}.{ext}")
-        openmode = ("a" if append else "w") + ("b" if env.bson_mode else "")
+        ext: str = 'bson' if env.bson_mode else 'json'
+        outpath: str = os.path.join(env.dump_dir, f'{coll.name}.{ext}')
+        openmode = ('a' if append else 'w') + ('b' if env.bson_mode else '')
         with open(outpath, openmode) as f:
             for o in objs:
                 if env.bson_mode:
                     f.write(bson.encode(_dict(o)))
                 else:
                     f.write(json.dumps(_dict(o), default=str, indent=4))
-        print(f"{coll.name} dumped to {outpath}")
+        print(f'{coll.name} dumped to {outpath}')
 
 
 # return a list of n semi-random ints >= minval which add up to sum
 def random_partition(sum: int, n: int, minval: int = 1) -> list[int]:
     if n < 1 or sum < 0 or minval < 0:
-        raise ValueError(f"invalid arguments:  sum={sum}, n={n}, minval={minval}")
+        raise ValueError(f'invalid arguments:  sum={sum}, n={n}, minval={minval}')
     if n * minval > sum:
         minval = 0
     parts: list[int] = []
@@ -75,7 +75,7 @@ def rrange(lower: int, upper: int) -> int:
 
 
 def normalize_id(name: str) -> str:
-    return "-".join(re.sub(r"[^\w\s]", "", name.lower()).split())
+    return '-'.join(re.sub(r'[^\w\s]', '', name.lower()).split())
 
 
 def chance(probability: float) -> bool:
@@ -97,42 +97,40 @@ def time_shortly_after(then: datetime) -> datetime:
 def time_since(then: datetime) -> datetime:
     restime = datetime.now()
     if then < restime:
-        restime = datetime.fromtimestamp(
-            random.uniform(int(then.timestamp()), int(restime.timestamp()))
-        )
+        restime = datetime.fromtimestamp(random.uniform(int(then.timestamp()), int(restime.timestamp())))
     return restime
 
 
 # time_since_days_ago returns a date between (now - days_ago) and now
-def time_since_days_ago(days_ago = env.args.days) -> datetime:
+def time_since_days_ago(days_ago=env.args.days) -> datetime:
     return datetime.now() - timedelta(days=random.uniform(0, days_ago))
-
-
-def insert_json(db: pymongo.MongoClient, filename: str) -> None:
-    with open(filename, "r") as f:
-        for (collName, objList) in json.load(f).items():
-            bulk_write(db[collName], objList)
 
 
 def _inupsert(o: object) -> object:
     if env.args.drop or env.args.drop_db:
-        return pymongo.InsertOne(o)
+        return InsertOne(_dict(o))
     else:
-        return pymongo.UpdateOne({"_id": o["_id"]}, {"$set": o}, upsert=True)
+        return UpdateOne({'_id': _dict(o)['_id']}, {'$set': o}, upsert=True)
 
 
-def _dict(o: object) -> dict:
-    return o.__dict__ if hasattr(o, "__dict__") else o
+def _dict(o: Any) -> dict[str, Any]:
+    if isinstance(o, dict):
+        return o
+    if hasattr(o, '__dict__'):
+        return vars(o)
+    if isinstance(o, Mapping):
+        return dict(o)
+    raise TypeError('not a dict')
 
 
-def _report(coll: str, res: pymongo.results.BulkWriteResult) -> str:
-    report = f"{coll.ljust(24, '.')} "
+def _report(coll: str, res: results.BulkWriteResult) -> str:
+    report = f'{coll.ljust(24, ".")} '
     if env.args.drop or env.args.drop_db:
-        report += f"Inserted: {res['nInserted']}"
+        report += f'Inserted: {res.inserted_count}'
     else:
-        report += f"Upserted: {str(res['nUpserted']).ljust(6, ' ')}"
-        report += f"Matched: {str(res['nMatched']).ljust(7, ' ')}"
-        report += f"Modified: {res['nModified']}"
-    if res["writeErrors"]:
-        report += f", Errors: {res['writeErrors']}"
+        report += f'Upserted: {str(res.upserted_count).ljust(6, " ")}'
+        report += f'Matched: {str(res.matched_count).ljust(7, " ")}'
+        report += f'Modified: {res.modified_count}'
+    if res.bulk_api_result['writeErrors']:
+        report += f', Errors: {res.bulk_api_result["writeErrors"]}'
     return report

@@ -30,7 +30,7 @@ def update_forum_colls() -> list:
             iter = int(len(topics) / len(env.topics))
             topics.append(
                 Topic(
-                    topic_name if iter == 0 else f"{topic_name} {iter}",
+                    topic_name if iter == 0 else f'{topic_name} {iter}',
                     random.choice(list(categs.keys())),
                 )
             )
@@ -43,27 +43,32 @@ def update_forum_colls() -> list:
         events.add_post(p.userId, p.createdAt, p._id, t._id, t.name)
 
     for t in topics:
-        if hasattr(t, "lastPostId"):
+        if hasattr(t, 'lastPostId'):
             categs[t.categId].add_topic(t)
 
-    diagnostic = Categ("Diagnostic", False, "User diagnostic reports")
+    diagnostic = Categ('Diagnostic', False, 'User diagnostic reports')
     diagnostic.hidden = True
     diagnostic.quiet = True
     categs[diagnostic._id] = diagnostic
-    headerPost = Post("admin")
-    headerPost.text = "none"
-    headerTopic = Topic("none", diagnostic._id)
+    headerPost = Post('admin')
+    headerPost.text = 'none'
+    headerTopic = Topic('none', diagnostic._id)
     headerTopic.correlate_post(headerPost)
     diagnostic.add_topic(headerTopic)
 
     if not args.no_create:
-        util.bulk_write(db.f_categ, categs.values())
+        util.bulk_write(db.f_categ, list(categs.values()))
         util.bulk_write(db.f_topic, topics)
         util.bulk_write(db.f_post, posts)
     return posts
 
 
 class Post:
+    topicId: str
+    categId: str
+    number: int
+    topic: str
+
     def __init__(self, uid: str):
         self._id = env.next_id(Post)
         self.text = env.random_paragraph()
@@ -74,6 +79,8 @@ class Post:
 
 
 class Topic:
+    blogUrl: str
+
     def __init__(self, name: str, categ_id: str):
         self._id = env.next_id(Topic)
         self.name = name
@@ -100,7 +107,7 @@ class Topic:
 
 class Categ:
     def __init__(self, name: str, team: bool = False, desc: str = env.random_topic()):
-        self._id = ("team-" if team else "") + util.normalize_id(name)
+        self._id = ('team-' if team else '') + util.normalize_id(name)
         self.name = name
         self.desc = desc
         self.nbTopics = 0
@@ -108,6 +115,7 @@ class Categ:
         self.nbTopicsTroll = 0
         self.nbPostsTroll = 0
         self.quiet = False
+        self.hidden = False
         self.lastPostAt = datetime.fromtimestamp(0.0)
         #       ^ lila doesn't used this field, but it helps us
         if team:

@@ -27,7 +27,7 @@ default_pages = [
     ['RacingKings', 'variant-racingKings', '/variant/racingKings'],
     ['Your account has been closed', 'appeal-landing'],
     ['Your account has been closed by your teacher', 'account-closed-by-teacher'],
-    ['Account deletion is pending', 'delete-done', '/account/delete/done']
+    ['Account deletion is pending', 'delete-done', '/account/delete/done'],
 ]
 
 
@@ -56,14 +56,16 @@ class CmsPage:
         if empty:
             body = ''
         else:
-            body = "\n\n".join([
-                f'## {env.random_topic()}',
-                f'{env.random_paragraph()}',
-                f'### {env.random_topic()}',
-                f'{env.random_paragraph()}',
-                f'#### {env.random_topic()}',
-                f'{env.random_paragraph()}',
-            ])
+            body = '\n\n'.join(
+                [
+                    f'## {env.random_topic()}',
+                    f'{env.random_paragraph()}',
+                    f'### {env.random_topic()}',
+                    f'{env.random_paragraph()}',
+                    f'#### {env.random_topic()}',
+                    f'{env.random_paragraph()}',
+                ]
+            )
 
         self._id = env.next_id(CmsPage)
         self.key = page[1]

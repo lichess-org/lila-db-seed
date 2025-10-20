@@ -15,13 +15,14 @@ def update_puzzle_colls() -> None:
     for uid in env.uids:
         sample_puzzles = random.sample(env.puzzles, 10)
         for i in range(10):
-            pid = f"{uid}:{sample_puzzles[i].get('_id')}"
+            pid = f'{uid}:{sample_puzzles[i].get("_id")}'
             puzzles.append(PuzzleRound(uid, pid))
 
     if args.no_create:
         return
 
     util.bulk_write(db.puzzle2_round, puzzles)
+
 
 class PuzzleRound:
     def __init__(self, uid: str, pid: str):

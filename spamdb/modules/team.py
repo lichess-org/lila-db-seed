@@ -19,9 +19,7 @@ def update_team_colls() -> list:
     teams: list[Team] = []
     all_members: list[TeamMember] = []
 
-    for (team_name, num_team_posts) in zip(
-        env.teams, util.random_partition(args.forum_posts, len(env.teams))
-    ):
+    for team_name, num_team_posts in zip(env.teams, util.random_partition(args.forum_posts, len(env.teams))):
         t = Team(team_name)
         teams.append(t)
         events.add_team(t.createdBy, t.createdAt, t._id, t.name)
@@ -58,11 +56,11 @@ def update_team_colls() -> list:
                     [u.user for u in team_members],
                 )
             categs[-1].add_topic(t)
-    teams.append(Team("Lichess Swiss"))
-    teams[-1].leaders = ["superadmin"]
+    teams.append(Team('Lichess Swiss'))
+    teams[-1].leaders = ['superadmin']
     teams[-1].nbMembers = len(env.uids)
     teams[-1].open = True
-    teams[-1].flair = "food-drink.cheese-wedge"
+    teams[-1].flair = 'food-drink.cheese-wedge'
     all_members.extend([TeamMember(user, teams[-1]._id) for user in env.uids])
 
     if not args.no_create:
@@ -77,7 +75,7 @@ def update_team_colls() -> list:
 
 class TeamMember:
     def __init__(self, uid: str, teamId: str):
-        self._id = uid + "@" + teamId
+        self._id = uid + '@' + teamId
         self.team = teamId
         self.user = uid
         self.date = util.time_since_days_ago()
@@ -88,7 +86,7 @@ class Team:
         self._id = util.normalize_id(name)
         self.name = name
         self.description = env.random_topic()
-        self.descPrivate = "All of our dads could beat up YOUR dad."
+        self.descPrivate = 'All of our dads could beat up YOUR dad.'
         self.nbMembers = 1
         self.enabled = True
         self.open = util.chance(0.5)
@@ -101,19 +99,18 @@ class Team:
             self.flair = env.random_flair()
 
     def create_members(self, membership: float) -> list[TeamMember]:
-        users: set[str] = set(self.leaders).union(
-            random.sample(env.uids, int(len(env.uids) * membership))
-        )
+        users: set[str] = set(self.leaders).union(random.sample(env.uids, int(len(env.uids) * membership)))
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]
 
+
 _leader_perms: list[str] = [
-    "public",
-    "settings",
-    "tour",
-    "comm",
-    "request",
-    "pmall",
-    "kick",
-    "admin"
+    'public',
+    'settings',
+    'tour',
+    'comm',
+    'request',
+    'pmall',
+    'kick',
+    'admin',
 ]
