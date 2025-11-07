@@ -4,28 +4,11 @@ import os
 import sys
 import subprocess
 import venv
-
+import shutil
+from typing import Final
 
 def main():
-    cur_path = os.path.dirname(__file__)
-    venv_dir = os.path.join(cur_path, 'venv')
-
-    if not os.path.isdir(venv_dir):
-        venv.create(venv_dir, with_pip=True)
-    pip = os.path.join(venv_dir, 'bin', 'pip')
-    reqs = os.path.join(cur_path, 'requirements.txt')
-    installed = {x.lower() for x in subprocess.check_output([pip, 'freeze'], text=True).splitlines()}
-    with open(reqs, 'r') as f:
-        if not {x.strip().lower() for x in f if x.strip() and not x.startswith('#')}.issubset(installed):
-            subprocess.check_call([pip, 'install', '--upgrade', 'pip'])
-            subprocess.check_call(
-                [pip, 'install', '--upgrade', '-r', os.path.join(cur_path, 'requirements.txt')]
-            )
-
-    if sys.prefix != os.path.abspath(venv_dir):
-        python_executable = os.path.join(venv_dir, 'bin', 'python')
-        subprocess.check_call([python_executable] + sys.argv)
-        return
+    ensure_venv_and_packages()
 
     import pymongo
     import modules.forum as forum
@@ -88,6 +71,41 @@ def main():
         jsbot.update_jsbot_colls()
         clas.update_clas_colls()
 
+
+SPAMDB_DIR: Final = os.path.dirname(__file__)
+VENV_DIR: Final = os.path.join(SPAMDB_DIR, "venv")
+VENV_PYTHON: Final = os.path.join(VENV_DIR, "bin", "python")
+VENV_PIP: Final = [VENV_PYTHON, "-m", "pip"]
+DEPENDENCIES = os.path.join(SPAMDB_DIR, "requirements.txt")
+
+def create_venv():
+    shutil.rmtree(VENV_DIR, ignore_errors=True)
+    venv.create(VENV_DIR, with_pip=True)
+
+def want_set():
+    with open(DEPENDENCIES, "r") as f:
+        return {x.strip().lower() for x in f if x.strip() and not x.lstrip().startswith("#")}
+
+def have_set():
+    out = subprocess.check_output(VENV_PIP + ["freeze"], text=True)
+    return {x.strip().lower() for x in out.splitlines() if x.strip()}
+
+def ensure_venv_and_packages():
+    if not os.path.isdir(VENV_DIR):
+        create_venv()
+    try:
+        installed = have_set()
+        needed = want_set()
+        if not needed.issubset(installed):
+            subprocess.check_call(VENV_PIP + ["install", "--upgrade", "pip", "setuptools", "wheel"])
+            subprocess.check_call(VENV_PIP + ["install", "--upgrade", "-r", DEPENDENCIES])
+    except Exception:
+        create_venv()
+        subprocess.check_call(VENV_PIP + ["install", "--upgrade", "pip", "setuptools", "wheel"])
+        subprocess.check_call(VENV_PIP + ["install", "--upgrade", "-r", DEPENDENCIES])
+
+    if os.path.realpath(sys.prefix) != os.path.realpath(VENV_DIR):
+        os.execv(VENV_PYTHON, [VENV_PYTHON] + sys.argv)
 
 if __name__ == '__main__':
     main()
