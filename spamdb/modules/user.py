@@ -198,7 +198,8 @@ class Streamer:
         self.headline = random.choice(env.msgs)
         self.description = random.choice(env.paragraphs)
         self.twitch = {
-            'userId': 'lichessdotorg',
+            'id': 'lichessdotorg',
+            'login': 'lichessdotorg',
         }
 
 
