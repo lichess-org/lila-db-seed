@@ -151,7 +151,7 @@ class TimelineEntry:
     def game_end(self, opponent: str, win: bool, pid: str):
         self.typ = 'game-end'
         self.data = {
-            'playerId': pid,
+            'fullId': pid,
             'perf': 'standard',
             'opponent': opponent,
             'win': win,
