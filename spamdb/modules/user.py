@@ -116,7 +116,7 @@ class User:
             'bio': env.random_paragraph()[:350],
             'firstName': self.username,
             'lastName': self.username + 'bertson',
-            'fideRating': rating,
+            'fideRating': max(1400, rating),
             'uscfRating': util.rrange(rating - 200, rating + 200),
             'ecfRating': util.rrange(rating - 200, rating + 200),
             'rcfRating': util.rrange(rating - 200, rating + 200),
