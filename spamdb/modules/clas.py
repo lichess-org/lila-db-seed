@@ -35,7 +35,7 @@ def update_clas_colls() -> None:
                     'teachers': ['teacher'],
                     'created': {'by': 'teacher', 'at': util.time_since_days_ago(2)},
                     'desc': 'Description for ' + clas_name,
-                    'wall': 'Last news',
+                    'wall': 'Latest news',
                     'viewedAt': util.time_since_days_ago(1),
                 }
             )
