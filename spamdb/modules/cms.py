@@ -28,6 +28,7 @@ default_pages = [
     ['Your account has been closed', 'appeal-landing'],
     ['Your account has been closed by your teacher', 'account-closed-by-teacher'],
     ['Account deletion is pending', 'delete-done', '/account/delete/done'],
+    ['Team Etiquette', 'team-etiquette'],
 ]
 
 
