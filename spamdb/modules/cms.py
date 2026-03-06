@@ -45,6 +45,7 @@ def update_cms_colls() -> None:
         pages.append(CmsPage(page))
 
     pages.append(CmsPage(['Mobile', 'mobile-apk'], empty=True))
+    pages.append(CmsPage(['Test Users', 'test-users'], body=_seeded_users_body()))
 
     if args.no_create:
         return
@@ -52,12 +53,76 @@ def update_cms_colls() -> None:
     util.bulk_write(db.cms_page, pages)
 
 
+def _seeded_users_body() -> str:
+    patron_users = [f'patron{i}' for i in list(range(1, 13)) + [24, 36, 48, 60]] + ['lifetime']
+    bot_users = [f'bot{i}' for i in range(10)]
+
+    def ul(items: list[str]) -> str:
+        return '\n'.join(f'- {item}' for item in items)
+
+    sections = [
+        '## Special Users',
+        (
+            'Default password for all users: **password**\n\n'
+        ),
+        '### Admin & Moderator Roles',
+        ul([
+            '**superadmin** — ROLE_SUPER_ADMIN',
+            '**admin** — ROLE_ADMIN',
+            '**shusher** — ROLE_SHUSHER',
+            '**hunter** — ROLE_CHEAT_HUNTER',
+            '**puzzler** — ROLE_PUZZLE_CURATOR',
+            '**editor** — ROLE_PAGES',
+            '**events** — ROLE_MANAGE_EVENT',
+            '**api** — ROLE_API_HOG',
+        ]),
+        '### Other Roles',
+        ul([
+            '**broadcaster**',
+            '**coach** — ROLE_COACH',
+            '**teacher** — ROLE_TEACHER',
+        ]),
+        '### Marked Users',
+        ul([
+            '**troll** — troll mark (shadow-banned)',
+            '**rankban** — rankban mark',
+            '**reportban** — reportban mark',
+            '**alt** — alt mark',
+            '**boost** — boost mark',
+            '**engine** — engine mark',
+        ]),
+        '### Other Special Users',
+        ul([
+            '**playban** — has an active playban',
+            '**zerogames** — no game history',
+            '**kid** — kid mode enabled',
+            '**wwwwwwwwwwwwwwwwwwww** — 20 W\'s, WGM title, patron',
+        ]),
+        '### Student Accounts',
+        '(all in kid mode, managed by **teacher**)\n\n'
+        + ', '.join(
+            f'**student{i}**'
+            for i in range(1, env.args.classes * env.args.students + 1)
+        ),
+        '### Bots',
+        '(bot0-bot2 are verified)\n\n' + ', '.join(f'**{b}**' for b in bot_users),
+        '### Patron Users',
+        ', '.join(f'**{p}**' for p in patron_users),
+        '## Normal Users',
+        ', '.join(f'**{uid}**' for uid in env.uids),
+    ]
+
+    return '\n\n'.join(sections)
+
+
 class CmsPage:
-    def __init__(self, page: list, empty=False):
-        if empty:
-            body = ''
+    def __init__(self, page: list, empty=False, body: str | None = None):
+        if body is not None:
+            content = body
+        elif empty:
+            content = ''
         else:
-            body = '\n\n'.join(
+            content = '\n\n'.join(
                 [
                     f'## {env.random_topic()}',
                     f'{env.random_paragraph()}',
@@ -67,6 +132,7 @@ class CmsPage:
                     f'{env.random_paragraph()}',
                 ]
             )
+        body = content
 
         self._id = env.next_id(CmsPage)
         self.key = page[1]
