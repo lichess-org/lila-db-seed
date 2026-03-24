@@ -1,7 +1,7 @@
 # Database data for development on lichess-org/lila
 
 > [!NOTE]
-> If you use [lila-gitpod](https://github.com/lichess-org/lila-gitpod) or [lila-docker](https://github.com/lichess-org/lila-docker) for your dev environment, this repo is already included and you can configure it during setup.
+> If you use [lila-docker](https://github.com/lichess-org/lila-docker) for your dev environment, this repo is already included and you can configure it during setup.
 
 ### This will get you the bare minimum of puzzles and game data:
 
