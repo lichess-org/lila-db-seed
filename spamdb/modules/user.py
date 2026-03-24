@@ -384,6 +384,5 @@ _scopes: list[str] = [
     'bot:play',
     'engine:read',
     'engine:write',
-    'web:mobile',
     'web:mod',
 ]
