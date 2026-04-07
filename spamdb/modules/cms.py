@@ -44,7 +44,7 @@ def update_cms_colls() -> None:
     for page in default_pages:
         pages.append(CmsPage(page))
 
-    pages.append(CmsPage(['Mobile', 'mobile-apk'], empty=True))
+    pages.append(CmsPage(['Mobile', 'mobile'], empty=True))
     pages.append(CmsPage(['Test Users', 'test-users'], body=_seeded_users_body()))
 
     if args.no_create:
