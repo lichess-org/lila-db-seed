@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 SEED_PASSWORD="password"
-if [ -f /run/secrets/seed-password ]; then
-    SEED_PASSWORD=$(cat /run/secrets/seed-password)
+if [ -f /run/secrets/user_seed_password ]; then
+    SEED_PASSWORD=$(cat /run/secrets/user_seed_password)
 fi
 
 echo "Seeding Lichess database..."
