@@ -1,11 +1,16 @@
 #!/bin/bash -e
 
+SEED_PASSWORD="password"
+if [ -f /run/secrets/seed-password ]; then
+    SEED_PASSWORD=$(cat /run/secrets/seed-password)
+fi
+
 echo "Seeding Lichess database..."
 python spamdb/spamdb.py \
     --uri=mongodb://mongodb/lichess \
     --drop-db \
-    --password=password \
-    --su-password=password \
+    --password="$SEED_PASSWORD" \
+    --su-password="$SEED_PASSWORD" \
     --streamers \
     --coaches \
     --tokens

@@ -62,9 +62,6 @@ def _seeded_users_body() -> str:
 
     sections = [
         '## Special Users',
-        (
-            'Default password for all users: **password**\n\n'
-        ),
         '### Admin & Moderator Roles',
         ul([
             '**superadmin** — ROLE_SUPER_ADMIN',
