@@ -5,7 +5,14 @@ if [ -f /run/secrets/user_seed_password ]; then
     SEED_PASSWORD=$(cat /run/secrets/user_seed_password)
 fi
 
+TOKENS_FLAG=""
+if [ "$SEED_PASSWORD" = "password" ]; then
+    TOKENS_FLAG="--tokens"
+fi
+
 echo "Seeding Lichess database..."
+echo "Using password: $SEED_PASSWORD"
+echo "Tokens flag: ${TOKENS_FLAG:-none}"
 python spamdb/spamdb.py \
     --uri=mongodb://mongodb/lichess \
     --drop-db \
@@ -13,7 +20,7 @@ python spamdb/spamdb.py \
     --su-password="$SEED_PASSWORD" \
     --streamers \
     --coaches \
-    --tokens
+    $TOKENS_FLAG
 
 echo "Creating indexes..."
 mongosh \
