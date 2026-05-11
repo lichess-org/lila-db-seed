@@ -308,6 +308,7 @@ def _create_special_users():
         users.append(User('editor', [], ['ROLE_PAGES'], False))
         users.append(User('events', [], ['ROLE_MANAGE_EVENT'], False))
     users.append(User('broadcaster', [], [], False))
+    users.append(User('openingexplorer', [], [], False))
     users.append(User('api', [], ['ROLE_API_HOG'], False))
     users.append(User('troll', ['troll'], [], False))
     users.append(User('rankban', ['rankban'], [], False))
