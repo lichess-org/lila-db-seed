@@ -74,7 +74,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.user_perf, userperfs)
     util.bulk_write(db.history4, history)
     util.bulk_write(db.playban, playbans)
-    if args.tokens:
+    if args.tokens is not None:
         tokens = [Token(u._id) for u in users]
         util.bulk_write(db.oauth2_access_token, tokens)
 
@@ -276,7 +276,8 @@ class History:
 
 class Token:
     def __init__(self, uid: str):
-        token = 'lip_' + uid
+        suffix = env.args.tokens
+        token = 'lip_' + uid + ('-' + suffix if suffix else '')
         self.plain = token
         self.userId = uid
         self._id = hashlib.sha256(token.encode('utf-8')).hexdigest()

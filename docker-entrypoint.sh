@@ -8,6 +8,8 @@ fi
 TOKENS_FLAG=""
 if [ "$SEED_PASSWORD" = "password" ]; then
     TOKENS_FLAG="--tokens"
+else
+    TOKENS_FLAG="--tokens=$SEED_PASSWORD"
 fi
 
 echo "Seeding Lichess database..."
