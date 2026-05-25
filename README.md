@@ -3,15 +3,15 @@
 > [!NOTE]
 > If you use [lila-docker](https://github.com/lichess-org/lila-docker) for your dev environment, this repo is already included and you can configure it during setup.
 
-### This will get you the bare minimum of puzzles and game data:
+## This will get you the bare minimum of puzzles and game data:
 
 ```bash
 mongorestore dump
 ```
 
-# Or...
+## Or use spamdb to fully populate your database:
 
-### Use spamdb to fully populate your database:
+### Install spamdb
 
 #### With devenv:
 
@@ -30,6 +30,8 @@ python3 -m venv venv --upgrade-deps && source venv/bin/activate
 # install required packages
 pip3 install -r spamdb/requirements.txt
 ```
+
+### Use spamdb
 
 The `lila-db-seed/spamdb/spamdb.py` script will generate semi-realistic dummy data that is useful for testing and makes your dev instance a lot more colorful. Usage help:
 
