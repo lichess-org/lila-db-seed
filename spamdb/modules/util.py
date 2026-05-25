@@ -22,9 +22,11 @@ def bulk_write(
         ledger = []
         for o in objs:
             ledger.append(_inupsert(_dict(o)))
-        res = coll.bulk_write(ledger, ordered = False)
-
-        print(_report(coll.name, res))
+        try:
+            res = coll.bulk_write(ledger, ordered = False)
+            print(_report(coll.name, res))
+        except Exception as e:
+            print(f'Error writing to {coll.name}: {str(e)[:400]}...')
     else:
         # export mode
         if not os.path.isdir(env.dump_dir):
