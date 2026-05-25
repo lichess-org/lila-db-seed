@@ -13,6 +13,14 @@ mongorestore dump
 
 ### Use spamdb to fully populate your database:
 
+#### With devenv:
+
+```sh
+devenv shell
+```
+
+#### Without devenv:
+
 [python3.9+](https://www.python.org/) is required. If you don't have python3, use your package manager or the [downloads page](https://www.python.org/downloads/) to install it, then install the necessary packages:
 
 ```sh
@@ -47,16 +55,16 @@ To push this data to elasticsearch, you can use the CLI tools from [lila-search]
 
 ## Special users:
 
--   superadmin - ROLE_SUPER_ADMIN # check out the mod UI if you haven't seen it, very cool!
--   admin - ROLE_ADMIN
--   shusher - ROLE_SHUSHER
--   hunter - ROLE_CHEAT_HUNTER
--   puzzler - ROLE_PUZZLE_CURATOR
--   api - ROLE_API_HOG (this guy is useful for api testing, both server and clients)
--   troll - marked as troll
--   bot0 thru bot9 - marked as bot
--   kid - they're just children, how could you checkmate children?
--   wwwwwwwwwwwwwwwwwwww - 20 W's in visible username, WGM title, and a patron to test ui for extremely wide usernames.
+- superadmin - ROLE_SUPER_ADMIN # check out the mod UI if you haven't seen it, very cool!
+- admin - ROLE_ADMIN
+- shusher - ROLE_SHUSHER
+- hunter - ROLE_CHEAT_HUNTER
+- puzzler - ROLE_PUZZLE_CURATOR
+- api - ROLE_API_HOG (this guy is useful for api testing, both server and clients)
+- troll - marked as troll
+- bot0 thru bot9 - marked as bot
+- kid - they're just children, how could you checkmate children?
+- wwwwwwwwwwwwwwwwwwww - 20 W's in visible username, WGM title, and a patron to test ui for extremely wide usernames.
 
 ## Normal users:
 
