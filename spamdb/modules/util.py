@@ -22,7 +22,7 @@ def bulk_write(
         ledger = []
         for o in objs:
             ledger.append(_inupsert(_dict(o)))
-        res = coll.bulk_write(ledger)
+        res = coll.bulk_write(ledger, ordered = False)
 
         print(_report(coll.name, res))
     else:
