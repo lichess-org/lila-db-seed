@@ -83,6 +83,8 @@ def _seeded_users_body() -> str:
         ul([
             '**troll** — troll mark (shadow-banned)',
             '**rankban** — rankban mark',
+            '**arenaban** — arenaban mark',
+            '**prizeban** — prizeban mark',
             '**reportban** — reportban mark',
             '**alt** — alt mark',
             '**boost** — boost mark',

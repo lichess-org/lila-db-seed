@@ -312,6 +312,8 @@ def _create_special_users():
     users.append(User('api', [], ['ROLE_API_HOG'], False))
     users.append(User('troll', ['troll'], [], False))
     users.append(User('rankban', ['rankban'], [], False))
+    users.append(User('arenaban', ['arenaban'], [], False))
+    users.append(User('prizeban', ['prizeban'], [], False))
     users.append(User('reportban', ['reportban'], [], False))
     users.append(User('playban', [], [], False))
     users.append(User('alt', ['alt'], [], False))
