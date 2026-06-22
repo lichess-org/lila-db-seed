@@ -100,8 +100,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--ublog-posts',
         type=int,
-        help='(default: 200)',
-        default=200,
+        help='(default: 300)',
+        default=300,
     )
     parser.add_argument(
         '--teams',
