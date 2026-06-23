@@ -91,6 +91,7 @@ class UBlogPost:
         self.views = util.rrange(10, 100)
         self.likes = util.rrange(0, len(env.uids))
         self.likers = random.sample(env.uids, self.likes)
+        self.automod = {'quality': util.rrange(1, 3)}
         self.rank = self.created['at'] + timedelta(
             days=_tier_rank_day_bonus[tier],
             hours=math.sqrt(self.likes) + self.likes / 100,
