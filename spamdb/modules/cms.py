@@ -87,6 +87,7 @@ def _seeded_users_body() -> str:
             '**prizeban** — prizeban mark',
             '**reportban** — reportban mark',
             '**alt** — alt mark',
+            '**altclosed** — alt mark, account closed (enabled=false)',
             '**boost** — boost mark',
             '**engine** — engine mark',
         ]),
