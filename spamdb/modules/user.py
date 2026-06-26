@@ -317,6 +317,8 @@ def _create_special_users():
     users.append(User('reportban', ['reportban'], [], False))
     users.append(User('playban', [], [], False))
     users.append(User('alt', ['alt'], [], False))
+    users.append(User('altclosed', ['alt'], [], False))
+    users[-1].enabled = False
     users.append(User('boost', ['boost'], [], False))
     users.append(User('engine', ['engine'], [], False))
     users.append(User('zerogames', [], [], False))
