@@ -19,6 +19,12 @@ mongorestore dump
 devenv shell
 ```
 
+then you can run the seeder with:
+
+```sh
+seed
+```
+
 #### Without devenv:
 
 [python3.9+](https://www.python.org/) is required. If you don't have python3, use your package manager or the [downloads page](https://www.python.org/downloads/) to install it, then install the necessary packages:
