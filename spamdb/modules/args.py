@@ -124,6 +124,15 @@ def parse_args() -> argparse.Namespace:
         help='(default: 80)',
     )
     parser.add_argument(
+        '--events',
+        type=int,
+        default=50,
+        help="""
+            number of homepage banner events (the `event` collection) to
+            generate, spread across the past and future. (default: 12)
+        """,
+    )
+    parser.add_argument(
         '--classes',
         type=int,
         default=3,
