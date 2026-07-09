@@ -1,6 +1,8 @@
 import enum
+import random
 import bson
-from datetime import datetime
+from string import ascii_letters, digits
+from datetime import datetime, timedelta
 import modules.util as util
 from modules.env import env
 
@@ -13,6 +15,10 @@ def update_event_colls() -> None:
         db.activity2.drop()
         db.timeline_entry.drop()
         db.relation.drop()
+        db.event.drop()
+
+    if not args.no_create:
+        util.bulk_write(db.event, [HomepageEvent() for _ in range(args.events)])
 
     if args.no_timeline:
         return
@@ -31,6 +37,43 @@ def update_event_colls() -> None:
     util.bulk_write(db.relation, relations)
     util.bulk_write(db.activity2, activities)
     util.bulk_write(db.timeline_entry, events.timeline)
+
+
+class HomepageEvent:
+    def __init__(self):
+        topic = env.random_topic()
+        self._id = ''.join(random.sample(ascii_letters + digits, 8))
+        self.title = topic[:40]
+        self.headline = env.random_paragraph()[:30]
+        self.description = env.random_paragraph()
+        self.homepageHours = random.choice([1, 2, 3, 6, 12, 24])
+        self.url = f'https://example.com/test'
+        self.lang = random.choice(['en', 'de', 'fr', 'es', 'it', 'ru'])
+        self.enabled = util.chance(0.85)
+        self.countdown = util.chance(0.5)
+
+        offset_days = util.rrange(-10, 14)
+        self.startsAt = datetime.now() + timedelta(days=offset_days, hours=random.uniform(-6, 6))
+        self.finishesAt = self.startsAt + timedelta(hours=random.uniform(1, 6))
+
+        self.createdBy = 'lichess'
+        self.createdAt = self.startsAt - timedelta(days=random.uniform(1, 10))
+        self.updatedBy = 'lichess'
+        self.updatedAt = util.time_since(self.createdAt)
+
+        hostedBy = random.choice(['lichess', None])
+        if hostedBy is not None:
+            self.hostedBy = hostedBy
+
+        icon = random.choice([
+            'broadcast.icon',
+            'lichess.event.png',
+            'trophy.event.png',
+            'offerspill.logo.png',
+            None,
+        ])
+        if icon is not None:
+            self.icon = icon
 
 
 # singleton EventApi, collects activity and timeline entries from other modules
