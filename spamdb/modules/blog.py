@@ -1,6 +1,6 @@
 import random
 import math
-from datetime import timedelta
+from datetime import datetime, timedelta
 from modules.event import events
 from modules.env import env
 import modules.forum as forum
@@ -56,6 +56,23 @@ def update_blog_colls() -> None:
         for ft in ftopics:
             categ.add_topic(ft)
 
+    # Feature a handful of posts so the homepage carousel has content.
+    # Carousel query needs live posts with featured.until >= now (pinned)
+    # or featured.at >= now - 1 month (queue). See lila UblogApi.fetchCarouselFromDb.
+    live_posts = [up for up in uposts if up.live]
+    carousel_target = min(9, len(live_posts))
+    now = datetime.now()
+    for i, up in enumerate(random.sample(live_posts, carousel_target)):
+        # Random author, lightly skewed toward the lichess system account,
+        # since any community blog can be elevated to the carousel.
+        by = 'lichess' if random.random() < 0.25 else env.random_uid()
+        if i < carousel_target // 2:
+            # pinned: currently featured, stays up for a while
+            up.featured = {'by': by, 'at': now, 'until': now + timedelta(days=util.rrange(7, 30))}
+        else:
+            # queue: featured recently, no active pin
+            up.featured = {'by': by, 'at': now - timedelta(days=util.rrange(0, 25))}
+
     if args.no_create:
         return
 
@@ -96,6 +113,7 @@ class UBlogPost:
             days=_tier_rank_day_bonus[tier],
             hours=math.sqrt(self.likes) + self.likes / 100,
         )
+        self.featured = None
 
 
 _tier_distributions: list[float] = [0.0, 0.05, 0.5, 0.2, 0.1, 0.05]
