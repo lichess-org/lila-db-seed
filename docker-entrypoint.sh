@@ -1,6 +1,9 @@
 #!/bin/bash -e
 
 SEED_PASSWORD="password"
+if [ -n "$USER_SEED_PASSWORD" ]; then
+    SEED_PASSWORD="$USER_SEED_PASSWORD"
+fi
 if [ -f /run/secrets/user_seed_password ]; then
     SEED_PASSWORD=$(cat /run/secrets/user_seed_password)
 fi
