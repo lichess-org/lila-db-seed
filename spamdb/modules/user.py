@@ -38,7 +38,7 @@ def update_user_colls() -> None:
     follow_factor = args.follow
 
     for uid in env.uids:
-        users.append(User(uid))
+        users.append(User(uid, ['troll'] if args.trolls else []))
         perfs, stats = users[-1].detach_perfs()
         userperfs.append(perf.UserPerfs(uid, perfs))
         history.append(History(userperfs[-1], users[-1].createdAt))
@@ -299,6 +299,8 @@ def _create_special_users():
     users.append(User('ai', [], [], False))
     if env.args.su is not None:
         users.append(User(env.args.su, [], ['ROLE_SUPER_ADMIN'], False))
+        if env.args.trolls:
+            return users
     else:
         users.append(User('superadmin', [], ['ROLE_SUPER_ADMIN'], False))
         users.append(User('admin', [], ['ROLE_ADMIN'], False))

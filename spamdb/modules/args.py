@@ -68,7 +68,7 @@ def parse_args() -> argparse.Namespace:
             with random image from lifat backgrounds. (default: 200)
         """,
         default=200,
-        choices=[100, 200, 400],
+        choices=[100, 110, 200, 400],
     )
     parser.add_argument(
         '--no-flair',
@@ -205,6 +205,11 @@ def parse_args() -> argparse.Namespace:
         '--list-ratings',
         action='store_true',
         help='list all spamdb users along with their ratings then exit',
+    )
+    parser.add_argument(
+        '--trolls',
+        action='store_true',
+        help='all normal users are trolls',
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
