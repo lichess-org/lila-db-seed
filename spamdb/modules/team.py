@@ -12,18 +12,23 @@ def update_team_colls() -> list:
     if args.drop:
         db.team.drop()
         db.team_member.drop()
+        db.team_update.drop()
 
     categs: list[forum.Categ] = []
     topics: list[forum.Topic] = []
     posts: list[forum.Post] = []
     teams: list[Team] = []
     all_members: list[TeamMember] = []
+    team_updates: list[TeamUpdate] = []
 
     for team_name, num_team_posts in zip(env.teams, util.random_partition(args.forum_posts, len(env.teams))):
         t = Team(team_name)
         teams.append(t)
         events.add_team(t.createdBy, t.createdAt, t._id, t.name)
         categs.append(forum.Categ(team_name, True))
+
+        for _ in range(util.rrange(0, 11)):
+            team_updates.append(TeamUpdate(t))
 
         team_members = t.create_members(args.membership)
         for m in team_members:
@@ -69,6 +74,7 @@ def update_team_colls() -> list:
         util.bulk_write(db.f_post, posts, True)
         util.bulk_write(db.team, teams)
         util.bulk_write(db.team_member, all_members)
+        util.bulk_write(db.team_update, team_updates)
 
     return teams
 
@@ -102,6 +108,16 @@ class Team:
         users: set[str] = set(self.leaders).union(random.sample(env.uids, int(len(env.uids) * membership)))
         self.nbMembers = len(users)
         return [TeamMember(user, self._id) for user in users]
+
+
+class TeamUpdate:
+    def __init__(self, team: Team):
+        self._id = env.next_id(TeamUpdate)
+        self.team = team._id
+        self.text = env.random_team_update()
+        self.sender = random.choice(team.leaders)
+        self.date = util.time_since(team.createdAt)
+        self.seenBy: list[str] = []
 
 
 _leader_perms: list[str] = [
