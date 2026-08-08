@@ -25,6 +25,7 @@ class Env:
         self._read_users()
         self.countries: list[str] = self._read_strings('countries.txt')
         self.teams: list[str] = self._read_strings('teams.txt')
+        self.team_updates: list[str] = self._read_strings('team_updates.txt')
         self.msgs: list[str] = self._read_strings('msgs.txt')
         self.categs: list[str] = self._read_strings('categs.txt')
         self.topics: list[str] = self._read_strings('topics.txt')
@@ -99,6 +100,9 @@ class Env:
 
     def random_paragraph(self) -> str:
         return random.choice(self.paragraphs)
+
+    def random_team_update(self) -> str:
+        return random.choice(self.team_updates)
 
     def random_social_media_links(self) -> list[str]:
         return random.sample(self.social_media_links, util.rrange(0, 6))
