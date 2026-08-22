@@ -14,7 +14,7 @@ WORKDIR /app
 COPY . /app
 COPY --from=lila-indexes /tmp/lila/bin/mongodb/indexes.js /app/indexes.js
 
-RUN npm install --global mongosh
+RUN npm install --global mongosh@2.9.2
 
 RUN pip install --no-cache-dir -r spamdb/requirements.txt
 
