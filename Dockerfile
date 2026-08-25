@@ -1,4 +1,5 @@
 FROM alpine/git AS lila-indexes
+
 RUN git clone --depth 1 --filter=blob:none --sparse https://github.com/lichess-org/lila.git /tmp/lila && \
     git -C /tmp/lila sparse-checkout set --no-cone bin/mongodb/indexes.js
 
