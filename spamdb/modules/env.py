@@ -70,8 +70,11 @@ class Env:
         except ValueError:
             return 1500
 
+    def get_password(self, uid: str) -> str:
+        return self.custom_passwords.get(uid, self.default_password)
+
     def get_password_hash(self, uid: str) -> bytes:
-        password = self.custom_passwords.get(uid, self.default_password)
+        password = self.get_password(uid)
         if password in self.hash_cache:
             return self.hash_cache[password]
 
