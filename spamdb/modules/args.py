@@ -135,9 +135,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--classes',
         type=int,
-        default=3,
+        default=10,
         help="""
-           (default: 3)
+           (default: 10)
            Classes are managed by special user teacher.
         """,
     )

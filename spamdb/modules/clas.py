@@ -27,19 +27,18 @@ def update_clas_colls() -> None:
     for clas_index in range(args.classes):
         clas_name = 'Class ' + str(clas_index + 1)
         clas_id = ''.join(random.sample(ascii_letters + digits, 8))
-        classes.append(
-            Clas(
-                {
-                    '_id': clas_id,
-                    'name': clas_name,
-                    'teachers': ['teacher'],
-                    'created': {'by': 'teacher', 'at': util.time_since_days_ago(2)},
-                    'desc': 'Description for ' + clas_name,
-                    'wall': 'Latest news',
-                    'viewedAt': util.time_since_days_ago(1),
-                }
-            )
-        )
+        clas_fields = {
+            '_id': clas_id,
+            'name': clas_name,
+            'teachers': ['teacher'],
+            'created': {'by': 'teacher', 'at': util.time_since_days_ago(2)},
+            'desc': 'Description for ' + clas_name,
+            'wall': 'Latest news',
+            'viewedAt': util.time_since_days_ago(1),
+        }
+        if util.chance(0.2):
+            clas_fields['archived'] = {'by': 'teacher', 'at': util.time_since_days_ago(1)}
+        classes.append(Clas(clas_fields))
 
         if args.students < 1:
             continue
@@ -76,6 +75,8 @@ class Clas:
         self.teachers = clas['teachers']
         self.created = clas['created']
         self.viewedAt = clas['viewedAt']
+        if 'archived' in clas:
+            self.archived = clas['archived']
 
 
 class Student:
