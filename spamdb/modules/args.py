@@ -48,12 +48,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         '--tokens',
-        nargs='?',
-        const='',
+        action='store_true',
         help="""
             generate "all access" api tokens with every permission for all users.
             they are lip_ concatenated with the user id. for example, lip_aaron.
-            optionally pass a suffix to append to the token, e.g. --tokens=foo gives lip_aaron-foo.
+            if a user's password differs from the default "password" (e.g. via
+            --password, --su-password, or a custom password in data/uids.txt),
+            it is appended to their token as a suffix, e.g. lip_aaron-password2.
             this is not recommended for exposed dev instances for obvious reasons.
         """,
     )

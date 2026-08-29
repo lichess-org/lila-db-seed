@@ -1,31 +1,27 @@
 #!/bin/bash -e
 
-SEED_PASSWORD="password"
+USER_SEED_PASSWORD="password"
 if [ -n "$USER_SEED_PASSWORD" ]; then
-    SEED_PASSWORD="$USER_SEED_PASSWORD"
-fi
-if [ -f /run/secrets/user_seed_password ]; then
-    SEED_PASSWORD=$(cat /run/secrets/user_seed_password)
+    USER_SEED_PASSWORD="$USER_SEED_PASSWORD"
 fi
 
-TOKENS_FLAG=""
-if [ "$SEED_PASSWORD" = "password" ]; then
-    TOKENS_FLAG="--tokens"
-else
-    TOKENS_FLAG="--tokens=$SEED_PASSWORD"
+PRIVILEGED_SEED_PASSWORD="password"
+if [ -n "$PRIVILEGED_SEED_PASSWORD" ]; then
+    PRIVILEGED_SEED_PASSWORD="$PRIVILEGED_SEED_PASSWORD"
 fi
 
 echo "Seeding Lichess database..."
-echo "Using password: $SEED_PASSWORD"
-echo "Tokens flag: ${TOKENS_FLAG:-none}"
+echo "Using regular password:    $USER_SEED_PASSWORD"
+echo "Using privileged password: $PRIVILEGED_SEED_PASSWORD"
+
 python spamdb/spamdb.py \
     --uri=mongodb://mongodb/lichess \
     --drop-db \
-    --password="$SEED_PASSWORD" \
-    --su-password="$SEED_PASSWORD" \
+    --password="$USER_SEED_PASSWORD" \
+    --su-password="$PRIVILEGED_SEED_PASSWORD" \
     --streamers \
     --coaches \
-    $TOKENS_FLAG
+    --tokens
 
 echo "Creating indexes..."
 mongosh \
