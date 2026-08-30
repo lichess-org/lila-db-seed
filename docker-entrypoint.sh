@@ -1,14 +1,7 @@
 #!/bin/bash -e
 
-USER_SEED_PASSWORD="password"
-if [ -n "$USER_SEED_PASSWORD" ]; then
-    USER_SEED_PASSWORD="$USER_SEED_PASSWORD"
-fi
-
-PRIVILEGED_SEED_PASSWORD="password"
-if [ -n "$PRIVILEGED_SEED_PASSWORD" ]; then
-    PRIVILEGED_SEED_PASSWORD="$PRIVILEGED_SEED_PASSWORD"
-fi
+USER_SEED_PASSWORD="${USER_SEED_PASSWORD:-password}"
+PRIVILEGED_SEED_PASSWORD="${PRIVILEGED_SEED_PASSWORD:-password}"
 
 echo "Seeding Lichess database..."
 echo "Using regular password:    $USER_SEED_PASSWORD"
