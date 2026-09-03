@@ -49,6 +49,16 @@ Usually, the script will generate a new set of data from inputs in the provided 
 
 ### Use `--su-password` to give the special (admin) users different passwords than the default if your dev instance will be exposed to others.
 
+### Docker image
+
+By default, the [Docker image](https://github.com/lichess-org/lila-db-seed/pkgs/container/lila-db-seed) seeds the database once and exits. To keep the container running and re-seed on a recurring schedule instead (e.g. to periodically refresh a shared/public preview instance), set `SEED_CRON` to a [cron expression](https://github.com/aptible/supercronic#crontab-format) using [supercronic](https://github.com/aptible/supercronic):
+
+```bash
+docker run -e SEED_CRON="0 3 * * *" ghcr.io/lichess-org/lila-db-seed:latest
+```
+
+The example above seeds immediately on startup, then re-seeds every day at 3am. When `SEED_CRON` is unset, the container runs the seeder once and exits as before.
+
 ### Creating lichess database indexes
 
 `lila-db-seed/spamdb/spamdb.py` does not create the indexes in lichess database. In case you need them, you can use https://github.com/lichess-org/lila/blob/master/bin/mongodb/indexes.js
