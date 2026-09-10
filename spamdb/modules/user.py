@@ -387,6 +387,7 @@ _scopes: list[str] = [
     'follow:read',
     'follow:write',
     'msg:write',
+    'note:write',
     'board:play',
     'bot:play',
     'engine:read',
