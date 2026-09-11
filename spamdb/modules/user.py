@@ -377,6 +377,7 @@ _scopes: list[str] = [
     'challenge:bulk',
     'study:read',
     'study:write',
+    'tournament:read',
     'tournament:write',
     'racer:write',
     'puzzle:read',
