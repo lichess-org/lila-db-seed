@@ -6,14 +6,16 @@
 
   languages.python = {
     enable = true;
+    directory = "./spamdb";
     venv = {
       enable = true;
+      quiet = false;
       requirements = ./spamdb/requirements.txt;
     };
   };
 
   env.LILA_PATH = "../lila";
-  
+
   scripts.seed = {
     exec = ''
       python spamdb/spamdb.py \
