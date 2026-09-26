@@ -49,12 +49,22 @@ def update_forum_colls() -> list:
     diagnostic = Categ('Diagnostic', False, 'User diagnostic reports')
     diagnostic.hidden = True
     diagnostic.quiet = True
+    diagnosticHeaderPost = Post('admin')
+    diagnosticHeaderPost.text = 'none'
+    diagnosticHeaderTopic = Topic('none', diagnostic._id)
+    diagnosticHeaderTopic.correlate_post(diagnosticHeaderPost)
+    diagnostic.add_topic(diagnosticHeaderTopic)
     categs[diagnostic._id] = diagnostic
-    headerPost = Post('admin')
-    headerPost.text = 'none'
-    headerTopic = Topic('none', diagnostic._id)
-    headerTopic.correlate_post(headerPost)
-    diagnostic.add_topic(headerTopic)
+
+    lichessUpdates = Categ('Lichess Updates', False, 'Announcements and updates from Lichess')
+    lichessUpdates.hidden = True
+    lichessUpdates.quiet = False
+    lichessUpdatesHeaderPost = Post('admin')
+    lichessUpdatesHeaderPost.text = 'none'
+    lichessUpdatesHeaderTopic = Topic('none', lichessUpdates._id)
+    lichessUpdatesHeaderTopic.correlate_post(lichessUpdatesHeaderPost)
+    lichessUpdates.add_topic(lichessUpdatesHeaderTopic)
+    categs[lichessUpdates._id] = lichessUpdates
 
     if not args.no_create:
         util.bulk_write(db.f_categ, list(categs.values()))
