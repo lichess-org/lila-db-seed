@@ -117,10 +117,15 @@ class Env:
         return random.choice(self.flairs)
 
     # ids only unique per collection
-    def next_id(self, key_obj, num_bytes: int = 6) -> str:
+    def next_id(self, key_obj, length: int = 8) -> str:
         seed = self.seeds.setdefault(key_obj.__name__, 1)
         self.seeds[key_obj.__name__] = seed + 1
-        return base64.b64encode(seed.to_bytes(num_bytes, 'big')).decode('ascii')
+        alphabet = string.ascii_uppercase + string.ascii_lowercase + string.digits
+        identifier = ''
+        while seed:
+            seed, digit = divmod(seed, len(alphabet))
+            identifier = alphabet[digit] + identifier
+        return identifier.rjust(length, 'A')
 
     def _genN(self, n: int, orig_list: list[str], default: str) -> list[str]:
         if not orig_list:
