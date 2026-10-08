@@ -4,7 +4,10 @@ import subprocess
 import base64
 import bson
 import requests
-import modules.util as util
+import chess
+import chess.pgn
+import re
+import string
 from modules.args import parse_args
 from pymongo.database import Database
 from typing import Any
@@ -40,6 +43,13 @@ class Env:
         self.puzzle_paths: list[dict] = self._read_bson('puzzle2_path.bson')
         self.practice_studies: list[dict] = self._read_bson('study.bson')
         self.practice_chapters: list[dict] = self._read_bson('study_chapter_flat.bson')
+        self.study_games: list[chess.pgn.Game] = []
+        if args.studies > 0:
+            with open(os.path.join(self.data_path, 'study-chapter-source.pgn'), encoding='utf-8-sig') as source:
+                while game := chess.pgn.read_game(source):
+                    self.study_games.append(game)
+            self.study_games = random.sample(self.study_games, min(200, len(self.study_games)))
+        self.study_roots = {game: pgn_root(game) for game in self.study_games}
         self.eval_cache: list[dict] = self._read_bson('eval_cache2.bson')
         with open(os.path.join(self.data_path, 'practice-config.txt'), encoding='utf-8') as f:
             self.practice_config = f.read()
@@ -108,7 +118,7 @@ class Env:
         return random.choice(self.team_updates)
 
     def random_social_media_links(self) -> list[str]:
-        return random.sample(self.social_media_links, util.rrange(0, 6))
+        return random.sample(self.social_media_links, random.randrange(6))
 
     def random_bg_image_link(self) -> str:
         return random.choice(self.bg_image_links)
@@ -169,6 +179,70 @@ class Env:
                     self.uids.append(uid)
                 if len(fields) > 1:
                     self.custom_passwords[uid] = fields[1].lstrip()
+
+
+def uci_char_pair(move: chess.Move) -> str:
+    destination = move.to_square + 35
+    if move.promotion:
+        destination = 99 + 'qrbnk'.index(chess.piece_symbol(move.promotion)) * 8 + chess.square_file(move.to_square)
+    return chr(move.from_square + 35) + chr(destination)
+
+
+def pgn_root(game: chess.pgn.Game) -> dict[str, dict]:
+    board = game.board()
+    root = {'_': {'p': board.ply(), 'f': board.fen(en_passant='fen'), **pgn_annotations(game)}}
+    pending = [(child, board.copy(stack=False), '', 1) for child in reversed(game.variations)]
+    while pending and len(root) <= 3000:
+        node, board, parent, depth = pending.pop()
+        move = node.move
+        path = parent + uci_char_pair(move)
+        san = board.san(move)
+        board.push(move)
+        root[path.replace('.', chr(144)).replace('$', chr(145))] = {
+            'p': board.ply(),
+            'u': move.uci(),
+            's': san,
+            'f': board.fen(en_passant='fen'),
+            **pgn_annotations(node),
+        }
+        if depth < 600:
+            pending.extend((child, board.copy(stack=False), path, depth + 1) for child in reversed(node.variations))
+    return root
+
+
+def pgn_annotations(node: chess.pgn.GameNode) -> dict:
+    annotations: dict = {}
+    text = re.sub(r'\[%[^\]]+\]', '', '\n'.join(filter(None, [node.starting_comment, node.comment]))).strip()
+    if text:
+        annotations['co'] = [{
+            'id': ''.join(random.choices(string.ascii_letters + string.digits, k=4)),
+            'text': text[:4000],
+            'by': '',
+        }]
+    if node.nags:
+        annotations['g'] = sorted(node.nags)
+    shapes = []
+    for arrow in node.arrows():
+        if arrow.tail == arrow.head:
+            shapes.append({'b': arrow.color, 'p': chess.square_name(arrow.tail)})
+        else:
+            shapes.append({'b': arrow.color, 'o': chess.square_name(arrow.tail), 'd': chess.square_name(arrow.head)})
+    if shapes:
+        annotations['h'] = shapes
+    clock = node.clock()
+    if clock is not None:
+        annotations['l'] = round(clock * 100)
+    score = node.eval()
+    if score is not None:
+        white = score.white()
+        mate = white.mate()
+        if mate is None:
+            annotations['e'] = max(-999999, min(999999, white.score()))
+        elif mate == 0:
+            annotations['e'] = 2147483647 if white == chess.engine.MateGiven else -2147483648
+        else:
+            annotations['e'] = mate * 1000000
+    return annotations
 
 
 env = Env()  # used by other modules

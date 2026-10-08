@@ -136,3 +136,4 @@ def _report(coll: str, res: results.BulkWriteResult) -> str:
     if res.bulk_api_result['writeErrors']:
         report += f', Errors: {res.bulk_api_result["writeErrors"]}'
     return report
+
