@@ -151,8 +151,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--studies',
         type=int,
-        default=100,
-        help='number of generated studies, each with 2-32 chapters (default: 100)',
+        default=0,
+        help='number of generated studies with chapters and meta (default: 0)',
     )
     parser.add_argument(
         '--streamers',
