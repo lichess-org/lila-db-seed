@@ -2,6 +2,7 @@
 {
   packages = [
     pkgs.mongosh
+    pkgs.jre_headless # spamdb hashes passwords with lila_crypt.jar
   ];
 
   languages.python = {
