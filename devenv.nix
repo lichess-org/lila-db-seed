@@ -1,31 +1,31 @@
 { pkgs, ... }:
+let
+  python = pkgs.python3.withPackages (ps: [
+    ps.pymongo
+    ps.requests
+    ps.faker
+    ps.chess
+  ]);
+in
 {
   packages = [
     pkgs.mongosh
     pkgs.jre_headless # spamdb hashes passwords with lila_crypt.jar
+    python
   ];
-
-  languages.python = {
-    enable = true;
-    directory = "./spamdb";
-    venv = {
-      enable = true;
-      quiet = false;
-      requirements = ./spamdb/requirements.txt;
-    };
-  };
-
-  env.LILA_PATH = "../lila";
 
   scripts.seed = {
     exec = ''
-      python spamdb/spamdb.py \
+      ${python}/bin/python ${./spamdb}/spamdb.py \
         --drop-db \
         --streamers \
         --coaches \
-        --tokens
+        --tokens \
+        "$@"
       echo "Creating indexes..."
-      mongosh lichess $LILA_PATH/bin/mongodb/indexes.js
+      indexes="$DEVENV_ROOT/bin/mongodb/indexes.js" # when imported by lila
+      [ -f "$indexes" ] || indexes="''${LILA_PATH:-$DEVENV_ROOT/../lila}/bin/mongodb/indexes.js"
+      mongosh lichess "$indexes"
       echo "✅ Done!"
     '';
   };
