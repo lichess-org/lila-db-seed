@@ -149,6 +149,12 @@ def parse_args() -> argparse.Namespace:
         help='(default/max = # of objects in data/game5.bson (around 3000))',
     )
     parser.add_argument(
+        '--studies',
+        type=int,
+        default=0,
+        help='number of generated studies with chapters and meta (default: 0)',
+    )
+    parser.add_argument(
         '--streamers',
         action='store_true',
         help="""

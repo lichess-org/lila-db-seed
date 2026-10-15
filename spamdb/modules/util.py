@@ -9,11 +9,7 @@ from modules.env import env
 from typing import Any, Mapping
 
 
-def bulk_write(
-    coll: collection.Collection,
-    objs: list[Any],
-    append: bool = False,
-) -> None:
+def bulk_write(coll: collection.Collection, objs: list[Any], append: bool = False) -> None:
     # append parameter is for bson/json export to forum collections
     if len(objs) == 0:
         return
@@ -23,7 +19,7 @@ def bulk_write(
         for o in objs:
             ledger.append(_inupsert(_dict(o)))
         try:
-            res = coll.bulk_write(ledger, ordered = False)
+            res = coll.bulk_write(ledger, ordered=False)
             print(_report(coll.name, res))
         except Exception as e:
             print(f'Error writing to {coll.name}: {str(e)[:400]}...')
