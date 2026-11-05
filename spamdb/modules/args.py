@@ -55,6 +55,8 @@ def parse_args() -> argparse.Namespace:
             if a user's password differs from the default "password" (e.g. via
             --password, --su-password, or a custom password in data/uids.txt),
             it is appended to their token as a suffix, e.g. lip_aaron-password2.
+            also generates mobile app tokens, with only the web:mobile scope,
+            e.g. lip_mobile_aaron.
             this is not recommended for exposed dev instances for obvious reasons.
         """,
     )
