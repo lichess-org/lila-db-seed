@@ -75,7 +75,7 @@ def update_user_colls() -> None:
     util.bulk_write(db.history4, history)
     util.bulk_write(db.playban, playbans)
     if args.tokens:
-        tokens = [Token(u._id) for u in users]
+        tokens = [Token(u._id) for u in users] + [MobileToken(u._id) for u in users]
         util.bulk_write(db.oauth2_access_token, tokens)
 
 
@@ -275,16 +275,34 @@ class History:
 
 
 class Token:
-    def __init__(self, uid: str):
+    def __init__(
+        self,
+        uid: str,
+        prefix: str = 'lip_',
+        description: str = 'all access',
+        scopes: list[str] | None = None,
+    ):
         password = env.get_password(uid)
         suffix = '-' + password if password != 'password' else ''
-        token = 'lip_' + uid + suffix
+        token = prefix + uid + suffix
         self.plain = token
         self.userId = uid
         self._id = hashlib.sha256(token.encode('utf-8')).hexdigest()
         self.created = util.time_since_days_ago(30)
-        self.description = 'all access'
-        self.scopes = _scopes
+        self.description = description
+        self.scopes = scopes or _scopes
+
+
+class MobileToken(Token):
+    """
+    A token as issued to the official mobile app, so the endpoints that only accept the app
+    (`OpenOrScoped(_.Web.Mobile)` in lila) can be tested. lila only accepts web:mobile tokens with
+    the app's origin; in dev mode it doesn't require the request signature.
+    """
+
+    def __init__(self, uid: str):
+        super().__init__(uid, 'lip_mobile_', 'mobile app', ['web:mobile'])
+        self.clientOrigin = 'org.lichess.mobile://'
 
 
 class Playban:
